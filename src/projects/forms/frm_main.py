@@ -1,5 +1,5 @@
 
-"""MainFrame for Package compare."""
+"""MainFrame for project management."""
 import tkinter as tk
 from tkinter import ttk, messagebox
 import subprocess
@@ -23,7 +23,7 @@ from projects.forms.frm_search import SearchFrame
 
 txt = Text()
 
-FRAME_TITLE = 'Package update and build'
+FRAME_TITLE = 'Project management'
 
 TREE_COLUMNS = (
     ('name', 'Project', 50),
@@ -34,7 +34,7 @@ TREE_COLUMNS = (
 
 class MainFrame():
     """
-    MainFrame for Package compare.
+    MainFrame forproject management.
 
     Explanation:
         Represents the main frame for comparing packages.

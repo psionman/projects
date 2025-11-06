@@ -320,7 +320,7 @@ class ProjectVersionsFrame():
 
         if returncode == 0:
             self._populate_versions_frame()
-            messagebox.showinfo('', 'Package updated')
+            messagebox.showinfo('', 'Project updated')
 
         self.refresh = True
         self._populate_versions_frame()
