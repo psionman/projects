@@ -48,6 +48,7 @@ class Project():
         self.py_project_missing = True
         self._version_text = ''
         self.script: str = ''
+        self.repository_name: str = ''
         self.pypi = False
         self.build_for_windows = False
 
@@ -79,6 +80,7 @@ class Project():
         return {
             'dir': self.source_dir,
             'pypi': self.pypi,
+            'repository': self .repository_name,
             'build_for_windows': self.build_for_windows,
             'cached_envs': {key: item.serialize()
                             for key, item in self.cached_envs.items()},
@@ -169,13 +171,16 @@ class Project():
         version = self.project_version.split('.')
         if 'missing' in version[0]:
             path = Path(self.source_dir, VERSION_FILE)
-            print(f' version file missing {path}')
+            logger.warning(
+                f'version file missing: {path}',
+                project=self.name,
+            )
             return ''
         if len(version) != 3:
             logger.warning(
                 f'Invalid version (structure) {self.project_version}',
                 project=self.name,
-        )
+            )
             return ''
         if not version[2].isnumeric():
             logger.warning(

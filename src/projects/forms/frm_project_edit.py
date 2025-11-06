@@ -9,12 +9,13 @@ from psiutils.buttons import ButtonFrame, IconButton
 from psiutils.utilities import window_resize, geometry
 
 from projects.project import Project
+from projects.constants import APP_TITLE
 from projects.config import read_config
 from projects.text import Text
 from projects import logger
 
 txt = Text()
-FRAME_TITLE = 'Project compare versions'
+FRAME_TITLE = f'{APP_TITLE} - edit'
 
 DEFAULT_DEV_DIR = str(Path(Path.home(), '.pyenv', 'versions'))
 DEFAULT_PROJECT_DIR = str(Path(Path.home(), 'projects'))
@@ -45,13 +46,13 @@ class ProjectEditFrame():
 
         # tk variables
         self.project_name = tk.StringVar(value=project.name)
-        # self.env_dir = tk.StringVar(value=project.env_dir)
         self.source_dir = tk.StringVar(value=project.source_dir)
         self.project_version = tk.StringVar(value=project.version_text)
         self.version = tk.StringVar(value=project.version_text)
         self.pypi = tk.BooleanVar(value=project.pypi)
         self.build_for_windows = tk.BooleanVar(value=project.build_for_windows)
         self.script = tk.StringVar(value=project.script)
+        self.repository_name = tk.StringVar(value=project.repository_name)
 
         # Trace
         self.project_name.trace_add('write', self._check_value_changed)
@@ -60,6 +61,7 @@ class ProjectEditFrame():
         self.pypi.trace_add('write', self._check_value_changed)
         self.build_for_windows.trace_add('write', self._check_value_changed)
         self.script.trace_add('write', self._check_value_changed)
+        self.repository_name.trace_add('write', self._check_value_changed)
 
         self._show()
 
@@ -139,6 +141,13 @@ class ProjectEditFrame():
             frame, text='Build for windows', variable=self.build_for_windows)
         check_button.grid(row=row, column=1, sticky=tk.W)
 
+        # row += 1
+        # label = ttk.Label(frame, text='Repository name')
+        # label.grid(row=row, column=0, sticky=tk.E, padx=PAD, pady=PAD)
+
+        # entry = ttk.Entry(frame, textvariable=self.repository_name)
+        # entry.grid(row=row, column=1, sticky=tk.EW)
+
         row += 1
         frame.rowconfigure(row, weight=1)
 
@@ -181,6 +190,7 @@ class ProjectEditFrame():
 
     def _save(self, *args) -> None:
         changes = self._record_changes()
+        ic(changes)
         if self.mode == Mode.NEW:
             self.project = Project()
             self.project.name = self.project_name.get()
@@ -190,10 +200,12 @@ class ProjectEditFrame():
                 "New project",
                 name=self.project.name
             )
+
         self.project.source_dir = self.source_dir.get()
         self.project.pypi = self.pypi.get()
         self.project.build_for_windows = self.build_for_windows.get()
         self.project.script = self.script.get()
+        self.project.repository_name = self.repository_name.get()
 
         logger.info(
             "Project changed",
@@ -220,6 +232,11 @@ class ProjectEditFrame():
                 self.project.build_for_windows, self.build_for_windows.get())
         if self.project.script != self.script.get():
             changes['script'] = (self.project.script, self.script.get())
+        if self.project.repository_name != self.repository_name.get():
+            changes['repository'] = (
+                self.project.repository_name, self.repository_name.get()
+                )
+
         return changes
 
     def _dismiss(self, *args) -> None:

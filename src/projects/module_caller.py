@@ -45,6 +45,7 @@ class ModuleCaller():
         self.root.wait_window(dlg.root)
 
     def _project(self) -> None:
+        self.project_server = ProjectServer()
         dlg = ProjectEditFrame(self, Mode.EDIT, self.projects['psiutils'])
         self.root.wait_window(dlg.root)
 

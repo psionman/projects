@@ -28,6 +28,8 @@ class ProjectServer():
             if 'build_for_windows' not in item:
                 item['build_for_windows'] = False
             project.build_for_windows = item['build_for_windows']
+            if 'repository' in item:
+                project.repository_name = item['repository']
             project.cached_envs = {key: EnvironmentVersion(data)
                                    for key, data
                                    in item['cached_envs'].items()}

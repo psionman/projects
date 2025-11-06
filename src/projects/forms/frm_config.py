@@ -71,6 +71,11 @@ class ConfigFrame():
         stringvar.trace_add('write', self._check_value_changed)
         return stringvar
 
+    def _boolvar(self, value: bool) -> tk.BooleanVar:
+        boolvar = tk.BooleanVar(value=value)
+        boolvar.trace_add('write', self._check_value_changed)
+        return boolvar
+
     def _show(self):
         root = self.root
         root.geometry(geometry(self.config, __file__))

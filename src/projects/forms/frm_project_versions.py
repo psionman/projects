@@ -24,7 +24,6 @@ from projects.config import read_config
 from projects.compare import compare
 from projects.project_utilities import update_project
 from projects.build import UV_PUBLISH_TOKEN
-from projects import logger
 
 from projects.forms.frm_compare import CompareFrame
 from projects.forms.frm_build import BuildFrame
