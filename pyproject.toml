@@ -1,0 +1,39 @@
+[project]
+name = "projects"
+version = "0.0.0"
+description = "Manage python projects,"
+authors = [{name = "Jeff", "email" = "<jeffwatkins2000@gmail.com>"}]
+readme = "README.md"
+requires-python = ">=3.10, <3.13"
+
+dependencies = [
+    "appdirs>=1.4.4",
+    "clipboard>=0.0.4",
+    "dotenv>=0.9.9",
+    "icecream>=2.1.8",
+    "psiutils>=0.2.13",
+    # "appdirs>=1.4.4",
+    # "clipboard>=0.0.4",
+    # "dotenv>=0.9.9",
+    # "icecream>=2.1.4",
+    # "jedi>=0.19.2",
+    # "markdown>=3.8",
+    # "psiutils>=0.2.10",
+    # "pygobject>=3.54.0",
+    # "python-dateutil>=2.9.0.post0",
+    # "structlog>=25.4.0",
+    # "tkinterweb>=4.3.1",
+    "pygithub>=2.8.1",
+    "pygobject>=3.54.5",
+    "python-dateutil>=2.9.0.post0",
+    "structlog>=25.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "jedi>=0.19.2",]
+
+[build-system]
+requires = ['uv-build']
+build-backend = 'uv_build'

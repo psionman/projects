@@ -1,0 +1,15 @@
+iniconfig==2.1.0
+Markdown==3.8.2
+packaging==25.0
+pillow==11.3.0
+pluggy==1.6.0
+psi-toml==0.0.12
+psiconfig==0.0.14
+# Editable install with no version control (psiutils==0.1.62)
+-e /home/jeff/projects/utilities/psiutils
+Pygments==2.19.2
+pytest==8.4.1
+tkinterweb==4.4.4
+tkinterweb-tkhtml==1.1.1
+tomli==2.2.1
+tomli_w==1.2.0

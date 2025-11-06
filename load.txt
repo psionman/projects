@@ -1,0 +1,26 @@
+export DISPLAY=:0 &&
+export TCL_LIBRARY=/usr/lib/tcl8.6 &&
+export TK_LIBRARY=/usr/lib/tk8.6 &&
+source /home/jeff/projects/utilities/package/.venv/bin/activate &&
+uv run xxx.py
+
+uv self update &&
+uv python upgrade --reinstall &&
+rm -rf .venv
+
+uv venv --python /usr/bin/python3.13 /home/jeff/projects/utilities/package/.venv
+
+or ...
+
+Create links in
+
+/home/jeff/.local/share/uv/python/cpython-3.12.11-linux-x86_64-gnu/lib
+
+to
+
+/root/usr/lib/libtcl8.6.so and libtk8.6.so
+
+┌─[jeff@everest] 25 Sep, 10:31 :~/.local/share/uv/python/cpython-3.12.11-linux-x86_64-gnu/lib
+└─ ➜ ln -s /usr/lib/libtk8.6.so
+
+(backup first)
