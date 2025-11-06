@@ -318,11 +318,14 @@ class Project():
     def _update_pyproject(self) -> int:
         pyproject = self._read_pyproject()
 
-        dev_dependencies = self._build_dependency_dict(
-            pyproject['dependency-groups']['dev'])
+        dev_dependencies = {}
+        if 'dependency-groups' in pyproject:
+            dev_dependencies = self._build_dependency_dict(
+                pyproject['dependency-groups']['dev'])
 
         requirements = self._build_dependency_dict(
             self._read_requirements())
+
         logger.info(
             "Update project dependencies: read requirements",
             project=self.name,
