@@ -22,7 +22,6 @@ def update_project(version: str, env_version: str, project: str) -> None:
     # Use the venv's python to run pip
     # ensure pip is installed
     command = [venv_python, '-m', 'ensurepip', '--upgrade']
-
     result = subprocess.run(command, check=True)
     returncode += result.returncode
     logger.info(

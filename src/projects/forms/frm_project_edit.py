@@ -190,7 +190,6 @@ class ProjectEditFrame():
 
     def _save(self, *args) -> None:
         changes = self._record_changes()
-        ic(changes)
         if self.mode == Mode.NEW:
             self.project = Project()
             self.project.name = self.project_name.get()

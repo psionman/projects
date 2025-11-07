@@ -9,7 +9,6 @@ and integrates build and compare workflows via modular frames.
 
 Intended for use within the PSI package build system.
 """
-import os
 import subprocess
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -24,6 +23,7 @@ from projects.config import read_config
 from projects.compare import compare
 from projects.project_utilities import update_project
 from projects.build import UV_PUBLISH_TOKEN
+from projects.constants import VERSION_FILE
 
 from projects.forms.frm_compare import CompareFrame
 from projects.forms.frm_build import BuildFrame
@@ -246,34 +246,30 @@ class ProjectVersionsFrame():
         if self.refresh:
             self.project_server.save_projects()
         self.refresh = False
+
         for widget in self.canvas_frame.winfo_children():
             widget.destroy()
+
         versions = self.project.env_versions
         for row, name in enumerate(sorted(list(versions))):
             version = versions[name]
-            style = ''
-            (missing, mismatches) = compare(self.project.source_dir,
-                                            version.dir)
-            style = ''
+            (missing, mismatches) = compare(
+                self.project.source_dir, version.dir)
+
             mismatch_str = ''
+
             style = 'green-fg.TRadiobutton'
-            missing_files = []
-            for count, item in enumerate(missing):
-                if count < 5:
-                    if item[0]:
-                        missing_files.append(item[0])
-
-                    if item[1]:
-                        missing_files.append(item[1])
-
             if missing or mismatches:
-                style = 'red-fg.TRadiobutton'
-                # style.config('width', 500)
-                if '_version.py' in mismatches:
-                    mismatches.remove('_version.py')
-                mismatch_str = ' '.join(mismatches + missing_files)
-                if len(mismatch_str) > 50:
-                    mismatch_str = f'{mismatch_str[:50]} ...'
+                missing_files = self._missing_files(missing)
+                if VERSION_FILE in mismatches:
+                    mismatches.remove(VERSION_FILE)
+
+                style = 'blue-fg.TRadiobutton'
+                if '999' in version.version:
+                    style = 'red-fg.TRadiobutton'
+
+                mismatch_str = self._mismatch_str(missing_files, mismatches)
+
             display_text = (f'{name} : ({version.version}) '
                             f'{mismatch_str}')
 
@@ -285,6 +281,23 @@ class ProjectVersionsFrame():
                 style=style,
             )
             button.grid(row=row, column=0, sticky=tk.W)
+
+    def _missing_files(self, missing: list) -> list:
+        missing_files = []
+        for count, item in enumerate(missing):
+            if count < 5:
+                if item[0]:
+                    missing_files.append(item[0])
+
+                if item[1]:
+                    missing_files.append(item[1])
+        return missing_files
+
+    def _mismatch_str(self, missing_files: list, mismatches: list) -> str:
+        mismatch_str = ' '.join(mismatches + missing_files)
+        if len(mismatch_str) > 50:
+            mismatch_str = f'{mismatch_str[:50]} ...'
+        return mismatch_str
 
     def _on_mouse_wheel(self, event):
         if event.num == 4:   # Linux scroll up

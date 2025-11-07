@@ -21,7 +21,7 @@
     Usage Example
     -------------
     >>> data = EnvironmentData(
-    ...     name="myenv",
+    ...     name="my_env",
     ...     dir="/path/to/project/.venv",
     ...     python_version="3.11.4"
     ... )
@@ -44,6 +44,8 @@ import os
 import re
 from pathlib import Path
 from typing import NamedTuple
+
+from projects.constants import VERSION_FILE
 
 
 class EnvironmentData(NamedTuple):
@@ -105,9 +107,10 @@ class EnvironmentVersion():
         self.python_version = environ.python_version
         self.version = self._get_version()
         self.venv_python = self._get_venv_python()
+
     def _get_version(self):
         version_re = r'[0-9]{1,}.[0-9]{1,}.[0-9]{1,}'
-        path = Path(self.dir, '_version.py')
+        path = Path(self.dir, VERSION_FILE)
         try:
             with open(path, 'r', encoding='utf8') as f_version:
                 text = f_version.read()

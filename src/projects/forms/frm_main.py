@@ -34,7 +34,7 @@ TREE_COLUMNS = (
 
 class MainFrame():
     """
-    MainFrame forproject management.
+    MainFrame for project management.
 
     Explanation:
         Represents the main frame for comparing packages.
@@ -346,6 +346,8 @@ class MainFrame():
             )
 
     def _build_for_windows(self, *args) -> None:
+        # env_version = self.project.env_versions[self.project.name]
+        # ic (env_version.python_version)
         return subprocess.Popen(
                 ['windows-converter', 'project', self.project.name]
             )

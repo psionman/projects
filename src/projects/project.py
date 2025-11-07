@@ -102,13 +102,10 @@ class Project():
         return self._get_version_text(raw_text)
 
     def _get_version_text(self, raw_text: str) -> str:
-        for line in raw_text.split('\n'):
-            if VERSION_TEXT in line and '=' in line:
-                version_text = line.split('=')[1]
-                version_text = version_text.strip()
-                version_text = version_text.replace("'", '')
-                return version_text
-        return 'Version text missing'
+        err_text = 'Version text missing'
+        version_re = r'[0-9]{1,}.[0-9]{1,}.[0-9]{1,}'
+        version = re.search(version_re, raw_text).group()
+        return version or err_text
 
     @property
     def base_dir(self) -> Path:
