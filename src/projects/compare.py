@@ -1,7 +1,16 @@
 """Compare the files in two directories."""
 from pathlib import Path
+from dataclasses import dataclass
 
 from projects.config import config
+
+
+@dataclass
+class Missing:
+    file_name: str
+    missing_in_project: bool
+    missing_in_env: bool
+
 
 
 def compare(source_dir: str, env_dir: str) -> list[str]:
@@ -22,9 +31,11 @@ def _compare_existence(comparison: dict) -> list:
     missing = []
     for name, files in comparison.items():
         if 'project' not in files:
-            missing.append((name, ''))
+            # missing.append((name, ''))
+            missing.append(Missing(name, False, True))
         if 'env' not in files:
-            missing.append(('', name))
+            # missing.append(('', name))
+            missing.append(Missing(name, True, False))
     return missing
 
 

@@ -4,17 +4,19 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, messagebox
 import shutil
+from functools import partial
 
 from psiutils.constants import PAD, PADB, PADT, WidgetState
-from psiutils.utilities import window_resize, geometry, notify
+from psiutils.utilities import window_resize, geometry
 from psiutils.buttons import ButtonFrame, IconButton
 from psiutils.widgets import ScrollingCanvas
 
-from projects.compare import compare
+from projects.compare import compare, Missing
 from projects.config import read_config
 from projects.project import Project
 from projects.env_version import EnvironmentVersion
 from projects.text import Text
+from projects import logger
 
 txt = Text()
 FRAME_TITLE = 'Compare files across directories'
@@ -32,7 +34,7 @@ class CompareFrame():
         self.env_version = env_version
         self.destroy_widgets = []
         self.missing_file_frame = None
-        self.canvas = None
+        self.mismatch_frame = None
 
         self.config = read_config()
         (self.missing, self.mismatches) = compare(
@@ -84,32 +86,35 @@ class CompareFrame():
         project_frame.grid(row=row, column=0, sticky=tk.EW, padx=PAD, pady=PAD)
 
         row += 1
+        label = ttk.Label(
+            frame, text='Missing files and dirs', style='blue-fg.TLabel')
+        label.grid(row=row, column=0, sticky=tk.W, padx=PAD, pady=PADT)
+        self.destroy_widgets.append(label)
+
+        row += 1
         self.missing_file_frame = self._missing_frame(frame)
-        self.missing_file_frame.grid(row=row, column=0, sticky=tk.NW, pady=PAD)
+        self.missing_file_frame.grid(
+            row=row, column=0, sticky=tk.NW, padx=PAD, pady=PAD)
+
+        row += 1
+        label = ttk.Label(frame, text='Mismatches', style='blue-fg.TLabel')
+        label.grid(row=row, column=0, sticky=tk.W, padx=PAD, pady=PADT)
 
         row += 1
         frame.rowconfigure(row, weight=1)
-
-        self.canvas = ScrollingCanvas(
+        self.mismatch_frame = ScrollingCanvas(
             frame,
             relief=tk.SUNKEN,
             borderwidth=2,)
-        self.canvas.grid(row=row, column=0, sticky=tk.NSEW, padx=PAD, pady=PAD)
+        self.mismatch_frame.grid(
+            row=row, column=0, sticky=tk.NSEW, padx=PAD, pady=PAD)
 
+        row += 1
         self.button_frame = self._button_frame(frame)
         self.button_frame.grid(
-            row=3, column=0, sticky=tk.EW, padx=PAD, pady=PAD)
+            row=row, column=0, sticky=tk.EW, padx=PAD, pady=PAD)
 
         return frame
-
-    def _canvas_frame(self, master) -> tk.Frame:
-        frame = tk.Frame(master, background='#ccc')
-        frame.bind("<Configure>", self._frame_configure)
-        return frame
-
-    def _frame_configure(self, *args):
-        """Reset the scroll region to encompass the inner frame"""
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def _project_frame(self, master: ttk.Frame) -> ttk.Frame:
         frame = ttk.Frame(master)
@@ -143,7 +148,8 @@ class CompareFrame():
                           state=WidgetState.READONLY)
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
 
-        entry = ttk.Entry(frame, textvariable=self.env_dir, state=WidgetState.READONLY)
+        entry = ttk.Entry(
+            frame, textvariable=self.env_dir, state=WidgetState.READONLY)
         entry.grid(row=row, column=2, sticky=tk.EW, padx=PAD)
 
         return frame
@@ -160,47 +166,24 @@ class CompareFrame():
     def compare_project(self) -> None:
         """Destroy and recreate widgets based on comparison."""
         ...
-        # (missing, mismatches) = compare(
-        #     self.project.source_dir, self.env_version.dir)
-
-        # for item in self.destroy_widgets:
-        #     item.destroy()
-
-        # frame = ttk.Frame(self.missing_frame)
-        # frame.grid(row=0, column=0, padx=PAD)
-        # frame.rowconfigure(1, weight=1)
-        # frame.columnconfigure(0, weight=1)
-
-        # self.destroy_widgets.append(frame)
-
-        # self.missing_file_frame = self._missing_frame(frame, missing)
-        # self.missing_file_frame.grid(row=0, column=0)
-        # self.destroy_widgets.append(self.missing_file_frame)
-
-        # mismatch_frame = self._mismatch_frame(frame, mismatches)
-        # mismatch_frame.grid(row=1, column=0, sticky=tk.NSEW)
-
-        # self.destroy_widgets.append(mismatch_frame)
 
     def _missing_frame(self, master: ttk.Frame) -> ttk.Frame:
-        frame = ttk.Frame(master, relief=tk.SUNKEN)
-        frame.grid(row=9, column=0, padx=PAD)
+        frame = ttk.Frame(master, relief=tk.SUNKEN, borderwidth=2)
         self.destroy_widgets.append(frame)
-        print(f"{self.missing=}")
 
-        row = 0
-        label = ttk.Label(
-            frame, text=' Missing files and dirs', style='blue-fg.TLabel')
-        label.grid(row=row, column=0, sticky=tk.W, padx=PAD, pady=PADT)
-        self.destroy_widgets.append(label)
-
-        row += 1
         if not self.missing:
-            label = ttk.Label(frame, text='None')
-            label.grid(row=row, column=0)
-            self.destroy_widgets.append(label)
-            return frame
+            return self._no_missing_items_frame(frame)
+        return self._missing_items_frame(frame)
 
+    def _no_missing_items_frame(self, frame: tk.Frame) -> tk.Frame:
+        row = 0
+        label = ttk.Label(frame, text='None')
+        label.grid(row=row, column=0)
+        self.destroy_widgets.append(label)
+        return frame
+
+    def _missing_items_frame(self, frame: tk.Frame) -> tk.Frame:
+        row = 0
         label = ttk.Label(frame, text='Env dir')
         label.grid(row=row, column=0, padx=PAD, sticky=tk.W)
         self.destroy_widgets.append(label)
@@ -209,52 +192,33 @@ class CompareFrame():
         label.grid(row=row, column=1, sticky=tk.W)
         self.destroy_widgets.append(label)
 
-        missing_files = None
-        for row, missing_files in enumerate(self.missing):
-            label = self._missing_file_label(frame, missing_files[0])
-            label.grid(row=row+2, column=0, padx=PAD, sticky=tk.W)
-
-            label = self._missing_file_label(frame, missing_files[1])
-            label.grid(row=row, column=1, sticky=tk.W)
-
-            if missing_files[0]:
-                button = IconButton(frame, txt.COPY, 'copy_docs')
-                button.grid(row=row+2, column=2, padx=PAD, pady=PADB)
-                button.widget.bind(
-                    '<Button-1>', lambda event, arg=None:
-                    self._copy_file(missing_files[0]))
-
+        for missing_file in self.missing:
             row += 1
+            self._missing_files_labels(frame, missing_file, row)
+            self._missing_button(frame, missing_file, row)
         return frame
 
-    def _missing_file_label(self, frame: ttk.Frame,
-                            file_name: str) -> ttk.Label:
-        style = ''
-        if not file_name:
-            file_name = '-- missing --'
-            style = 'red-fg.TLabel'
-        label = ttk.Label(frame, text=file_name, style=style)
-        self.destroy_widgets.append(label)
-        return label
+    def _missing_files_labels(
+            self, frame: tk.Frame, missing_file: Missing, row: int) -> None:
+        missing_col = 0 if missing_file.missing_in_env else 1
+        present_col = (missing_col +1) % 2
+        label = ttk.Label(frame, text=missing_file.file_name)
+        label.grid(row=row, column=missing_col, padx=PAD, sticky=tk.W)
+        label = ttk.Label(
+            frame, text='missing', style='red-fg.TLabel')
+        label.grid(row=row, column=present_col, padx=PAD, sticky=tk.W)
 
-    # def _mismatch_frame(self, master: ttk.Frame) -> ttk.Frame:
-    #     frame = ttk.Frame(master, relief=tk.SUNKEN)
-    #     self.destroy_widgets.append(frame)
-
-    #     label = ttk.Label(frame, text=' Mismatches', style='blue-fg.TLabel')
-    #     label.grid(row=0, column=0, sticky=tk.W, padx=PAD, pady=PADT)
-    #     self.destroy_widgets.append(label)
-
-    #     if not self.mismatches:
-    #         label = ttk.Label(frame, text='None')
-    #         label.grid(row=1, column=0)
-    #         self.destroy_widgets.append(label)
-    #         return frame
+    def _missing_button(
+            self, frame: tk.Frame, missing_file: Missing, row: int) -> None:
+        button = IconButton(frame, txt.COPY, 'copy_docs')
+        button.grid(row=row, column=2, padx=PAD, pady=PADB)
+        button.widget.bind(
+            '<Button-1>', partial(self._copy_file, missing_file.file_name))
 
     def _populate_mismatches(self) -> None:
         for row, item in enumerate(sorted(self.mismatches)):
             button = ttk.Radiobutton(
-                self.canvas.content,
+                self.mismatch_frame.content,
                 text=item,
                 value=item,
                 variable=self.mismatch,
@@ -281,29 +245,33 @@ class CompareFrame():
         if self.env_dir.get() and self.source_dir.get():
             self.compare_project()
 
-    def _copy_file(self, file_name: str) -> None:
+    def _copy_file(self, file_name, *args) -> None:
         source = Path(self.env_version.dir, file_name)
-        item = 'file'
-        if source.is_dir():
-            item = 'directory'
-        dlg = messagebox.askokcancel(
-            '', f'Copy this {item}? ({file_name})', parent=self.root)
-        if not dlg:
+        if not self._confirm_copy(source, file_name):
             return
 
         destination = Path(self.project.source_dir, file_name)
 
         if source.is_dir():
             shutil.copytree(source, destination, dirs_exist_ok=True)
+            logger.info(
+                'Copy directory',
+                source=str(source),
+                destination=str(destination))
         else:
-            print(f'{source=}')
-            print(f'{destination=}')
+            logger.info(
+                'Copy file', source=str(source), destination=str(destination))
             shutil.copyfile(source, destination)
-        notify(FRAME_TITLE, f'Item {file_name} copied')
 
         for widget in self.missing_file_frame.winfo_children():
             widget.destroy()
         self.compare_project()
+
+    def _confirm_copy(self, source: Path, file_name: str) -> bool:
+        item = 'directory' if source.is_dir() else 'file'
+        return messagebox.askokcancel(
+            '', f'Copy this {item}? ({file_name})', parent=self.root)
+
 
     def _dismiss(self, *args) -> None:
         self.root.destroy()
