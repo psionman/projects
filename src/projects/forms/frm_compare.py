@@ -32,14 +32,10 @@ class CompareFrame():
         self.parent = parent
         self.project = project
         self.env_version = env_version
-        self.destroy_widgets = []
-        self.missing_file_frame = None
+        self.missing_frame = None
         self.mismatch_frame = None
 
         self.config = read_config()
-        (self.missing, self.mismatches) = compare(
-            self.project.source_dir, self.env_version.dir)
-
         self.missing_frame = None
         self.button_frame = None
 
@@ -52,7 +48,9 @@ class CompareFrame():
         self.mismatch = tk.StringVar(value='')
         self._show()
 
-        self.compare_project()
+        (self.missing, self.mismatches) = compare(
+            self.project.source_dir, self.env_version.dir)
+        self._populate_missing_frame()
         self._populate_mismatches()
 
     def _show(self):
@@ -89,11 +87,11 @@ class CompareFrame():
         label = ttk.Label(
             frame, text='Missing files and dirs', style='blue-fg.TLabel')
         label.grid(row=row, column=0, sticky=tk.W, padx=PAD, pady=PADT)
-        self.destroy_widgets.append(label)
 
         row += 1
-        self.missing_file_frame = self._missing_frame(frame)
-        self.missing_file_frame.grid(
+        self.missing_frame = ttk.Frame(
+            frame, relief=tk.SUNKEN, borderwidth=2)
+        self.missing_frame.grid(
             row=row, column=0, sticky=tk.NW, padx=PAD, pady=PAD)
 
         row += 1
@@ -157,51 +155,42 @@ class CompareFrame():
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.HORIZONTAL)
         frame.buttons = [
-            frame.icon_button('diff', self.show_diff, True),
+            frame.icon_button('diff', self._show_differences, True),
             frame.icon_button('exit', self._dismiss),
         ]
         frame.enable(False)
         return frame
 
-    def compare_project(self) -> None:
-        """Destroy and recreate widgets based on comparison."""
-        ...
-
-    def _missing_frame(self, master: ttk.Frame) -> ttk.Frame:
-        frame = ttk.Frame(master, relief=tk.SUNKEN, borderwidth=2)
-        self.destroy_widgets.append(frame)
-
+    def _populate_missing_frame(self) -> None:
+        self._clear_frame(self.missing_frame)
         if not self.missing:
-            return self._no_missing_items_frame(frame)
-        return self._missing_items_frame(frame)
+            self._populate_no_missing_items()
+        self._populate_missing_items()
 
-    def _no_missing_items_frame(self, frame: tk.Frame) -> tk.Frame:
+    def _populate_no_missing_items(self) -> None:
         row = 0
-        label = ttk.Label(frame, text='None')
+        label = ttk.Label(
+            self.missing_frame, text='None', style='green-fg.TLabel')
         label.grid(row=row, column=0)
-        self.destroy_widgets.append(label)
-        return frame
 
-    def _missing_items_frame(self, frame: tk.Frame) -> tk.Frame:
+    def _populate_missing_items(self) -> None:
+        frame = self.missing_frame
         row = 0
         label = ttk.Label(frame, text='Env dir')
         label.grid(row=row, column=0, padx=PAD, sticky=tk.W)
-        self.destroy_widgets.append(label)
 
         label = ttk.Label(frame, text='Project dir')
         label.grid(row=row, column=1, sticky=tk.W)
-        self.destroy_widgets.append(label)
 
         for missing_file in self.missing:
             row += 1
             self._missing_files_labels(frame, missing_file, row)
             self._missing_button(frame, missing_file, row)
-        return frame
 
     def _missing_files_labels(
             self, frame: tk.Frame, missing_file: Missing, row: int) -> None:
         missing_col = 0 if missing_file.missing_in_env else 1
-        present_col = (missing_col +1) % 2
+        present_col = (missing_col + 1) % 2
         label = ttk.Label(frame, text=missing_file.file_name)
         label.grid(row=row, column=missing_col, padx=PAD, sticky=tk.W)
         label = ttk.Label(
@@ -222,17 +211,14 @@ class CompareFrame():
                 text=item,
                 value=item,
                 variable=self.mismatch,
-                command=self.rb_selected
+                command=self._rb_selected
             )
             button.grid(row=row+2, column=0, sticky=tk.W, padx=PAD)
-            self.destroy_widgets.append(button)
 
-        # return frame
-
-    def rb_selected(self, *args) -> None:
+    def _rb_selected(self, *args) -> None:
         self.button_frame.enable(True)
 
-    def show_diff(self, *args) -> None:
+    def _show_differences(self, *args) -> None:
         file = self.mismatch.get()
         paths = [
             str(Path(self.env_version.dir, file)),
@@ -242,8 +228,9 @@ class CompareFrame():
         self.root.withdraw()
         subprocess.run(['meld', *paths])
         self.root.deiconify()
-        if self.env_dir.get() and self.source_dir.get():
-            self.compare_project()
+        (self.missing, self.mismatches) = compare(
+            self.project.source_dir, self.env_version.dir)
+        self._populate_mismatches()
 
     def _copy_file(self, file_name, *args) -> None:
         source = Path(self.env_version.dir, file_name)
@@ -262,16 +249,19 @@ class CompareFrame():
             logger.info(
                 'Copy file', source=str(source), destination=str(destination))
             shutil.copyfile(source, destination)
-
-        for widget in self.missing_file_frame.winfo_children():
-            widget.destroy()
-        self.compare_project()
+        (self.missing, self.mismatches) = compare(
+            self.project.source_dir, self.env_version.dir)
+        self._populate_missing_frame()
 
     def _confirm_copy(self, source: Path, file_name: str) -> bool:
         item = 'directory' if source.is_dir() else 'file'
         return messagebox.askokcancel(
             '', f'Copy this {item}? ({file_name})', parent=self.root)
 
+    @staticmethod
+    def _clear_frame(frame: tk.Frame) -> None:
+        for widget in frame.winfo_children():
+            widget.destroy()
 
     def _dismiss(self, *args) -> None:
         self.root.destroy()
