@@ -7,6 +7,8 @@ from projects.forms.frm_config import ConfigFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_search import SearchFrame
+from projects.forms.frm_compare import CompareFrame
+from projects.forms.frm_project_versions import ProjectVersionsFrame
 
 # from projects.github import upload
 
@@ -18,9 +20,12 @@ class ModuleCaller():
             'project': self._project,
             'search': self._search,
             'build': self._build,
+            'compare': self._compare,
+            'versions': self._versions,
             # 'github': self._github,
             }
-        self.projects = ProjectServer().projects
+        self.project_server = ProjectServer()
+        self.projects = self.project_server.projects
 
         self.invalid = False
         if module == '-h':
@@ -44,8 +49,21 @@ class ModuleCaller():
         dlg = ConfigFrame(self)
         self.root.wait_window(dlg.root)
 
+    def _compare(self) -> None:
+        project_name = sys.argv[2]
+        project = self.projects[project_name]
+        project.env_versions = project.get_versions()
+        dlg = CompareFrame(self, project, project.env_versions[sys.argv[3]])
+        self.root.wait_window(dlg.root)
+
+    def _versions(self) -> None:
+        project_name = sys.argv[2]
+        project = self.projects[project_name]
+        project.env_versions = project.get_versions()
+        dlg = ProjectVersionsFrame(self, project)
+        self.root.wait_window(dlg.root)
+
     def _project(self) -> None:
-        self.project_server = ProjectServer()
         dlg = ProjectEditFrame(self, Mode.EDIT, self.projects['psiutils'])
         self.root.wait_window(dlg.root)
 

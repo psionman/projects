@@ -4,8 +4,8 @@ from tkinter import ttk
 from tkinter import messagebox
 
 from psiutils.buttons import ButtonFrame
-from psiutils.widgets import clickable_widget
-from psiutils.constants import PAD, Status
+from psiutils.widgets import clickable_widget, WaitCursor
+from psiutils.constants import PAD, Status, WidgetState
 from psiutils.utilities import window_resize, geometry
 
 from projects.config import config, read_config
@@ -83,7 +83,7 @@ class BuildFrame():
         label.grid(row=row, column=0, sticky=tk.E, padx=PAD)
 
         entry = ttk.Entry(frame, textvariable=self.project_name,
-                          state='readonly')
+                          state=WidgetState.READONLY)
         entry.grid(row=row, column=1, sticky=tk.W, padx=PAD, pady=PAD)
         clickable_widget(entry)
 
@@ -93,7 +93,7 @@ class BuildFrame():
         entry = ttk.Entry(
             frame,
             textvariable=self.current_version,
-            state='readonly'
+            state=WidgetState.READONLY
             )
         entry.grid(row=row, column=1, sticky=tk.W, padx=PAD, pady=PAD)
 
@@ -108,7 +108,7 @@ class BuildFrame():
         entry = ttk.Entry(
             frame,
             textvariable=self.pyproject_version,
-            state='readonly',
+            state=WidgetState.READONLY,
             )
         if self.current_version.get() != self.pyproject_version.get():
             entry['foreground'] = 'red'
@@ -170,6 +170,10 @@ class BuildFrame():
         return frame
 
     def _build(self, *args) -> None:
+        with WaitCursor(self.root):
+            self._build_project()
+
+    def _build_project(self) -> None:
         context = {
             'project': self.project,
             'delete_build': self.delete_build.get(),
@@ -182,12 +186,19 @@ class BuildFrame():
             'commit_text': self.commit_text.get(),
         }
         if update_module(context) == Status.OK:
+            self._build_success()
+        else:
+            self._build_failure
+        self._dismiss()
+
+    def _build_success(self) -> None:
             messagebox.showinfo(
                 'Module update',
                 'Module updated',
                 parent=self.root
             )
-        else:
+
+    def _build_failure(self) -> None:
             logger.warning(
                 "Build process error",
                 project=self.project.name,
@@ -197,7 +208,6 @@ class BuildFrame():
                 'Module not updated',
                 parent=self.root
             )
-        self._dismiss()
 
     def _dismiss(self):
         self.root.destroy()

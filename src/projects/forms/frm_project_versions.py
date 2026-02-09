@@ -14,9 +14,10 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from pathlib import Path
 
-from psiutils.constants import PAD, Status, Mode
+from psiutils.constants import PAD, Status, Mode, WidgetState
 from psiutils.buttons import ButtonFrame
 from psiutils.utilities import window_resize, geometry
+from psiutils.widgets import ScrollingCanvas
 
 from projects.project import Project
 from projects.config import read_config
@@ -80,13 +81,12 @@ class ProjectVersionsFrame():
     def __init__(
             self,
             parent,
-            mode: int,
             project: Project = None,
             refresh: bool = False) -> None:
         self.root = tk.Toplevel(parent.root)
         self.parent = parent
         self.config = read_config()
-        self.mode = mode
+        self.mode = Mode.VIEW
         self.project = project
         self.project_server = parent.project_server
         self.save_button = None
@@ -122,7 +122,6 @@ class ProjectVersionsFrame():
         self.version.trace_add('write', self._values_changed)
 
         self._show()
-
         self._populate_versions_frame()
 
     def _show(self) -> None:
@@ -160,10 +159,12 @@ class ProjectVersionsFrame():
         label = ttk.Label(frame, text='Project name')
         label.grid(row=0, column=0, sticky=tk.E, pady=PAD)
 
-        state = 'readonly' if self.mode == Mode.EDIT else 'normal'
+        state = (WidgetState.NORMAL if self.mode == Mode.EDIT
+                 else WidgetState.READONLY)
         entry = ttk.Entry(frame, textvariable=self.project_name, state=state)
         entry.grid(row=0, column=1, sticky=tk.EW, padx=PAD)
-        entry.focus_set()
+        if state == WidgetState.NORMAL:
+            entry.focus_set()
 
         label = ttk.Label(frame, text='(Used to find dirs in virtual envs)')
         label.grid(row=1, column=1, sticky=tk.W, pady=0)
@@ -172,53 +173,31 @@ class ProjectVersionsFrame():
         label.grid(row=2, column=0, sticky=tk.E, pady=PAD)
 
         entry = ttk.Entry(
-            frame, textvariable=self.project_version, state='readonly')
+            frame,
+            textvariable=self.project_version,
+            state=WidgetState.READONLY)
         entry.grid(row=2, column=1, sticky=tk.EW, padx=PAD)
 
         label = ttk.Label(frame, text='Project dir')
         label.grid(row=3, column=0, sticky=tk.E, pady=PAD)
 
         entry = ttk.Entry(
-            frame, textvariable=self.source_dir, state='readonly')
+            frame, textvariable=self.source_dir, state=WidgetState.READONLY)
         entry.grid(row=3, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
 
         label = ttk.Label(frame, text='Development version')
         label.grid(row=4, column=1, sticky=tk.W, pady=PAD)
 
-        self.versions_frame = self._versions_frame(frame)
+        self.versions_frame = ScrollingCanvas(
+            frame,
+            relief=tk.SUNKEN,
+            borderwidth=2,)
         self.versions_frame.grid(row=5, column=0, columnspan=3, sticky=tk.NSEW)
 
         self.button_frame = self._button_frame(frame)
         self.button_frame.grid(row=0, column=4, rowspan=9,
                                sticky=tk.NS, padx=PAD, pady=PAD)
         return frame
-
-    def _versions_frame(self, master: tk.Frame) -> tk.Frame:
-        frame = ttk.Frame(master, relief="sunken", borderwidth=2)
-        frame.rowconfigure(0, weight=1)
-        frame.columnconfigure(0, weight=1)
-
-        self.canvas = tk.Canvas(frame, borderwidth=0)
-        self.canvas.grid(row=0, column=0, sticky=tk.NSEW)
-        self.canvas.bind("<Configure>", self._on_canvas_configure)
-
-        self.canvas_frame = self._canvas_frame(self.canvas)
-        self.canvas_frame.bind("<Button-4>", self._on_mouse_wheel)
-        self.canvas_frame.bind("<Button-5>", self._on_mouse_wheel)
-
-        v_scroll = tk.Scrollbar(
-            frame, orient=tk.VERTICAL, command=self.canvas.yview)
-        v_scroll.grid(row=0, column=1, sticky=tk.NS)
-
-        self.canvas.configure(yscrollcommand=v_scroll.set)
-        self.canvas_frame_id = self.canvas.create_window(
-            (4, 4), window=self.canvas_frame, anchor=tk.NW)
-        self._populate_versions_frame()
-        return frame
-
-    def _on_canvas_configure(self, event):
-        # Match inner frame’s width to canvas’s width
-        self.canvas.itemconfig(self.canvas_frame_id, width=event.width)
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.VERTICAL)
@@ -232,23 +211,14 @@ class ProjectVersionsFrame():
         frame.enable(False)
         return frame
 
-    def _canvas_frame(self, master) -> tk.Frame:
-        frame = tk.Frame(master, background='#ccc')
-        frame.bind("<Configure>", self._frame_configure)
-        return frame
-
-    def _frame_configure(self, *args):
-        """Reset the scroll region to encompass the inner frame"""
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-
     def _populate_versions_frame(self) -> None:
         self.project.env_versions = self.project.get_versions(self.refresh)
         if self.refresh:
             self.project_server.save_projects()
         self.refresh = False
 
-        for widget in self.canvas_frame.winfo_children():
-            widget.destroy()
+        # for widget in self.versions_frame.canvas.winfo_children():
+        #     widget.destroy()
 
         versions = self.project.env_versions
         for row, name in enumerate(sorted(list(versions))):
@@ -274,7 +244,7 @@ class ProjectVersionsFrame():
                             f'{mismatch_str}')
 
             button = ttk.Radiobutton(
-                self.canvas_frame,
+                self.versions_frame.content,
                 text=display_text,
                 variable=self.version,
                 value=version.name,
@@ -299,13 +269,13 @@ class ProjectVersionsFrame():
             mismatch_str = f'{mismatch_str[:50]} ...'
         return mismatch_str
 
-    def _on_mouse_wheel(self, event):
-        if event.num == 4:   # Linux scroll up
-            self.canvas.yview_scroll(-1, "units")
-        elif event.num == 5:  # Linux scroll down
-            self.canvas.yview_scroll(1, "units")
-        else:                # Windows / macOS
-            self.canvas.yview_scroll(-1 * (event.delta // 120), "units")
+    # def _on_mouse_wheel(self, event):
+    #     if event.num == 4:   # Linux scroll up
+    #         self.canvas.yview_scroll(-1, "units")
+    #     elif event.num == 5:  # Linux scroll down
+    #         self.canvas.yview_scroll(1, "units")
+    #     else:                # Windows / macOS
+    #         self.canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     def _values_changed(self, *args) -> None:
         enable = bool(self.project_name.get())
@@ -323,7 +293,6 @@ class ProjectVersionsFrame():
         env_version = self.project.env_versions[self.version.get()]
         dlg = CompareFrame(self, self.project, env_version)
         self.root.wait_window(dlg.root)
-
         self._populate_versions_frame()
 
     def _update_project(self) -> None:

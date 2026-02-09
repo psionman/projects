@@ -4,7 +4,7 @@ version = "0.0.0"
 description = "Manage python projects,"
 authors = [{name = "Jeff", "email" = "<jeffwatkins2000@gmail.com>"}]
 readme = "README.md"
-requires-python = ">=3.10, <3.13"
+requires-python = ">=3.10"
 
 dependencies = [
     "appdirs>=1.4.4",
@@ -18,7 +18,7 @@ dependencies = [
     # "icecream>=2.1.4",
     # "jedi>=0.19.2",
     # "markdown>=3.8",
-    # "psiutils>=0.2.10",
+    "psiutils>=0.2.26",
     # "pygobject>=3.54.0",
     # "python-dateutil>=2.9.0.post0",
     # "structlog>=25.4.0",

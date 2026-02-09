@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 from pathlib import Path
 
-from psiutils.constants import PAD, Status, Mode
+from psiutils.constants import PAD, Status, Mode, WidgetState
 from psiutils.buttons import ButtonFrame, IconButton
 from psiutils.utilities import window_resize, geometry
 
@@ -84,7 +84,6 @@ class ProjectEditFrame():
         sizegrip.grid(sticky=tk.SE)
 
     def _main_frame(self, master: tk.Frame) -> ttk.Frame:
-        # pylint: disable=no-member)
         frame = ttk.Frame(master)
         frame.columnconfigure(2, weight=1)
 
@@ -92,7 +91,8 @@ class ProjectEditFrame():
         label = ttk.Label(frame, text='Project name')
         label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
 
-        state = 'readonly' if self.mode == Mode.EDIT else 'normal'
+        state = (WidgetState.NORMAL if self.mode == Mode.EDIT
+                 else WidgetState.READONLY)
         entry = ttk.Entry(frame, textvariable=self.project_name, state=state)
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
         entry.focus_set()
@@ -106,7 +106,7 @@ class ProjectEditFrame():
         label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
 
         entry = ttk.Entry(
-            frame, textvariable=self.project_version, state='readonly')
+            frame, textvariable=self.project_version, state=WidgetState.READONLY)
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
 
         row += 1

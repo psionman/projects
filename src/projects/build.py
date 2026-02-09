@@ -172,6 +172,7 @@ def _proc_action(project: Project, action: list[str]) -> int:
         proc = subprocess.Popen(action)
     proc.wait()
     (stdout, stderr) = proc.communicate()
+    print(stdout, stderr)
     del stdout, stderr
     return proc.returncode
 

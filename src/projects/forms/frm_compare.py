@@ -5,9 +5,10 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import shutil
 
-from psiutils.constants import PAD, PADB
+from psiutils.constants import PAD, PADB, PADT, WidgetState
 from psiutils.utilities import window_resize, geometry, notify
 from psiutils.buttons import ButtonFrame, IconButton
+from psiutils.widgets import ScrollingCanvas
 
 from projects.compare import compare
 from projects.config import read_config
@@ -29,8 +30,13 @@ class CompareFrame():
         self.parent = parent
         self.project = project
         self.env_version = env_version
+        self.destroy_widgets = []
+        self.missing_file_frame = None
+        self.canvas = None
 
         self.config = read_config()
+        (self.missing, self.mismatches) = compare(
+            self.project.source_dir, self.env_version.dir)
 
         self.missing_frame = None
         self.button_frame = None
@@ -44,8 +50,8 @@ class CompareFrame():
         self.mismatch = tk.StringVar(value='')
         self._show()
 
-        self.destroy_widgets = []
         self.compare_project()
+        self._populate_mismatches()
 
     def _show(self):
         self._configure()
@@ -69,25 +75,44 @@ class CompareFrame():
 
         root.title(f'{FRAME_TITLE}')
 
-    def _main_frame(self, container: ttk.Frame) -> ttk.Frame:
-        frame = ttk.Frame(container)
-        frame.rowconfigure(1, weight=1)
+    def _main_frame(self, master: ttk.Frame) -> ttk.Frame:
+        frame = ttk.Frame(master)
         frame.columnconfigure(0, weight=1)
 
+        row = 0
         project_frame = self._project_frame(frame)
-        project_frame.grid(row=0, column=0, sticky=tk.EW, padx=PAD, pady=PAD)
+        project_frame.grid(row=row, column=0, sticky=tk.EW, padx=PAD, pady=PAD)
 
-        self.missing_frame = ttk.Frame(frame)
-        self.missing_frame.grid(row=1, column=0, sticky=tk.NW, pady=PAD)
+        row += 1
+        self.missing_file_frame = self._missing_frame(frame)
+        self.missing_file_frame.grid(row=row, column=0, sticky=tk.NW, pady=PAD)
+
+        row += 1
+        frame.rowconfigure(row, weight=1)
+
+        self.canvas = ScrollingCanvas(
+            frame,
+            relief=tk.SUNKEN,
+            borderwidth=2,)
+        self.canvas.grid(row=row, column=0, sticky=tk.NSEW, padx=PAD, pady=PAD)
 
         self.button_frame = self._button_frame(frame)
         self.button_frame.grid(
-            row=2, column=0, sticky=tk.EW, padx=PAD, pady=PAD)
+            row=3, column=0, sticky=tk.EW, padx=PAD, pady=PAD)
 
         return frame
 
-    def _project_frame(self, container: ttk.Frame) -> ttk.Frame:
-        frame = ttk.Frame(container)
+    def _canvas_frame(self, master) -> tk.Frame:
+        frame = tk.Frame(master, background='#ccc')
+        frame.bind("<Configure>", self._frame_configure)
+        return frame
+
+    def _frame_configure(self, *args):
+        """Reset the scroll region to encompass the inner frame"""
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+    def _project_frame(self, master: ttk.Frame) -> ttk.Frame:
+        frame = ttk.Frame(master)
         frame.columnconfigure(2, weight=1)
 
         row = 0
@@ -95,7 +120,7 @@ class CompareFrame():
         label.grid(row=row, column=0, sticky=tk.E)
 
         entry = ttk.Entry(frame, textvariable=self.project_name,
-                          state='readonly')
+                          state=WidgetState.READONLY)
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
 
         row += 1
@@ -103,11 +128,11 @@ class CompareFrame():
         label.grid(row=row, column=0, sticky=tk.E)
 
         entry = ttk.Entry(frame, textvariable=self.project_version,
-                          state='readonly')
+                          state=WidgetState.READONLY)
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
 
         entry = ttk.Entry(frame, textvariable=self.source_dir,
-                          state='readonly')
+                          state=WidgetState.READONLY)
         entry.grid(row=row, column=2, sticky=tk.EW, padx=PAD)
 
         row += 1
@@ -115,10 +140,10 @@ class CompareFrame():
         label.grid(row=row, column=0, sticky=tk.E)
 
         entry = ttk.Entry(frame, textvariable=self.env_version_version,
-                          state='readonly')
+                          state=WidgetState.READONLY)
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
 
-        entry = ttk.Entry(frame, textvariable=self.env_dir, state='readonly')
+        entry = ttk.Entry(frame, textvariable=self.env_dir, state=WidgetState.READONLY)
         entry.grid(row=row, column=2, sticky=tk.EW, padx=PAD)
 
         return frame
@@ -134,46 +159,50 @@ class CompareFrame():
 
     def compare_project(self) -> None:
         """Destroy and recreate widgets based on comparison."""
-        (missing, mismatches) = compare(
-            self.project.source_dir, self.env_version.dir)
+        ...
+        # (missing, mismatches) = compare(
+        #     self.project.source_dir, self.env_version.dir)
 
-        for item in self.destroy_widgets:
-            item.destroy()
+        # for item in self.destroy_widgets:
+        #     item.destroy()
 
-        frame = ttk.Frame(self.missing_frame)
-        frame.grid(row=0, column=0, padx=PAD)
-        self.destroy_widgets.append(frame)
+        # frame = ttk.Frame(self.missing_frame)
+        # frame.grid(row=0, column=0, padx=PAD)
+        # frame.rowconfigure(1, weight=1)
+        # frame.columnconfigure(0, weight=1)
 
-        self.missing_file_frame = self._missing_frame(frame, missing)
-        self.missing_file_frame.grid(row=0, column=0)
-        self.destroy_widgets.append(self.missing_file_frame)
+        # self.destroy_widgets.append(frame)
 
-        mismatch_frame = self._mismatch_frame(frame, mismatches)
-        mismatch_frame.grid(row=1, column=0, sticky=tk.W)
-        self.destroy_widgets.append(mismatch_frame)
+        # self.missing_file_frame = self._missing_frame(frame, missing)
+        # self.missing_file_frame.grid(row=0, column=0)
+        # self.destroy_widgets.append(self.missing_file_frame)
 
-    def _missing_frame(self, container: ttk.Frame,
-                       missing: list[tuple]) -> ttk.Frame:
-        # pylint: disable=no-member)
-        frame = ttk.Frame(container)
+        # mismatch_frame = self._mismatch_frame(frame, mismatches)
+        # mismatch_frame.grid(row=1, column=0, sticky=tk.NSEW)
+
+        # self.destroy_widgets.append(mismatch_frame)
+
+    def _missing_frame(self, master: ttk.Frame) -> ttk.Frame:
+        frame = ttk.Frame(master, relief=tk.SUNKEN)
         frame.grid(row=9, column=0, padx=PAD)
         self.destroy_widgets.append(frame)
+        print(f"{self.missing=}")
 
         row = 0
         label = ttk.Label(
             frame, text=' Missing files and dirs', style='blue-fg.TLabel')
-        label.grid(row=row, column=0, sticky=tk.W)
+        label.grid(row=row, column=0, sticky=tk.W, padx=PAD, pady=PADT)
         self.destroy_widgets.append(label)
 
         row += 1
-        if not missing:
+        if not self.missing:
             label = ttk.Label(frame, text='None')
             label.grid(row=row, column=0)
             self.destroy_widgets.append(label)
             return frame
 
         label = ttk.Label(frame, text='Env dir')
-        label.grid(row=row, column=0, sticky=tk.W)
+        label.grid(row=row, column=0, padx=PAD, sticky=tk.W)
         self.destroy_widgets.append(label)
 
         label = ttk.Label(frame, text='Project dir')
@@ -181,7 +210,7 @@ class CompareFrame():
         self.destroy_widgets.append(label)
 
         missing_files = None
-        for row, missing_files in enumerate(missing):
+        for row, missing_files in enumerate(self.missing):
             label = self._missing_file_label(frame, missing_files[0])
             label.grid(row=row+2, column=0, padx=PAD, sticky=tk.W)
 
@@ -208,33 +237,33 @@ class CompareFrame():
         self.destroy_widgets.append(label)
         return label
 
-    def _mismatch_frame(self, container: ttk.Frame,
-                        mismatches: list[str]) -> ttk.Frame:
-        frame = ttk.Frame(container)
-        self.destroy_widgets.append(frame)
+    # def _mismatch_frame(self, master: ttk.Frame) -> ttk.Frame:
+    #     frame = ttk.Frame(master, relief=tk.SUNKEN)
+    #     self.destroy_widgets.append(frame)
 
-        label = ttk.Label(frame, text=' Mismatches', style='blue-fg.TLabel')
-        label.grid(row=0, column=0, sticky=tk.W)
-        self.destroy_widgets.append(label)
+    #     label = ttk.Label(frame, text=' Mismatches', style='blue-fg.TLabel')
+    #     label.grid(row=0, column=0, sticky=tk.W, padx=PAD, pady=PADT)
+    #     self.destroy_widgets.append(label)
 
-        if not mismatches:
-            label = ttk.Label(frame, text='None')
-            label.grid(row=1, column=0)
-            self.destroy_widgets.append(label)
-            return frame
+    #     if not self.mismatches:
+    #         label = ttk.Label(frame, text='None')
+    #         label.grid(row=1, column=0)
+    #         self.destroy_widgets.append(label)
+    #         return frame
 
-        for row, item in enumerate(sorted(mismatches)):
+    def _populate_mismatches(self) -> None:
+        for row, item in enumerate(sorted(self.mismatches)):
             button = ttk.Radiobutton(
-                frame,
+                self.canvas.content,
                 text=item,
                 value=item,
                 variable=self.mismatch,
                 command=self.rb_selected
             )
-            button.grid(row=row+2, column=0, sticky=tk.W)
+            button.grid(row=row+2, column=0, sticky=tk.W, padx=PAD)
             self.destroy_widgets.append(button)
 
-        return frame
+        # return frame
 
     def rb_selected(self, *args) -> None:
         self.button_frame.enable(True)
