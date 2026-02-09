@@ -217,9 +217,6 @@ class ProjectVersionsFrame():
             self.project_server.save_projects()
         self.refresh = False
 
-        # for widget in self.versions_frame.canvas.winfo_children():
-        #     widget.destroy()
-
         versions = self.project.env_versions
         for row, name in enumerate(sorted(list(versions))):
             version = versions[name]
@@ -254,28 +251,15 @@ class ProjectVersionsFrame():
 
     def _missing_files(self, missing: list) -> list:
         missing_files = []
-        for count, item in enumerate(missing):
-            if count < 5:
-                if item[0]:
-                    missing_files.append(item[0])
-
-                if item[1]:
-                    missing_files.append(item[1])
-        return missing_files
+        for item in missing:
+            missing_files.append(item.file_name)
+        return missing_files[:5]
 
     def _mismatch_str(self, missing_files: list, mismatches: list) -> str:
         mismatch_str = ' '.join(mismatches + missing_files)
         if len(mismatch_str) > 50:
             mismatch_str = f'{mismatch_str[:50]} ...'
         return mismatch_str
-
-    # def _on_mouse_wheel(self, event):
-    #     if event.num == 4:   # Linux scroll up
-    #         self.canvas.yview_scroll(-1, "units")
-    #     elif event.num == 5:  # Linux scroll down
-    #         self.canvas.yview_scroll(1, "units")
-    #     else:                # Windows / macOS
-    #         self.canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     def _values_changed(self, *args) -> None:
         enable = bool(self.project_name.get())

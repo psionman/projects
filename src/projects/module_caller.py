@@ -68,7 +68,9 @@ class ModuleCaller():
         self.root.wait_window(dlg.root)
 
     def _build(self) -> None:
-        dlg = BuildFrame(self, self.projects['bfgbidding'])
+        project_name = sys.argv[2]
+        project = self.projects[project_name]
+        dlg = BuildFrame(self, project)
         self.root.wait_window(dlg.root)
 
     def _search(self) -> None:

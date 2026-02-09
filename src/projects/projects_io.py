@@ -34,14 +34,14 @@ def update_file(pyproject_path: str, output: str) -> int:
         output (str): The content to write to the file.
 
     Returns:
-        int: The status of the update operation (Status.OK
+        int: The status of the update operation (Status.SUCCESS
         or Status.ERROR).
     """
     try:
         with open(
                 pyproject_path, 'w', encoding='utf8') as f_output:
             f_output.write(output)
-        return Status.OK
+        return Status.SUCCESS
     except NotADirectoryError:
         logger.warning(f'Cannot find directory: {Path(pyproject_path).parent}')
         return Status.ERROR

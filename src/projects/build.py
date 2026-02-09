@@ -5,6 +5,7 @@ import subprocess
 import shutil
 from pathlib import Path
 from dotenv import load_dotenv
+from dataclasses import dataclass
 
 from psiutils.constants import Status
 from projects import logger
@@ -21,46 +22,69 @@ except TypeError:
     UV_PUBLISH_TOKEN = False
 
 
-def update_module(context: dict) -> int:
+@dataclass
+class BuildData:
+    project: Project
+    delete_build: bool
+    version: str
+    current_version: str
+    history: str
+    current_history: str
+    test_build: bool
+    sync_repository: str
+    commit_text: str
 
-    project = context['project']
+
+
+def update_module(build_data: dict) -> int:
+    project = build_data.project
     logger.info(
         "Starting build process",
         project=project.name,
     )
     check_imports(project.name, project.source_dir)
 
-    if not context['test_build']:
-        if _update_version(project, context['version']) != Status.OK:
+    if not build_data.test_build:
+        if _update_non_test_items(build_data) == Status.ERROR:
             return Status.ERROR
 
-        if project.update_history(context['history']) != Status.OK:
-            return Status.ERROR
-        logger.info(
-            "Update history",
-            project=project.name,
-        )
-
-        if (context['delete_build']
-                and _delete_build_dirs(project) != Status.OK):
-            return Status.ERROR
-
-    if _build(project) != Status.OK:
-        _restore_project(context)
+    if _build(project) != Status.SUCCESS:
+        _restore_project(build_data)
         return Status.ERROR
 
-    if _upload(project, context['test_build']) != Status.OK:
-        _restore_project(context)
+    if _upload(project, build_data.test_build) != Status.SUCCESS:
+        _restore_project(build_data)
         return Status.ERROR
 
-    if _git_push(context) != Status.OK:
+    if _git_push(build_data) != Status.SUCCESS:
         return Status.ERROR
 
-    return Status.OK
+    return Status.SUCCESS
+
+
+def _update_non_test_items(build_data: dict) -> Status:
+    project = build_data.project
+    if _update_version(project, build_data.version) != Status.SUCCESS:
+        return Status.ERROR
+
+    xxx = project.update_history(build_data.history)
+    print('b', xxx)
+    if xxx != Status.SUCCESS:
+        return Status.ERROR
+    logger.info(
+        "Update history",
+        project=project.name,
+    )
+
+    if (build_data.delete_build
+            and _delete_build_dirs(project) != Status.SUCCESS):
+        return Status.ERROR
+
+    return Status.SUCCESS
 
 
 def _update_version(project: Project, version: str) -> int:
-    if project.update_version(version) != Status.OK:
+    if project.update_version(version) != Status.SUCCESS:
         return Status.ERROR
     logger.info(
         "Update version",
@@ -68,7 +92,7 @@ def _update_version(project: Project, version: str) -> int:
         version=version
     )
 
-    if project.update_pyproject_version(version) != Status.OK:
+    if project.update_pyproject_version(version) != Status.SUCCESS:
         return Status.ERROR
     logger.info(
         "Update pyproject version",
@@ -76,17 +100,17 @@ def _update_version(project: Project, version: str) -> int:
         version=version
     )
 
-    return Status.OK
+    return Status.SUCCESS
 
 
-def _restore_project(context: dict) -> None:
-    project = context['project']
+def _restore_project(build_data: dict) -> None:
+    project = build_data.project
     logger.info(
         "Restoring project",
         project=project.name,
     )
-    _update_version(project, context['current_version'])
-    project.update_history(context['current_history'])
+    _update_version(project, build_data.current_version)
+    project.update_history(build_data.current_history)
 
 
 def _build(project: Project) -> int:
@@ -103,7 +127,7 @@ def _build(project: Project) -> int:
         "Build project",
         project=project.name,
     )
-    return Status.OK
+    return Status.SUCCESS
 
 
 def _upload(project: Project, test_build: bool = False) -> int:
@@ -139,18 +163,18 @@ def _upload(project: Project, test_build: bool = False) -> int:
             project=project.name,
             )
         return Status.ERROR
-    return Status.OK
+    return Status.SUCCESS
 
 
-def _git_push(context: dict) -> int:
+def _git_push(build_data: dict) -> int:
     """Save the version to remote git repository."""
-    if not context['sync_repository']:
-        return Status.OK
+    if not build_data.sync_repository:
+        return Status.SUCCESS
 
-    project = context['project']
+    project = build_data.project
     returncode = _proc_action(project, ['git', 'add', '.'])
     returncode += _proc_action(
-        project, ['git', 'commit', '-m', context['commit_text']])
+        project, ['git', 'commit', '-m', build_data.commit_text])
     returncode += _proc_action(project, ['git', 'push', 'origin', 'master'])
 
     if returncode == 0:
@@ -158,13 +182,13 @@ def _git_push(context: dict) -> int:
             "git repository uploaded",
             project=project.name,
         )
-        return Status.OK
-    else:
-        logger.exception(
-            f'git repository not uploaded, Return code: {returncode}',
-            project=project.name,
-            )
-        return Status.ERROR
+        return Status.SUCCESS
+
+    logger.exception(
+        f'git repository not uploaded, Return code: {returncode}',
+        project=project.name,
+        )
+    return Status.ERROR
 
 
 def _proc_action(project: Project, action: list[str]) -> int:
@@ -199,4 +223,4 @@ def _delete_build_dirs(project: Project) -> int:
             except OSError:
                 logger.exception(f'Failed to remove {path}')
                 return Status.ERROR
-    return Status.OK
+    return Status.SUCCESS

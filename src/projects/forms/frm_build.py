@@ -11,7 +11,7 @@ from psiutils.utilities import window_resize, geometry
 from projects.config import config, read_config
 from projects import logger
 
-from projects.build import update_module
+from projects.build import update_module, BuildData
 from projects.text import Text
 
 txt = Text()
@@ -174,40 +174,41 @@ class BuildFrame():
             self._build_project()
 
     def _build_project(self) -> None:
-        context = {
-            'project': self.project,
-            'delete_build': self.delete_build.get(),
-            'version': self.new_version.get(),
-            'current_version': self.current_version.get(),
-            'history': self.history_text.get('1.0', 'end'),
-            'current_history': self.project.history,
-            'test_build': self.test_build.get(),
-            'sync_repository': self.sync_repository.get(),
-            'commit_text': self.commit_text.get(),
-        }
-        if update_module(context) == Status.OK:
+        build_data = BuildData(
+            self.project,
+            self.delete_build.get(),
+            self.new_version.get(),
+            self.current_version.get(),
+            self.history_text.get('1.0', 'end'),
+            self.project.history,
+            self.test_build.get(),
+            self.sync_repository.get(),
+            self.commit_text.get(),
+        )
+
+        if update_module(build_data) == Status.SUCCESS:
             self._build_success()
         else:
-            self._build_failure
+            self._build_failure()
         self._dismiss()
 
     def _build_success(self) -> None:
-            messagebox.showinfo(
-                'Module update',
-                'Module updated',
-                parent=self.root
-            )
+        messagebox.showinfo(
+            'Module update',
+            'Module updated',
+            parent=self.root
+        )
 
     def _build_failure(self) -> None:
-            logger.warning(
-                "Build process error",
-                project=self.project.name,
-            )
-            messagebox.showerror(
-                'Module update',
-                'Module not updated',
-                parent=self.root
-            )
+        logger.warning(
+            "Build process error",
+            project=self.project.name,
+        )
+        messagebox.showerror(
+            'Module update',
+            'Module not updated',
+            parent=self.root
+        )
 
     def _dismiss(self):
         self.root.destroy()

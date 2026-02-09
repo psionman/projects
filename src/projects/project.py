@@ -229,19 +229,27 @@ class Project():
 
     def update_pyproject_version(self, version: str) -> int:
         for index, line in enumerate(self._pyproject_list):
-            if 'version =' in line:
-                line_list = line.split('=')
-                if len(line_list) != 2:
-                    print(f'Version format error in {self.version_path}')
-                    return Status.ERROR
-                version_text = f'{line_list[0].strip()} = "{version}"'
+            if 'version = {attr = "psiutils.__version__"}' in line:
+                return Status.SUCCESS
 
-                output = self._pyproject_list[:index]
-                output.append(version_text)
-                output.extend(self._pyproject_list[index+1:])
-                break
+            if 'version =' not in line:
+                continue
 
-        return io.update_file(self.pyproject_path, '\n'.join(output))
+            line_list = line.split('=')
+            if len(line_list) != 2:
+                logger.error(
+                    'Version format error',
+                    version_file=str(self.version_path))
+                return Status.ERROR
+            version_text = f'{line_list[0].strip()} = "{version}"'
+
+            output = self._pyproject_list[:index]
+            output.append(version_text)
+            output.extend(self._pyproject_list[index+1:])
+
+            io.update_file(self.pyproject_path, '\n'.join(output))
+            break
+        return Status.SUCCESS
 
     def update_history(self, history: str) -> int:
         return io.update_file(self.history_path, history)

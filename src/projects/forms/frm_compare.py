@@ -168,7 +168,7 @@ class CompareFrame():
         self._populate_missing_items()
 
     def _populate_no_missing_items(self) -> None:
-        row = 0
+        row = 1
         label = ttk.Label(
             self.missing_frame, text='None', style='green-fg.TLabel')
         label.grid(row=row, column=0)
@@ -205,6 +205,18 @@ class CompareFrame():
             '<Button-1>', partial(self._copy_file, missing_file.file_name))
 
     def _populate_mismatches(self) -> None:
+        if not self.mismatches:
+            self._populate_no_mismatches()
+            return
+        self._populate_mismatched_files()
+
+    def _populate_no_mismatches(self) -> None:
+        label = ttk.Label(
+            self.mismatch_frame.content, text='None', style='green-fg.TLabel')
+        label.grid(row=0, column=0, sticky=tk.E, padx=PAD, pady=PAD)
+
+    def _populate_mismatched_files(self) -> None:
+        self._clear_frame(self.mismatch_frame.content)
         for row, item in enumerate(sorted(self.mismatches)):
             button = ttk.Radiobutton(
                 self.mismatch_frame.content,
