@@ -35,6 +35,10 @@ DEFAULT_DEV_DIR = str(Path(Path.home(), '.pyenv', 'versions'))
 DEFAULT_PROJECT_DIR = str(Path(Path.home(), 'projects'))
 
 
+UP_TO_DATE_STYLE = 'green-fg.TRadiobutton'
+OUT_OF_DATE_STYLE = 'blue-fg.TRadiobutton'
+MODIFIED_STYLE = 'red-fg.TRadiobutton'
+
 class ProjectVersionsFrame():
     """
     A GUI frame for selecting, comparing, and building project versions.
@@ -223,31 +227,33 @@ class ProjectVersionsFrame():
             (missing, mismatches) = compare(
                 self.project.source_dir, version.dir)
 
-            mismatch_str = ''
-
-            style = 'green-fg.TRadiobutton'
-            if missing or mismatches:
-                missing_files = self._missing_files(missing)
-                if VERSION_FILE in mismatches:
-                    mismatches.remove(VERSION_FILE)
-
-                style = 'blue-fg.TRadiobutton'
-                if '999' in version.version:
-                    style = 'red-fg.TRadiobutton'
-
-                mismatch_str = self._mismatch_str(missing_files, mismatches)
-
-            display_text = (f'{name} : ({version.version}) '
-                            f'{mismatch_str}')
+            mismatch_str = self._get_mismatch_str(missing, mismatches)
+            display_text = f'{name} : ({version.version}) {mismatch_str}'
+            button_style = self._button_style(version, mismatch_str)
 
             button = ttk.Radiobutton(
                 self.versions_frame.content,
                 text=display_text,
                 variable=self.version,
                 value=version.name,
-                style=style,
+                style=button_style,
             )
             button.grid(row=row, column=0, sticky=tk.W)
+
+    def _button_style(self, version, mismatch_str: str) -> str:
+        if '999' in version.version:
+            return MODIFIED_STYLE
+        if mismatch_str:
+            return OUT_OF_DATE_STYLE
+        return UP_TO_DATE_STYLE
+
+    def _get_mismatch_str(self, missing: list, mismatches: list) -> str:
+        if not missing and not mismatches:
+            return ''
+        missing_files = self._missing_files(missing)
+        if VERSION_FILE in mismatches:
+            mismatches.remove(VERSION_FILE)
+        return self._mismatch_str(missing_files, mismatches)
 
     def _missing_files(self, missing: list) -> list:
         missing_files = []

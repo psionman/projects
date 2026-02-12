@@ -246,10 +246,13 @@ class CompareFrame():
 
     def _copy_file(self, file_name, *args) -> None:
         source = Path(self.env_version.dir, file_name)
+        destination = Path(self.project.source_dir, file_name)
+        if not source.is_file():
+            source = Path(self.project.source_dir, file_name)
+            destination = Path(self.env_version.dir, file_name)
+
         if not self._confirm_copy(source, file_name):
             return
-
-        destination = Path(self.project.source_dir, file_name)
 
         if source.is_dir():
             shutil.copytree(source, destination, dirs_exist_ok=True)
