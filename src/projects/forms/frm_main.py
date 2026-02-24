@@ -3,6 +3,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import subprocess
+import threading
+from typing import Any
 
 from psiutils.constants import PAD, PADL, Status
 from psiutils.buttons import ButtonFrame, IconButton
@@ -20,6 +22,7 @@ from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_project_versions import ProjectVersionsFrame
 from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_search import SearchFrame
+from projects import logger
 
 txt = Text()
 
@@ -321,29 +324,51 @@ class MainFrame():
 
     def _open_code(self, *args) -> None:
         try:
-            subprocess.call(['codium', '-n', self.project.base_dir])
+            # subprocess.call(['codium', '-n', self.project.base_dir])
+            return self._call_process(['codium', '-n', self.project.base_dir])
         except FileNotFoundError:
             messagebox.showerror('', "codium not found.")
 
     def _konsole(self, *args) -> None:
-        return subprocess.Popen(
-                ['konsole', '--workdir', self.project.base_dir]
-            )
+        return self._call_process(
+            ['konsole', '--workdir', self.project.base_dir])
 
     def _edit_script(self, *args) -> None:
-        return subprocess.Popen(
-                ['kate', self.project.script]
+        return self._call_process(['kate', self.project.script])
+
+    def _run_script(self, *args) -> Any:
+        return self._call_process([self.project.script])
+
+    def _call_process(self, process: list) -> Any:
+        threading.Thread(
+            target=self._call_process_worker,
+            args=(process,),
+            daemon=True,
+        ).start()
+
+
+    def _call_process_worker(self, process: list) -> None:
+        proc = subprocess.Popen(
+            process,
+            stdout=subprocess.PIPE,
+            text=True,
+        )
+
+        stdout, stderr = proc.communicate()
+        if proc.returncode != 0:
+            error = 'None'
+            if stderr:
+                error = stderr.strip().split('\n')[-1]
+            logger.error('Process failed', process=process, error=error)
+
+            self.root.after(
+                0,
+                lambda: messagebox.showerror('', 'Process failed')
             )
 
-    def _run_script(self, *args) -> None:
-        return subprocess.Popen(
-                [self.project.script]
-            )
-
-    def _build_for_windows(self, *args) -> None:
-        return subprocess.Popen(
-                ['windows-converter', 'project', self.project.name]
-            )
+    def _build_for_windows(self) -> None:
+        return self._call_process(
+            ['windows-converter', 'project', self.project.name])
 
     def _search_for_content(self, * args):
         dlg = SearchFrame(self)
