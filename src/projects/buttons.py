@@ -1,0 +1,20 @@
+from psiutils.buttons import IconButton, ButtonFrame as PsiButtonFrame
+from projects.constants import ICON_DIR
+
+
+buttons = {"console": ("Konsole", "console"), "console": ("Konsole", "console")}
+
+
+class ButtonFrame(PsiButtonFrame):
+    def __init__(
+        self,
+        *args,
+        sticky: str = "",
+        dimmable: bool = False,
+        **kwargs: dict,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        for name, button in buttons.items():
+            self.icon_buttons[name] = IconButton(
+                self, button[0], button[1], icon_path=ICON_DIR
+            )

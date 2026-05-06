@@ -11,28 +11,26 @@ dependencies = [
     "clipboard>=0.0.4",
     "dotenv>=0.9.9",
     "icecream>=2.1.8",
-    "psiutils>=0.2.13",
-    # "appdirs>=1.4.4",
-    # "clipboard>=0.0.4",
-    # "dotenv>=0.9.9",
-    # "icecream>=2.1.4",
-    # "jedi>=0.19.2",
-    # "markdown>=3.8",
-    "psiutils>=0.2.26",
-    # "pygobject>=3.54.0",
-    # "python-dateutil>=2.9.0.post0",
-    # "structlog>=25.4.0",
-    # "tkinterweb>=4.3.1",
+    "psiutils>=0.2.33",
     "pygithub>=2.8.1",
     "pygobject>=3.54.5",
     "python-dateutil>=2.9.0.post0",
     "structlog>=25.5.0",
 ]
+[tool.ruff]
+line-length = 79
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]  # pycodestyle, pyflakes, isort
+ignore = []
 
 [dependency-groups]
 dev = [
     "pytest",
-    "jedi>=0.19.2",]
+    "jedi>=0.19.2",
+    "ruff>=0.15.12",
+]
 
 [build-system]
 requires = ['uv-build']

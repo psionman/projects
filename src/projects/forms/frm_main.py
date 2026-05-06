@@ -1,42 +1,43 @@
-
 """MainFrame for project management."""
-import tkinter as tk
-from tkinter import ttk, messagebox
+
 import subprocess
 import threading
+import tkinter as tk
+from tkinter import messagebox, ttk
 from typing import Any
 
+from psiutils.buttons import IconButton
 from psiutils.constants import PAD, PADL, Status
-from psiutils.buttons import ButtonFrame, IconButton
 from psiutils.menus import Menu, MenuItem
-from psiutils.treeview import Treeview, ColumnDefn
-from psiutils.utilities import window_resize, geometry
+from psiutils.treeview import ColumnDefn, Treeview
+from psiutils.utilities import geometry, window_resize
 
-from projects.project_server import ProjectServer
-from projects.config import read_config
+from projects import logger
 from projects.build import UV_PUBLISH_TOKEN
-from projects.text import Text
-
-from projects.main_menu import MainMenu
+from projects.buttons import ButtonFrame
+from projects.config import read_config
+from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_project_versions import ProjectVersionsFrame
-from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_search import SearchFrame
-from projects import logger
+from projects.main_menu import MainMenu
+from projects.project import Project
+from projects.project_server import ProjectServer
+from projects.text import Text
 
 txt = Text()
 
-FRAME_TITLE = 'Project management'
+FRAME_TITLE = "Project management"
 
 COLUMN_DEFS = (
-    ColumnDefn('key', '', 0),
-    ColumnDefn('project_name', 'Project', 50),
-    ColumnDefn('script', 'Script', 1),
-    ColumnDefn('main', 'Source dir', 400),
+    ColumnDefn("key", "", 0),
+    ColumnDefn("project_name", "Project", 50),
+    ColumnDefn("script", "Script", 1),
+    ColumnDefn("main", "Source dir", 400),
 )
 
 
-class MainFrame():
+class MainFrame:
     """
     MainFrame for project management.
 
@@ -46,6 +47,7 @@ class MainFrame():
         display project information, and perform various actions
         like building projects or editing project details.
     """
+
     def __init__(self, parent):
         self.root = parent.root
         self.parent = parent
@@ -53,7 +55,9 @@ class MainFrame():
 
         self.project_server = ProjectServer()
         self.projects = self.project_server.projects
-        self.project = self.projects[self.config.last_project]
+        self.project = Project()
+        if self.config.last_project in self.projects:
+            self.project = self.projects[self.config.last_project]
 
         self.tree = None
         self.build_button = None
@@ -77,9 +81,11 @@ class MainFrame():
         root = self.root
         root.geometry(geometry(self.config, __file__))
         root.title(FRAME_TITLE)
-        root.bind('<Control-x>', self._dismiss)
-        root.bind('<Configure>',
-                  lambda event, arg=None: window_resize(self, __file__))
+        root.bind("<Control-x>", self._dismiss)
+        root.bind(
+            "<Configure>",
+            lambda event, arg=None: window_resize(self, __file__),
+        )
 
         main_menu = MainMenu(self)
         main_menu.create()
@@ -91,8 +97,9 @@ class MainFrame():
         main_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=PAD, pady=PAD)
 
         self.button_frame = self._button_frame(root)
-        self.button_frame.grid(row=0, column=1, rowspan=9,
-                               sticky=tk.NS, padx=PAD, pady=PAD)
+        self.button_frame.grid(
+            row=0, column=1, rowspan=9, sticky=tk.NS, padx=PAD, pady=PAD
+        )
 
         sizegrip = ttk.Sizegrip(root)
         sizegrip.grid(column=1, sticky=tk.SE)
@@ -105,12 +112,13 @@ class MainFrame():
         frame.columnconfigure(0, weight=1)
 
         self.tree = self._get_tree(frame)
-        self.tree.bind('<<TreeviewSelect>>', self._tree_clicked)
-        self.tree.bind('<Button-3>', self._show_context_menu)
+        self.tree.bind("<<TreeviewSelect>>", self._tree_clicked)
+        self.tree.bind("<Button-3>", self._show_context_menu)
         self.tree.grid(row=0, column=0, sticky=tk.NSEW, padx=PADL)
 
         v_scroll = tk.Scrollbar(
-            frame, orient=tk.VERTICAL, command=self.tree.yview)
+            frame, orient=tk.VERTICAL, command=self.tree.yview
+        )
         v_scroll.grid(row=0, column=1, sticky=tk.NS)
         self.tree.configure(yscrollcommand=v_scroll.set)
 
@@ -121,12 +129,12 @@ class MainFrame():
         tree = Treeview(
             master,
             column_defs=COLUMN_DEFS,
-            selectmode='browse',
+            selectmode="browse",
             height=15,
-            show='headings',
-            )
-        tree.bind('<<TreeviewSelect>>', self._tree_clicked)
-        tree.bind('<Button-3>', self._show_context_menu)
+            show="headings",
+        )
+        tree.bind("<<TreeviewSelect>>", self._tree_clicked)
+        tree.bind("<Button-3>", self._show_context_menu)
         return tree
 
     def _populate_tree(self) -> None:
@@ -135,27 +143,29 @@ class MainFrame():
         self._set_selection()
 
     def _get_values_for_tree(self) -> list[tuple]:
-        projects = {key: self.projects[key]
-                    for key in sorted(self.projects.keys())}
-        return [(
+        projects = {
+            key: self.projects[key] for key in sorted(self.projects.keys())
+        }
+        return [
+            (
                 project.name,
-                project.script.replace(
-                    f'{self.config.script_directory}/', ''),
-                project.source_dir_short,)
-                for project in projects.values()
-                ]
+                project.script.replace(f"{self.config.script_directory}/", ""),
+                project.source_dir_short,
+            )
+            for project in projects.values()
+        ]
 
     def _set_selection(self) -> None:
         self.tree.select_item(0, self.project.name)
 
     def _tree_clicked(self, *args) -> None:
-        if not (values := self.tree.item(self.tree.selection())['values']):
+        if not (values := self.tree.item(self.tree.selection())["values"]):
             return
 
         self.project = self.projects[values[0]]
         self._enable_relevant_items()
 
-        self.config.update('last_project', values[0])
+        self.config.update("last_project", values[0])
         self.config.save()
 
     def _enable_relevant_items(self) -> None:
@@ -196,33 +206,37 @@ class MainFrame():
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.VERTICAL)
         self.build_button = frame.icon_button(
-            'build', self._build_project, True)
+            "build", self._build_project, True
+        )
         self.compare_button = frame.icon_button(
-            'compare', self._compare_project, True)
+            "compare", self._compare_project, True
+        )
         self.refresh_button = frame.icon_button(
-            'refresh', self._refresh_project, True)
-        konsole_button = IconButton(
-            frame, txt.KONSOLE, 'gear', self._konsole)
+            "refresh", self._refresh_project, True
+        )
         self.script_button = IconButton(
-            frame, txt.EDIT_SCRIPT, 'script', self._edit_script)
+            frame, txt.EDIT_SCRIPT, "script", self._edit_script
+        )
         self.run_script_button = IconButton(
-            frame, txt.RUN_SCRIPT, 'start', self._run_script)
+            frame, txt.RUN_SCRIPT, "start", self._run_script
+        )
         self.windows_build_button = IconButton(
-            frame, txt.BUILD_FOR_WINDOWS, 'windows', self._build_for_windows)
+            frame, txt.BUILD_FOR_WINDOWS, "windows", self._build_for_windows
+        )
 
         frame.buttons = [
-            frame.icon_button('edit', self._edit_project, True),
+            frame.icon_button("edit", self._edit_project, True),
             self.build_button,
-            frame.icon_button('update', self._update_pyproject),
-            frame.icon_button('code', self._open_code, True),
-            konsole_button,
+            frame.icon_button("update", self._update_pyproject),
+            frame.icon_button("code", self._open_code, True),
+            frame.icon_button("console", self._konsole),
             self.script_button,
             self.run_script_button,
             self.compare_button,
             self.refresh_button,
             self.windows_build_button,
-            frame.icon_button('delete', self._delete_project, True),
-            frame.icon_button('close', self._dismiss),
+            frame.icon_button("delete", self._delete_project, True),
+            frame.icon_button("close", self._dismiss),
         ]
         self.script_button.disable()
         self.run_script_button.disable()
@@ -232,17 +246,23 @@ class MainFrame():
 
     def _context_menu(self) -> tk.Menu:
         self.build_menu_item = MenuItem(
-            txt.BUILD, self._build_project, dimmable=True)
+            txt.BUILD, self._build_project, dimmable=True
+        )
         self.compare_menu_item = MenuItem(
-            txt.COMPARE, self._compare_project, dimmable=True)
+            txt.COMPARE, self._compare_project, dimmable=True
+        )
         self.refresh_menu_item = MenuItem(
-            txt.REFRESH, self._refresh_project, dimmable=True)
+            txt.REFRESH, self._refresh_project, dimmable=True
+        )
         self.edit_script_menu_item = MenuItem(
-            txt.EDIT_SCRIPT, self._edit_script, dimmable=True)
+            txt.EDIT_SCRIPT, self._edit_script, dimmable=True
+        )
         self.run_script_menu_item = MenuItem(
-            txt.RUN_SCRIPT, self._run_script, dimmable=True)
+            txt.RUN_SCRIPT, self._run_script, dimmable=True
+        )
         self.windows_build_menu_item = MenuItem(
-            txt.BUILD_FOR_WINDOWS, self._build_for_windows, dimmable=True)
+            txt.BUILD_FOR_WINDOWS, self._build_for_windows, dimmable=True
+        )
         menu_items = [
             MenuItem(txt.EDIT, self._edit_project, dimmable=True),
             self.build_menu_item,
@@ -280,8 +300,8 @@ class MainFrame():
 
     def _delete_project(self, *args) -> None:
         dlg = messagebox.askyesno(
-            'Delete project',
-            f'Are you sure you want to delete {self.project.name}?',
+            "Delete project",
+            f"Are you sure you want to delete {self.project.name}?",
             parent=self.root,
         )
         if dlg is False:
@@ -298,17 +318,13 @@ class MainFrame():
     def _save_projects(self) -> None:
         result = self.project_server.save_projects(self.projects)
         if result == Status.ERROR:
-            messagebox.showerror(
-                'Save',
-                'Save failed',
-                parent=self.root
-            )
+            messagebox.showerror("Save", "Save failed", parent=self.root)
             return
         self._populate_tree()
 
     def _build_project(self, *args) -> None:
         if not UV_PUBLISH_TOKEN:
-            messagebox.showerror('', 'UV_PUBLISH_TOKEN not set.')
+            messagebox.showerror("", "UV_PUBLISH_TOKEN not set.")
             return
 
         dlg = BuildFrame(self, self.project)
@@ -317,24 +333,23 @@ class MainFrame():
     def _update_pyproject(self, *args) -> None:
         code = self.project.update_pyproject()
         if code == 0:
-            messagebox.showinfo('', 'Project updated')
+            messagebox.showinfo("", "Project updated")
         else:
-            messagebox.showerror(
-                '', f'Project not updated - code: {code}')
+            messagebox.showerror("", f"Project not updated - code: {code}")
 
     def _open_code(self, *args) -> None:
         try:
-            # subprocess.call(['codium', '-n', self.project.base_dir])
-            return self._call_process(['codium', '-n', self.project.base_dir])
+            return self._call_process(["codium", "-n", self.project.base_dir])
         except FileNotFoundError:
-            messagebox.showerror('', "codium not found.")
+            messagebox.showerror("", "codium not found.")
 
     def _konsole(self, *args) -> None:
         return self._call_process(
-            ['konsole', '--workdir', self.project.base_dir])
+            ["konsole", "--workdir", self.project.base_dir]
+        )
 
     def _edit_script(self, *args) -> None:
-        return self._call_process(['kate', self.project.script])
+        return self._call_process(["kate", self.project.script])
 
     def _run_script(self, *args) -> Any:
         return self._call_process([self.project.script])
@@ -346,7 +361,6 @@ class MainFrame():
             daemon=True,
         ).start()
 
-
     def _call_process_worker(self, process: list) -> None:
         proc = subprocess.Popen(
             process,
@@ -356,21 +370,21 @@ class MainFrame():
 
         stdout, stderr = proc.communicate()
         if proc.returncode != 0:
-            error = 'None'
+            error = "None"
             if stderr:
-                error = stderr.strip().split('\n')[-1]
-            logger.error('Process failed', process=process, error=error)
+                error = stderr.strip().split("\n")[-1]
+            logger.error("Process failed", process=process, error=error)
 
             self.root.after(
-                0,
-                lambda: messagebox.showerror('', 'Process failed')
+                0, lambda: messagebox.showerror("", "Process failed")
             )
 
     def _build_for_windows(self) -> None:
         return self._call_process(
-            ['windows-converter', 'project', self.project.name])
+            ["windows-converter", "project", self.project.name]
+        )
 
-    def _search_for_content(self, * args):
+    def _search_for_content(self, *args):
         dlg = SearchFrame(self)
         self.root.wait_window(dlg.root)
 

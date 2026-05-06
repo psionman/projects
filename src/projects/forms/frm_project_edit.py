@@ -1,7 +1,9 @@
-
 """ProjectEditFrame  for <application>."""
+
+import os
+import stat
 import tkinter as tk
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, messagebox
 from pathlib import Path
 
 from psiutils.constants import PAD, Status, Mode, WidgetState
@@ -15,14 +17,14 @@ from projects.text import Text
 from projects import logger
 
 txt = Text()
-FRAME_TITLE = f'{APP_TITLE} - edit'
+FRAME_TITLE = f"{APP_TITLE} - edit"
 
-DEFAULT_DEV_DIR = str(Path(Path.home(), '.pyenv', 'versions'))
-DEFAULT_PROJECT_DIR = str(Path(Path.home(), 'projects'))
-DEFAULT_VERSION_TEXT = '0.0.0'
+DEFAULT_DEV_DIR = str(Path(Path.home(), ".pyenv", "versions"))
+DEFAULT_PROJECT_DIR = str(Path(Path.home(), "projects"))
+DEFAULT_VERSION_TEXT = "0.0.0"
 
 
-class ProjectEditFrame():
+class ProjectEditFrame:
     def __init__(self, parent, mode: int, project: Project = None) -> None:
         self.root = tk.Toplevel(parent.root)
         self.parent = parent
@@ -55,13 +57,13 @@ class ProjectEditFrame():
         self.repository_name = tk.StringVar(value=project.repository_name)
 
         # Trace
-        self.project_name.trace_add('write', self._check_value_changed)
-        self.source_dir.trace_add('write', self._check_value_changed)
-        self.version.trace_add('write', self._check_value_changed)
-        self.pypi.trace_add('write', self._check_value_changed)
-        self.build_for_windows.trace_add('write', self._check_value_changed)
-        self.script.trace_add('write', self._check_value_changed)
-        self.repository_name.trace_add('write', self._check_value_changed)
+        self.project_name.trace_add("write", self._check_value_changed)
+        self.source_dir.trace_add("write", self._check_value_changed)
+        self.version.trace_add("write", self._check_value_changed)
+        self.pypi.trace_add("write", self._check_value_changed)
+        self.build_for_windows.trace_add("write", self._check_value_changed)
+        self.script.trace_add("write", self._check_value_changed)
+        self.repository_name.trace_add("write", self._check_value_changed)
 
         self._show()
 
@@ -70,9 +72,8 @@ class ProjectEditFrame():
         root.geometry(geometry(self.config, __file__))
         root.title(FRAME_TITLE)
         root.transient(self.parent.root)
-        root.bind('<Control-x>', self._dismiss)
-        root.bind('<Configure>',
-                  lambda event, arg=None: window_resize(self, __file__))
+        root.bind("<Control-x>", self._dismiss)
+        root.bind("<Configure>", lambda event, arg=None: window_resize(self, __file__))
 
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
@@ -88,57 +89,59 @@ class ProjectEditFrame():
         frame.columnconfigure(2, weight=1)
 
         row = 0
-        label = ttk.Label(frame, text='Project name')
+        label = ttk.Label(frame, text="Project name")
         label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
 
-        state = (WidgetState.NORMAL if self.mode == Mode.EDIT
-                 else WidgetState.READONLY)
+        state = (
+            WidgetState.NORMAL
+            if self.mode in (Mode.EDIT, Mode.NEW)
+            else WidgetState.READONLY
+        )
         entry = ttk.Entry(frame, textvariable=self.project_name, state=state)
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
         entry.focus_set()
 
         row += 1
-        label = ttk.Label(frame, text='(Used to find dirs in virtual envs)')
+        label = ttk.Label(frame, text="(Used to find dirs in virtual envs)")
         label.grid(row=row, column=1, sticky=tk.W, pady=0)
 
         row += 1
-        label = ttk.Label(frame, text='Current_version')
+        label = ttk.Label(frame, text="Current_version")
         label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
 
         entry = ttk.Entry(
-            frame, textvariable=self.project_version, state=WidgetState.READONLY)
+            frame, textvariable=self.project_version, state=WidgetState.READONLY
+        )
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
 
         row += 1
-        label = ttk.Label(frame, text='Source dir')
+        label = ttk.Label(frame, text="Source dir")
         label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
 
         entry = ttk.Entry(frame, textvariable=self.source_dir)
         entry.grid(row=row, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
 
-        button = IconButton(
-            frame, txt.OPEN, 'open', self._get_source_dir)
+        button = IconButton(frame, txt.OPEN, "open", self._get_source_dir)
         button.grid(row=row, column=3)
 
         row += 1
-        label = ttk.Label(frame, text='script')
+        label = ttk.Label(frame, text="script")
         label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
 
         entry = ttk.Entry(frame, textvariable=self.script)
         entry.grid(row=row, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
 
-        button = IconButton(
-            frame, txt.OPEN, 'open', self._get_script)
+        button = IconButton(frame, txt.OPEN, "open", self._get_script)
         button.grid(row=row, column=3, pady=PAD)
 
         row += 1
-        check_button = ttk.Checkbutton(
-            frame, text='PyPi project', variable=self.pypi)
+        check_button = ttk.Checkbutton(frame, text="PyPi project", variable=self.pypi)
         check_button.grid(row=row, column=1, sticky=tk.W)
 
         row += 1
         check_button = ttk.Checkbutton(
-            frame, text='Build for windows', variable=self.build_for_windows)
+            frame, text="Build for windows", variable=self.build_for_windows
+        )
         check_button.grid(row=row, column=1, sticky=tk.W)
 
         # row += 1
@@ -153,36 +156,88 @@ class ProjectEditFrame():
 
         row += 1
         self.button_frame = self._button_frame(frame)
-        self.button_frame.grid(row=row, column=0, columnspan=4,
-                               sticky=tk.EW, padx=PAD, pady=PAD)
+        self.button_frame.grid(
+            row=row, column=0, columnspan=4, sticky=tk.EW, padx=PAD, pady=PAD
+        )
         return frame
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.HORIZONTAL)
         frame.buttons = [
-            frame.icon_button('save', self._save, True),
-            frame.icon_button('exit', self._dismiss),
+            frame.icon_button("save", self._save, True),
+            frame.icon_button("exit", self._dismiss),
         ]
         frame.enable(False)
         return frame
 
     def _get_source_dir(self, *args) -> None:
         if directory := filedialog.askdirectory(
-                initialdir=self.source_dir.get(),
-                parent=self.root,):
+            initialdir=self.source_dir.get(),
+            parent=self.root,
+        ):
             self.source_dir.set(directory)
 
     def _get_script(self, *args) -> None:
-        # pylint: disable=no-member)
         initialdir = self.config.script_directory
         if self.script.get():
             initialdir = Path(self.script.get()).parent
+        path = self.ask_save_path(initialdir)
 
-        if directory := filedialog.askopenfilename(
-                initialdir=initialdir,
-                initialfile=self.script.get(),
-                parent=self.root,):
-            self.script.set(directory)
+        # # if Path(self.script.get()).is_file():
+        # #     path = filedialog.
+        # # else:
+        # # if self.script.get() and Path(self.script.get()).is_file():
+        # # path = filedialog.askopenfile(
+        # #     initialdir=initialdir,
+        # #     initialfile=self.script.get(),
+        # #     parent=self.root,).name
+        # # else:
+        # path = filedialog.asksaveasfilename(
+        #     initialdir=initialdir,
+        #     initialfile=self.script.get(),
+        #     parent=self.root,).name
+
+        # # Create file if it doesn't exist
+        # print(f"{path=}")
+        # if path and not Path(path).is_file():
+        #     dlg = messagebox.askyesno('', f'{path} does not exist. Create?')
+        #     if dlg != tk.YES:
+        #         return
+        #     open(path, 'w', encoding='utf-8').close()
+        #     current_permissions = stat.S_IMODE(os.lstat(path).st_mode)
+        #     os.chmod(
+        #         path,
+        #         current_permissions | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+        #     print(f'{current_permissions=}')
+        if path:
+            self.script.set(path)
+
+    @staticmethod
+    def ask_save_path(initialdir: Path):
+        path = filedialog.asksaveasfilename(
+            title="Choose file",
+            initialdir=initialdir,
+            confirmoverwrite=False,
+        )
+
+        if not path:
+            return None  # user cancelled dialog
+
+        if os.path.exists(path):
+            # file exists → just return it (or optionally confirm overwrite)
+            return path
+        else:
+            # file does not exist → ask to create
+            create = messagebox.askyesno(
+                "Create file?", f"{path} does not exist.\nCreate it?"
+            )
+            if create:
+                with open(path, "w") as f_script:
+                    f_script.write("")
+                return path
+            else:
+                return None
 
     def _check_value_changed(self, *args) -> None:
         enable = self._record_changes()
@@ -195,10 +250,7 @@ class ProjectEditFrame():
             self.project.name = self.project_name.get()
             self.projects[self.project.name] = self.project
 
-            logger.info(
-                "New project",
-                name=self.project.name
-            )
+            logger.info("New project", name=self.project.name)
 
         self.project.source_dir = self.source_dir.get()
         self.project.pypi = self.pypi.get()
@@ -206,10 +258,7 @@ class ProjectEditFrame():
         self.project.script = self.script.get()
         self.project.repository_name = self.repository_name.get()
 
-        logger.info(
-            "Project changed",
-            changes=changes
-        )
+        logger.info("Project changed", changes=changes)
 
         self.parent.project_server.save_projects(self.projects)
         self.project_version.set(self.project.version_text)
@@ -219,22 +268,23 @@ class ProjectEditFrame():
     def _record_changes(self) -> dict:
         changes = {}
         if self.project.name != self.project_name.get():
-            changes['project_name'] = (
-                self.project.name, self.project_name.get())
+            changes["project_name"] = (self.project.name, self.project_name.get())
         if self.project.source_dir != self.source_dir.get():
-            changes['source_dir'] = (
-                 self.project.source_dir, self.source_dir.get())
+            changes["source_dir"] = (self.project.source_dir, self.source_dir.get())
         if self.project.pypi != self.pypi.get():
-            changes['pypi'] = (self.project.pypi, self.pypi.get())
+            changes["pypi"] = (self.project.pypi, self.pypi.get())
         if self.project.build_for_windows != self.build_for_windows.get():
-            changes['build_for_windows'] = (
-                self.project.build_for_windows, self.build_for_windows.get())
+            changes["build_for_windows"] = (
+                self.project.build_for_windows,
+                self.build_for_windows.get(),
+            )
         if self.project.script != self.script.get():
-            changes['script'] = (self.project.script, self.script.get())
+            changes["script"] = (self.project.script, self.script.get())
         if self.project.repository_name != self.repository_name.get():
-            changes['repository'] = (
-                self.project.repository_name, self.repository_name.get()
-                )
+            changes["repository"] = (
+                self.project.repository_name,
+                self.repository_name.get(),
+            )
 
         return changes
 
