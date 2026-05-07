@@ -1,8 +1,12 @@
-from psiutils.buttons import IconButton, ButtonFrame as PsiButtonFrame
+from psiutils.buttons import ButtonFrame as PsiButtonFrame
+from psiutils.buttons import IconButton
+
 from projects.constants import ICON_DIR
 
-
-buttons = {"console": ("Konsole", "console"), "console": ("Konsole", "console")}
+buttons = {
+    "console": ("Konsole", "console"),
+    "help": ("Help", "help"),
+}
 
 
 class ButtonFrame(PsiButtonFrame):

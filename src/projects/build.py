@@ -1,17 +1,18 @@
 """Process the upgrade of the module."""
-from contextlib import chdir
+
 import os
-import subprocess
 import shutil
-from pathlib import Path
-from dotenv import load_dotenv
+import subprocess
+from contextlib import chdir
 from dataclasses import dataclass
+from pathlib import Path
 
+from dotenv import load_dotenv
 from psiutils.constants import Status
-from projects import logger
 
-from projects.project import Project
+from projects import logger
 from projects.modules import check_imports
+from projects.project import Project
 
 try:
     load_dotenv()
@@ -33,7 +34,6 @@ class BuildData:
     test_build: bool
     sync_repository: str
     commit_text: str
-
 
 
 def update_module(build_data: dict) -> int:
@@ -68,7 +68,7 @@ def _update_non_test_items(build_data: dict) -> Status:
         return Status.ERROR
 
     xxx = project.update_history(build_data.history)
-    print('b', xxx)
+    print("b", xxx)
     if xxx != Status.SUCCESS:
         return Status.ERROR
     logger.info(
@@ -76,8 +76,10 @@ def _update_non_test_items(build_data: dict) -> Status:
         project=project.name,
     )
 
-    if (build_data.delete_build
-            and _delete_build_dirs(project) != Status.SUCCESS):
+    if (
+        build_data.delete_build
+        and _delete_build_dirs(project) != Status.SUCCESS
+    ):
         return Status.ERROR
 
     return Status.SUCCESS
@@ -86,18 +88,12 @@ def _update_non_test_items(build_data: dict) -> Status:
 def _update_version(project: Project, version: str) -> int:
     if project.update_version(version) != Status.SUCCESS:
         return Status.ERROR
-    logger.info(
-        "Update version",
-        project=project.name,
-        version=version
-    )
+    logger.info("Update version", project=project.name, version=version)
 
     if project.update_pyproject_version(version) != Status.SUCCESS:
         return Status.ERROR
     logger.info(
-        "Update pyproject version",
-        project=project.name,
-        version=version
+        "Update pyproject version", project=project.name, version=version
     )
 
     return Status.SUCCESS
@@ -116,7 +112,7 @@ def _restore_project(build_data: dict) -> None:
 def _build(project: Project) -> int:
     try:
         with chdir(str(project.base_dir)):
-            subprocess.call(['uv', 'build'])
+            subprocess.call(["uv", "build"])
     except FileNotFoundError as error:
         logger.warning(
             "Build failed",
@@ -132,15 +128,15 @@ def _build(project: Project) -> int:
 
 def _upload(project: Project, test_build: bool = False) -> int:
     """
-        The PyPi token is stored in the environmental variable UV_PUBLISH_TOKEN
-        the value is kept in Documents/pypi folder
+    The PyPi token is stored in the environmental variable UV_PUBLISH_TOKEN
+    the value is kept in Documents/pypi folder
     """
     try:
         with chdir(str(project.base_dir)):
             if test_build:
-                proc = subprocess.Popen(['uv', 'publish', '--dry-run'])
+                proc = subprocess.Popen(["uv", "publish", "--dry-run"])
             else:
-                proc = subprocess.Popen(['uv', 'publish'])
+                proc = subprocess.Popen(["uv", "publish"])
         proc.wait()
         (stdout, stderr) = proc.communicate()
         del stdout, stderr
@@ -152,16 +148,16 @@ def _upload(project: Project, test_build: bool = False) -> int:
             )
         else:
             logger.exception(
-                f'Package not uploaded! Return code: {proc.returncode}',
+                f"Package not uploaded! Return code: {proc.returncode}",
                 project=project.name,
-                )
+            )
             return Status.ERROR
 
     except FileNotFoundError as error:
         logger.exception(
-            f'Error! {error}',
+            f"Error! {error}",
             project=project.name,
-            )
+        )
         return Status.ERROR
     return Status.SUCCESS
 
@@ -172,10 +168,11 @@ def _git_push(build_data: dict) -> int:
         return Status.SUCCESS
 
     project = build_data.project
-    returncode = _proc_action(project, ['git', 'add', '.'])
+    returncode = _proc_action(project, ["git", "add", "."])
     returncode += _proc_action(
-        project, ['git', 'commit', '-m', build_data.commit_text])
-    returncode += _proc_action(project, ['git', 'push', 'origin', 'master'])
+        project, ["git", "commit", "-m", build_data.commit_text]
+    )
+    returncode += _proc_action(project, ["git", "push", "origin", "master"])
 
     if returncode == 0:
         logger.info(
@@ -185,9 +182,9 @@ def _git_push(build_data: dict) -> int:
         return Status.SUCCESS
 
     logger.exception(
-        f'git repository not uploaded, Return code: {returncode}',
+        f"git repository not uploaded, Return code: {returncode}",
         project=project.name,
-        )
+    )
     return Status.ERROR
 
 
@@ -207,9 +204,9 @@ def _delete_build_dirs(project: Project) -> int:
         project=project.name,
     )
     for build_dir in [
-        'dist',
-        'build',
-        f'{project.name}.egg-info',
+        "dist",
+        "build",
+        f"{project.name}.egg-info",
     ]:
         path = Path(project.base_dir, build_dir)
         if path.is_dir():
@@ -221,6 +218,6 @@ def _delete_build_dirs(project: Project) -> int:
                     path=str(path),
                 )
             except OSError:
-                logger.exception(f'Failed to remove {path}')
+                logger.exception(f"Failed to remove {path}")
                 return Status.ERROR
     return Status.SUCCESS

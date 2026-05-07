@@ -2,41 +2,41 @@ import sys
 
 from psiutils.constants import Mode
 
-from projects.project_server import ProjectServer
+from projects.forms.frm_build import BuildFrame
+from projects.forms.frm_compare import CompareFrame
 from projects.forms.frm_config import ConfigFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
-from projects.forms.frm_build import BuildFrame
-from projects.forms.frm_search import SearchFrame
-from projects.forms.frm_compare import CompareFrame
 from projects.forms.frm_project_versions import ProjectVersionsFrame
+from projects.forms.frm_search import SearchFrame
+from projects.project_server import ProjectServer
 
 # from projects.github import upload
 
 
-class ModuleCaller():
+class ModuleCaller:
     def __init__(self, root, module) -> None:
         modules = {
-            'config': self._config,
-            'project': self._project,
-            'search': self._search,
-            'build': self._build,
-            'compare': self._compare,
-            'versions': self._versions,
+            "config": self._config,
+            "project": self._project,
+            "search": self._search,
+            "build": self._build,
+            "compare": self._compare,
+            "versions": self._versions,
             # 'github': self._github,
-            }
+        }
         self.project_server = ProjectServer()
         self.projects = self.project_server.projects
 
         self.invalid = False
-        if module == '-h':
-            for key in sorted(list(modules.keys())+['main']):
+        if module == "-h":
+            for key in sorted(list(modules.keys()) + ["main"]):
                 print(key)
             self.invalid = True
             return
 
         if module not in modules:
-            if module != 'main':
-                print(f'*** Invalid function name: {module} ***')
+            if module != "main":
+                print(f"*** Invalid function name: {module} ***")
             self.invalid = True
             return
 
@@ -65,7 +65,7 @@ class ModuleCaller():
         self.root.wait_window(dlg.root)
 
     def _project(self) -> None:
-        dlg = ProjectEditFrame(self, Mode.EDIT, self.projects['psiutils'])
+        dlg = ProjectEditFrame(self, Mode.EDIT, self.projects["psiutils"])
         self.root.wait_window(dlg.root)
 
     def _build(self) -> None:
@@ -75,9 +75,9 @@ class ModuleCaller():
         self.root.wait_window(dlg.root)
 
     def _search(self) -> None:
-        search_term = sys.argv[2] if len(sys.argv) > 2 else ''
+        search_term = sys.argv[2] if len(sys.argv) > 2 else ""
         dlg = SearchFrame(self, search_term)
         self.root.wait_window(dlg.root)
 
-    def _github(self):
-        upload(self.projects['sudoku'])
+    # def _github(self):
+    #     upload(self.projects["sudoku"])

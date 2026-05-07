@@ -21,7 +21,7 @@ def update_project(version: str, env_version: str, project: str) -> None:
 
     # Use the venv's python to run pip
     # ensure pip is installed
-    command = [venv_python, '-m', 'ensurepip', '--upgrade']
+    command = [venv_python, "-m", "ensurepip", "--upgrade"]
     result = subprocess.run(command, check=True)
     returncode += result.returncode
     logger.info(
@@ -31,7 +31,7 @@ def update_project(version: str, env_version: str, project: str) -> None:
     )
 
     # upgrade package
-    command = [venv_python, '-m', 'pip', 'install', '-U', project]
+    command = [venv_python, "-m", "pip", "install", "-U", project]
     result = subprocess.run(command, check=True)
     returncode += result.returncode
 
@@ -53,13 +53,13 @@ def update_project(version: str, env_version: str, project: str) -> None:
 
 def _get_venv_python(env_version: str) -> str:
     parts = Path(env_version.dir).parts
-    if '.venv' in parts:
-        index = parts.index('.venv')
+    if ".venv" in parts:
+        index = parts.index(".venv")
         source_dir = Path(*parts[:index])
-        return os.path.join(source_dir, '.venv', 'bin', 'python')
-    if '.pyenv' in parts:
-        index = parts.index('versions')
-        source_dir = Path(*parts[:index+2])
-        return os.path.join(source_dir, 'bin', 'python')
+        return os.path.join(source_dir, ".venv", "bin", "python")
+    if ".pyenv" in parts:
+        index = parts.index("versions")
+        source_dir = Path(*parts[: index + 2])
+        return os.path.join(source_dir, "bin", "python")
 
-    return ''
+    return ""

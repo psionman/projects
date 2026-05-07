@@ -1,8 +1,8 @@
 """Constants for Project Management."""
 
 from pathlib import Path
-from appdirs import user_config_dir, user_data_dir
 
+from appdirs import user_config_dir, user_data_dir
 
 PROJECT_DIR = Path(__file__).parent.parent
 
