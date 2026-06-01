@@ -1,20 +1,19 @@
 """ProjectEditFrame  for <application>."""
 
 import os
-import stat
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
 from pathlib import Path
+from tkinter import filedialog, messagebox, ttk
 
-from psiutils.constants import PAD, Status, Mode, WidgetState
 from psiutils.buttons import ButtonFrame, IconButton
-from psiutils.utilities import window_resize, geometry
+from psiutils.constants import PAD, Mode, Status, WidgetState
+from psiutils.utilities import geometry, window_resize
 
-from projects.project import Project
-from projects.constants import APP_TITLE
-from projects.config import read_config
-from projects.text import Text
 from projects import logger
+from projects.config import read_config
+from projects.constants import APP_TITLE
+from projects.project import Project
+from projects.text import Text
 
 txt = Text()
 FRAME_TITLE = f"{APP_TITLE} - edit"
@@ -73,7 +72,10 @@ class ProjectEditFrame:
         root.title(FRAME_TITLE)
         root.transient(self.parent.root)
         root.bind("<Control-x>", self._dismiss)
-        root.bind("<Configure>", lambda event, arg=None: window_resize(self, __file__))
+        root.bind(
+            "<Configure>",
+            lambda event, arg=None: window_resize(self, __file__),
+        )
 
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
@@ -110,7 +112,9 @@ class ProjectEditFrame:
         label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
 
         entry = ttk.Entry(
-            frame, textvariable=self.project_version, state=WidgetState.READONLY
+            frame,
+            textvariable=self.project_version,
+            state=WidgetState.READONLY,
         )
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
 
@@ -135,7 +139,9 @@ class ProjectEditFrame:
         button.grid(row=row, column=3, pady=PAD)
 
         row += 1
-        check_button = ttk.Checkbutton(frame, text="PyPi project", variable=self.pypi)
+        check_button = ttk.Checkbutton(
+            frame, text="PyPi project", variable=self.pypi
+        )
         check_button.grid(row=row, column=1, sticky=tk.W)
 
         row += 1
@@ -165,7 +171,7 @@ class ProjectEditFrame:
         frame = ButtonFrame(master, tk.HORIZONTAL)
         frame.buttons = [
             frame.icon_button("save", self._save, True),
-            frame.icon_button("exit", self._dismiss),
+            frame.icon_button("exit-orange", self._dismiss),
         ]
         frame.enable(False)
         return frame
@@ -268,9 +274,15 @@ class ProjectEditFrame:
     def _record_changes(self) -> dict:
         changes = {}
         if self.project.name != self.project_name.get():
-            changes["project_name"] = (self.project.name, self.project_name.get())
+            changes["project_name"] = (
+                self.project.name,
+                self.project_name.get(),
+            )
         if self.project.source_dir != self.source_dir.get():
-            changes["source_dir"] = (self.project.source_dir, self.source_dir.get())
+            changes["source_dir"] = (
+                self.project.source_dir,
+                self.source_dir.get(),
+            )
         if self.project.pypi != self.pypi.get():
             changes["pypi"] = (self.project.pypi, self.pypi.get())
         if self.project.build_for_windows != self.build_for_windows.get():

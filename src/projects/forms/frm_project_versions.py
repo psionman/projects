@@ -9,37 +9,38 @@ and integrates build and compare workflows via modular frames.
 
 Intended for use within the PSI package build system.
 """
+
 import subprocess
 import tkinter as tk
-from tkinter import ttk, messagebox
 from pathlib import Path
+from tkinter import messagebox, ttk
 
-from psiutils.constants import PAD, Status, Mode, WidgetState
-from psiutils.buttons import ButtonFrame
-from psiutils.utilities import window_resize, geometry
+from psiutils.constants import PAD, Mode, Status, WidgetState
+from psiutils.utilities import geometry, window_resize
 from psiutils.widgets import ScrollingCanvas
 
-from projects.project import Project
-from projects.config import read_config
-from projects.compare import compare
-from projects.project_utilities import update_project
 from projects.build import UV_PUBLISH_TOKEN
+from projects.buttons import ButtonFrame
+from projects.compare import compare
+from projects.config import read_config
 from projects.constants import VERSION_FILE
-
-from projects.forms.frm_compare import CompareFrame
 from projects.forms.frm_build import BuildFrame
+from projects.forms.frm_compare import CompareFrame
+from projects.project import Project
+from projects.project_utilities import update_project
 
-FRAME_TITLE = 'Project compare versions'
+FRAME_TITLE = "Project compare versions"
 
-DEFAULT_DEV_DIR = str(Path(Path.home(), '.pyenv', 'versions'))
-DEFAULT_PROJECT_DIR = str(Path(Path.home(), 'projects'))
+DEFAULT_DEV_DIR = str(Path(Path.home(), ".pyenv", "versions"))
+DEFAULT_PROJECT_DIR = str(Path(Path.home(), "projects"))
 
 
-UP_TO_DATE_STYLE = 'green-fg.TRadiobutton'
-OUT_OF_DATE_STYLE = 'blue-fg.TRadiobutton'
-MODIFIED_STYLE = 'red-fg.TRadiobutton'
+UP_TO_DATE_STYLE = "green-fg.TRadiobutton"
+OUT_OF_DATE_STYLE = "blue-fg.TRadiobutton"
+MODIFIED_STYLE = "red-fg.TRadiobutton"
 
-class ProjectVersionsFrame():
+
+class ProjectVersionsFrame:
     """
     A GUI frame for selecting, comparing, and building project versions.
 
@@ -82,11 +83,10 @@ class ProjectVersionsFrame():
         _build_project(): Opens build dialog for selected version.
         _is_valid(): Checks project integrity before building.
     """
+
     def __init__(
-            self,
-            parent,
-            project: Project = None,
-            refresh: bool = False) -> None:
+        self, parent, project: Project = None, refresh: bool = False
+    ) -> None:
         self.root = tk.Toplevel(parent.root)
         self.parent = parent
         self.config = read_config()
@@ -120,10 +120,10 @@ class ProjectVersionsFrame():
         self.version = tk.StringVar()
 
         # Trace
-        self.project_name.trace_add('write', self._values_changed)
-        self.env_dir.trace_add('write', self._values_changed)
-        self.source_dir.trace_add('write', self._values_changed)
-        self.version.trace_add('write', self._values_changed)
+        self.project_name.trace_add("write", self._values_changed)
+        self.env_dir.trace_add("write", self._values_changed)
+        self.source_dir.trace_add("write", self._values_changed)
+        self.version.trace_add("write", self._values_changed)
 
         self._show()
         self._populate_versions_frame()
@@ -142,9 +142,11 @@ class ProjectVersionsFrame():
         root.geometry(geometry(self.config, __file__))
         root.title(FRAME_TITLE)
         root.transient(self.parent.root)
-        root.bind('<Control-x>', self._dismiss)
-        root.bind('<Configure>',
-                  lambda event, arg=None: window_resize(self, __file__))
+        root.bind("<Control-x>", self._dismiss)
+        root.bind(
+            "<Configure>",
+            lambda event, arg=None: window_resize(self, __file__),
+        )
 
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
@@ -160,57 +162,65 @@ class ProjectVersionsFrame():
         frame.rowconfigure(5, weight=1)
         frame.columnconfigure(2, weight=1)
 
-        label = ttk.Label(frame, text='Project name')
+        label = ttk.Label(frame, text="Project name")
         label.grid(row=0, column=0, sticky=tk.E, pady=PAD)
 
-        state = (WidgetState.NORMAL if self.mode == Mode.EDIT
-                 else WidgetState.READONLY)
+        state = (
+            WidgetState.NORMAL
+            if self.mode == Mode.EDIT
+            else WidgetState.READONLY
+        )
         entry = ttk.Entry(frame, textvariable=self.project_name, state=state)
         entry.grid(row=0, column=1, sticky=tk.EW, padx=PAD)
         if state == WidgetState.NORMAL:
             entry.focus_set()
 
-        label = ttk.Label(frame, text='(Used to find dirs in virtual envs)')
+        label = ttk.Label(frame, text="(Used to find dirs in virtual envs)")
         label.grid(row=1, column=1, sticky=tk.W, pady=0)
 
-        label = ttk.Label(frame, text='Current_version')
+        label = ttk.Label(frame, text="Current_version")
         label.grid(row=2, column=0, sticky=tk.E, pady=PAD)
 
         entry = ttk.Entry(
             frame,
             textvariable=self.project_version,
-            state=WidgetState.READONLY)
+            state=WidgetState.READONLY,
+        )
         entry.grid(row=2, column=1, sticky=tk.EW, padx=PAD)
 
-        label = ttk.Label(frame, text='Project dir')
+        label = ttk.Label(frame, text="Project dir")
         label.grid(row=3, column=0, sticky=tk.E, pady=PAD)
 
         entry = ttk.Entry(
-            frame, textvariable=self.source_dir, state=WidgetState.READONLY)
+            frame, textvariable=self.source_dir, state=WidgetState.READONLY
+        )
         entry.grid(row=3, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
 
-        label = ttk.Label(frame, text='Development version')
+        label = ttk.Label(frame, text="Development version")
         label.grid(row=4, column=1, sticky=tk.W, pady=PAD)
 
         self.versions_frame = ScrollingCanvas(
             frame,
             relief=tk.SUNKEN,
-            borderwidth=2,)
+            borderwidth=2,
+        )
         self.versions_frame.grid(row=5, column=0, columnspan=3, sticky=tk.NSEW)
 
         self.button_frame = self._button_frame(frame)
-        self.button_frame.grid(row=0, column=4, rowspan=9,
-                               sticky=tk.NS, padx=PAD, pady=PAD)
+        self.button_frame.grid(
+            row=0, column=4, rowspan=9, sticky=tk.NS, padx=PAD, pady=PAD
+        )
         return frame
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.VERTICAL)
         frame.buttons = [
-            frame.icon_button('build', self._build_project),
-            frame.icon_button('compare', self._compare_project, True),
-            frame.icon_button('update', self._update_project, True),
-            frame.icon_button('code', self._open_code, True),
-            frame.icon_button('exit', self._dismiss),
+            frame.icon_button("build", self._build_project),
+            frame.icon_button("folder-open", self._open_dolphin, True),
+            frame.icon_button("compare-orange", self._compare_project, True),
+            frame.icon_button("update", self._update_project, True),
+            frame.icon_button("code-blue", self._open_code, True),
+            frame.icon_button("exit-orange", self._dismiss),
         ]
         frame.enable(False)
         return frame
@@ -225,10 +235,11 @@ class ProjectVersionsFrame():
         for row, name in enumerate(sorted(list(versions))):
             version = versions[name]
             (missing, mismatches) = compare(
-                self.project.source_dir, version.dir)
+                self.project.source_dir, version.dir
+            )
 
             mismatch_str = self._get_mismatch_str(missing, mismatches)
-            display_text = f'{name} : ({version.version}) {mismatch_str}'
+            display_text = f"{name} : ({version.version}) {mismatch_str}"
             button_style = self._button_style(version, mismatch_str)
 
             button = ttk.Radiobutton(
@@ -241,7 +252,7 @@ class ProjectVersionsFrame():
             button.grid(row=row, column=0, sticky=tk.W)
 
     def _button_style(self, version, mismatch_str: str) -> str:
-        if '999' in version.version:
+        if "999" in version.version:
             return MODIFIED_STYLE
         if mismatch_str:
             return OUT_OF_DATE_STYLE
@@ -249,7 +260,7 @@ class ProjectVersionsFrame():
 
     def _get_mismatch_str(self, missing: list, mismatches: list) -> str:
         if not missing and not mismatches:
-            return ''
+            return ""
         missing_files = self._missing_files(missing)
         if VERSION_FILE in mismatches:
             mismatches.remove(VERSION_FILE)
@@ -262,9 +273,9 @@ class ProjectVersionsFrame():
         return missing_files[:5]
 
     def _mismatch_str(self, missing_files: list, mismatches: list) -> str:
-        mismatch_str = ' '.join(mismatches + missing_files)
+        mismatch_str = " ".join(mismatches + missing_files)
         if len(mismatch_str) > 50:
-            mismatch_str = f'{mismatch_str[:50]} ...'
+            mismatch_str = f"{mismatch_str[:50]} ..."
         return mismatch_str
 
     def _values_changed(self, *args) -> None:
@@ -274,8 +285,8 @@ class ProjectVersionsFrame():
     def _compare_project(self) -> None:
         if not Path(self.project.env_dir).is_dir():
             messagebox.showerror(
-                'Path error',
-                f'{self.project.env_dir} \nis not a directory!',
+                "Path error",
+                f"{self.project.env_dir} \nis not a directory!",
                 parent=self.root,
             )
             return
@@ -288,18 +299,19 @@ class ProjectVersionsFrame():
     def _update_project(self) -> None:
         env_version = self.project.env_versions[self.version.get()]
         returncode = update_project(
-            self.version.get(), env_version, self.project.name)
+            self.version.get(), env_version, self.project.name
+        )
 
         if returncode == 0:
             self._populate_versions_frame()
-            messagebox.showinfo('', 'Project updated')
+            messagebox.showinfo("", "Project updated")
 
         self.refresh = True
         self._populate_versions_frame()
 
     def _build_project(self, *args) -> None:
         if not UV_PUBLISH_TOKEN:
-            messagebox.showerror('', 'UV_PUBLISH_TOKEN not set.')
+            messagebox.showerror("", "UV_PUBLISH_TOKEN not set.")
             return
 
         if not self._is_valid():
@@ -310,13 +322,17 @@ class ProjectVersionsFrame():
 
     def _is_valid(self) -> bool:
         if self.project.py_project_missing:
-            messagebox.showerror('', 'py_project.toml missing')
+            messagebox.showerror("", "py_project.toml missing")
             return False
         return True
 
+    def _open_dolphin(self, *args) -> None:
+        env_version = self.project.env_versions[self.version.get()]
+        subprocess.call(["dolphin", env_version.dir])
+
     def _open_code(self, *args) -> None:
         env_version = self.project.env_versions[self.version.get()]
-        subprocess.call(['codium', '-n', env_version.dir])
+        subprocess.call(["codium", "-n", env_version.dir])
 
     def _dismiss(self, *args) -> None:
         """

@@ -209,7 +209,7 @@ class MainFrame:
             "build", self._build_project, True
         )
         self.compare_button = frame.icon_button(
-            "compare", self._compare_project, True
+            "compare-orange", self._compare_project, True
         )
         self.refresh_button = frame.icon_button(
             "refresh", self._refresh_project, True
@@ -228,7 +228,9 @@ class MainFrame:
             frame.icon_button("edit", self._edit_project, True),
             self.build_button,
             frame.icon_button("update", self._update_pyproject),
-            frame.icon_button("code", self._open_code, True),
+            frame.icon_button("folder-open", self._open_dolphin, True),
+            frame.icon_button("code-blue", self._open_code, True),
+            frame.icon_button("windsurf", self._open_windurf, True),
             frame.icon_button("console", self._konsole),
             self.script_button,
             self.run_script_button,
@@ -236,7 +238,7 @@ class MainFrame:
             self.refresh_button,
             self.windows_build_button,
             frame.icon_button("delete", self._delete_project, True),
-            frame.icon_button("close", self._dismiss),
+            frame.icon_button("close-red", self._dismiss),
         ]
         self.script_button.disable()
         self.run_script_button.disable()
@@ -268,6 +270,7 @@ class MainFrame:
             self.build_menu_item,
             MenuItem(txt.UPDATE, self._update_pyproject, dimmable=True),
             MenuItem(txt.CODE, self._open_code, dimmable=True),
+            MenuItem(txt.WINDSURF, self._open_windurf, dimmable=True),
             MenuItem(txt.KONSOLE, self._konsole, dimmable=True),
             self.edit_script_menu_item,
             self.run_script_menu_item,
@@ -337,11 +340,20 @@ class MainFrame:
         else:
             messagebox.showerror("", f"Project not updated - code: {code}")
 
+    def _open_dolphin(self, *args) -> None:
+        subprocess.call(["dolphin", self.project.base_dir])
+
     def _open_code(self, *args) -> None:
         try:
             return self._call_process(["codium", "-n", self.project.base_dir])
         except FileNotFoundError:
             messagebox.showerror("", "codium not found.")
+
+    def _open_windurf(self, *args) -> None:
+        try:
+            return self._call_process(["windsurf", self.project.base_dir])
+        except FileNotFoundError:
+            messagebox.showerror("", "windsurf not found.")
 
     def _konsole(self, *args) -> None:
         return self._call_process(
@@ -349,7 +361,11 @@ class MainFrame:
         )
 
     def _edit_script(self, *args) -> None:
-        return self._call_process(["kate", self.project.script])
+        repsonse = self._call_process(["kate", self.project.script])
+        if repsonse != 0:
+            messagebox.showinfo(
+                "Script open", "Script opened in kate", parent=self.root
+            )
 
     def _run_script(self, *args) -> Any:
         return self._call_process([self.project.script])

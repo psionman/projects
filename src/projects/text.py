@@ -13,15 +13,16 @@ from dataclasses import dataclass, field
 from psiutils.text import Text as PsiText
 
 strings = {
-    'ACCEPT': 'Accept',
-    'BUILD_FOR_WINDOWS': 'Build for Windows',
-    'CONFIG': 'Preferences',
-    'DELETE_PROMPT': 'Are you sure you wish to delete this record?',
-    'EDIT_SCRIPT': 'Edit script',
-    'KONSOLE': 'Konsole',
-    'NOT_IN_PROJECT_DIR': 'Not working in project\'s directory',
-    'RUN_SCRIPT': 'Run script',
-    'SELECT': 'Select',
+    "ACCEPT": "Accept",
+    "BUILD_FOR_WINDOWS": "Build for Windows",
+    "CONFIG": "Preferences",
+    "DELETE_PROMPT": "Are you sure you wish to delete this record?",
+    "EDIT_SCRIPT": "Edit script",
+    "KONSOLE": "Konsole",
+    "NOT_IN_PROJECT_DIR": "Not working in project's directory",
+    "RUN_SCRIPT": "Run script",
+    "SELECT": "Select",
+    "WINDSURF": "Windsurf",
 }
 
 

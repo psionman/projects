@@ -6,6 +6,8 @@ from projects.constants import ICON_DIR
 buttons = {
     "console": ("Konsole", "console"),
     "help": ("Help", "help"),
+    "folder-open": ("Open here", "folder-open"),
+    "windsurf": ("Windsurf", "windsurf"),
 }
 
 

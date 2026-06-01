@@ -1,25 +1,23 @@
 import os
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 from psiutils.buttons import ButtonFrame
-from psiutils.widgets import clickable_widget, WaitCursor
 from psiutils.constants import PAD, Status, WidgetState
-from psiutils.utilities import window_resize, geometry
+from psiutils.utilities import geometry, window_resize
+from psiutils.widgets import WaitCursor, clickable_widget
 
-from projects.config import config, read_config
 from projects import logger
-
-from projects.build import update_module, BuildData
+from projects.build import BuildData, update_module
+from projects.config import config, read_config
 from projects.text import Text
 
 txt = Text()
 
-FRAME_TITLE = 'Build package'
+FRAME_TITLE = "Build package"
 
 
-class BuildFrame():
+class BuildFrame:
     def __init__(self, parent, project):
         # pylint: disable=no-member)
         self.root = tk.Toplevel(parent.root)
@@ -39,7 +37,8 @@ class BuildFrame():
         self.test_build = tk.BooleanVar(value=False)
         self.sync_repository = tk.BooleanVar(value=True)
         self.commit_text = tk.StringVar(
-            value=f'Version : {project.next_version()}')
+            value=f"Version : {project.next_version()}"
+        )
 
         if os.getcwd() != self.project.source_dir:
             self.status.set(txt.NOT_IN_PROJECT_DIR)
@@ -56,8 +55,10 @@ class BuildFrame():
         root.transient(self.parent.root)
         root.title(FRAME_TITLE)
 
-        root.bind('<Configure>',
-                  lambda event, arg=None: window_resize(self, __file__))
+        root.bind(
+            "<Configure>",
+            lambda event, arg=None: window_resize(self, __file__),
+        )
 
         root.rowconfigure(1, weight=1)
         root.columnconfigure(0, weight=1)
@@ -66,7 +67,9 @@ class BuildFrame():
         main_frame.grid(row=1, column=0, sticky=tk.NSEW)
 
         self.button_frame = self._button_frame(root)
-        self.button_frame.grid(row=9, column=0, sticky=tk.EW, padx=PAD, pady=PAD)
+        self.button_frame.grid(
+            row=9, column=0, sticky=tk.EW, padx=PAD, pady=PAD
+        )
 
         sizegrip = ttk.Sizegrip(root)
         sizegrip.grid(row=99, column=2, sticky=tk.SE)
@@ -79,51 +82,51 @@ class BuildFrame():
         frame.columnconfigure(3, weight=1)
 
         row = 0
-        label = ttk.Label(frame, text='Project')
+        label = ttk.Label(frame, text="Project")
         label.grid(row=row, column=0, sticky=tk.E, padx=PAD)
 
-        entry = ttk.Entry(frame, textvariable=self.project_name,
-                          state=WidgetState.READONLY)
+        entry = ttk.Entry(
+            frame, textvariable=self.project_name, state=WidgetState.READONLY
+        )
         entry.grid(row=row, column=1, sticky=tk.W, padx=PAD, pady=PAD)
         clickable_widget(entry)
 
         row += 1
-        label = ttk.Label(frame, text='Current version')
+        label = ttk.Label(frame, text="Current version")
         label.grid(row=row, column=0, sticky=tk.E, padx=PAD)
         entry = ttk.Entry(
             frame,
             textvariable=self.current_version,
-            state=WidgetState.READONLY
-            )
+            state=WidgetState.READONLY,
+        )
         entry.grid(row=row, column=1, sticky=tk.W, padx=PAD, pady=PAD)
 
-        label = ttk.Label(frame, text='New version')
+        label = ttk.Label(frame, text="New version")
         label.grid(row=row, column=2, sticky=tk.W, padx=PAD)
         entry = ttk.Entry(frame, textvariable=self.new_version)
         entry.grid(row=row, column=3, sticky=tk.W, padx=PAD, pady=PAD)
 
         row += 1
-        label = ttk.Label(frame, text='pyproject version')
+        label = ttk.Label(frame, text="pyproject version")
         label.grid(row=row, column=0, sticky=tk.E, padx=PAD)
         entry = ttk.Entry(
             frame,
             textvariable=self.pyproject_version,
             state=WidgetState.READONLY,
-            )
+        )
         if self.current_version.get() != self.pyproject_version.get():
-            entry['foreground'] = 'red'
+            entry["foreground"] = "red"
         entry.grid(row=row, column=1, sticky=tk.W, padx=PAD, pady=PAD)
 
         row += 1
         checkbutton = tk.Checkbutton(
-            frame,
-            text='Delete all "build" files',
-            variable=self.delete_build
-            )
+            frame, text='Delete all "build" files', variable=self.delete_build
+        )
         checkbutton.grid(row=row, column=0, sticky=tk.W)
 
-        check_button = tk.Checkbutton(frame, text='Test build',
-                                      variable=self.test_build)
+        check_button = tk.Checkbutton(
+            frame, text="Test build", variable=self.test_build
+        )
         check_button.grid(row=row, column=1, sticky=tk.W)
 
         row += 1
@@ -133,9 +136,15 @@ class BuildFrame():
         row += 1
         frame.rowconfigure(row, weight=1)
         self.history_text = tk.Text(frame)
-        self.history_text.insert('1.0', self.history.get())
-        self.history_text.grid(row=row, column=0, columnspan=4, sticky=tk.NSEW,
-                               padx=(PAD, 0), pady=PAD)
+        self.history_text.insert("1.0", self.history.get())
+        self.history_text.grid(
+            row=row,
+            column=0,
+            columnspan=4,
+            sticky=tk.NSEW,
+            padx=(PAD, 0),
+            pady=PAD,
+        )
 
         return frame
 
@@ -145,13 +154,11 @@ class BuildFrame():
 
         row = 0
         checkbutton = tk.Checkbutton(
-            frame,
-            text='Sync repository',
-            variable=self.sync_repository
-            )
+            frame, text="Sync repository", variable=self.sync_repository
+        )
         checkbutton.grid(row=row, column=0, sticky=tk.W)
 
-        label = ttk.Label(frame, text='Commit text')
+        label = ttk.Label(frame, text="Commit text")
         label.grid(row=row, column=1, sticky=tk.W, padx=PAD, pady=PAD)
 
         entry = ttk.Entry(frame, textvariable=self.commit_text)
@@ -163,8 +170,8 @@ class BuildFrame():
         """Create button row."""
         frame = ButtonFrame(master, tk.HORIZONTAL)
         frame.buttons = [
-            frame.icon_button('build', self._build, True),
-            frame.icon_button('exit', self._dismiss),
+            frame.icon_button("build", self._build, True),
+            frame.icon_button("exit-orange", self._dismiss),
         ]
         frame.disable()
         return frame
@@ -179,7 +186,7 @@ class BuildFrame():
             self.delete_build.get(),
             self.new_version.get(),
             self.current_version.get(),
-            self.history_text.get('1.0', 'end'),
+            self.history_text.get("1.0", "end"),
             self.project.history,
             self.test_build.get(),
             self.sync_repository.get(),
@@ -194,9 +201,7 @@ class BuildFrame():
 
     def _build_success(self) -> None:
         messagebox.showinfo(
-            'Module update',
-            'Module updated',
-            parent=self.root
+            "Module update", "Module updated", parent=self.root
         )
 
     def _build_failure(self) -> None:
@@ -205,9 +210,7 @@ class BuildFrame():
             project=self.project.name,
         )
         messagebox.showerror(
-            'Module update',
-            'Module not updated',
-            parent=self.root
+            "Module update", "Module not updated", parent=self.root
         )
 
     def _dismiss(self):
