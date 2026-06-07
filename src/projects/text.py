@@ -10,6 +10,7 @@ Usage:
 """
 
 from dataclasses import dataclass, field
+
 from psiutils.text import Text as PsiText
 
 strings = {

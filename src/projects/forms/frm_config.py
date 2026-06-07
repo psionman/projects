@@ -38,7 +38,7 @@ class ConfigFrame:
     Methods:
         _stringvar(value: str) -> tk.StringVar: Creates a StringVar with a
         given value.
-        _show(): Displays the configuration frame.
+        _show() -> None: Displays the configuration frame.
         _main_frame(master: tk.Frame) -> tk.Frame: Creates the main frame of
         the configuration.
         _button_frame(master: tk.Frame) -> tk.Frame: Creates the button frame
@@ -46,7 +46,7 @@ class ConfigFrame:
         _check_value_changed(*args) -> None: Checks if values have changed.
         _set_data_directory() -> None: Sets the data directory.
         _set_script_directory() -> None: Sets the script directory.
-        _save_config(): Saves the configuration changes.
+        _save_config() -> None: Saves the configuration changes.
         _config_changes() -> dict: Determines the changes in
         configuration settings.
         _set_config(*args) -> None: Sets the configuration settings.
@@ -77,7 +77,7 @@ class ConfigFrame:
         boolvar.trace_add("write", self._check_value_changed)
         return boolvar
 
-    def _show(self):
+    def _show(self) -> None:
         root = self.root
         root.geometry(geometry(self.config, __file__))
         root.title(txt.CONFIG)
@@ -179,7 +179,7 @@ class ConfigFrame:
         ):
             self.script_directory.set(directory)
 
-    def _save_config(self):
+    def _save_config(self) -> None:
         raw_changes = self._config_changes()
         changes = {
             field: f"(old value={change[0]}, new_value={change[1]})"

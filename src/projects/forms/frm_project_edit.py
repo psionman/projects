@@ -219,8 +219,7 @@ class ProjectEditFrame:
         if path:
             self.script.set(path)
 
-    @staticmethod
-    def ask_save_path(initialdir: Path):
+    def ask_save_path(self, initialdir: Path):
         path = filedialog.asksaveasfilename(
             title="Choose file",
             initialdir=initialdir,
@@ -239,11 +238,14 @@ class ProjectEditFrame:
                 "Create file?", f"{path} does not exist.\nCreate it?"
             )
             if create:
-                with open(path, "w") as f_script:
+                with open(path, "w", opener=self.opener) as f_script:
                     f_script.write("")
                 return path
             else:
                 return None
+
+    def opener(path: str, flags: int) -> int:
+        return os.open(path, flags, 0o755)
 
     def _check_value_changed(self, *args) -> None:
         enable = self._record_changes()
