@@ -11,6 +11,7 @@ dependencies = [
     "clipboard>=0.0.4",
     "dotenv>=0.9.9",
     "icecream>=2.1.8",
+    "psiutils==1.0.2",
     "pygithub>=2.8.1",
     "pygobject>=3.54.5",
     "python-dateutil>=2.9.0.post0",

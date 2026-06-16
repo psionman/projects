@@ -376,6 +376,7 @@ class MainFrame:
                 f"file://{self.project.script}",
             ],
             check=False,
+            stderr=subprocess.DEVNULL,
         )
         subprocess.run(
             [

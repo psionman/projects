@@ -23,6 +23,7 @@ def _activate_kate(file_path: str) -> None:
             f"file://{file_path}",
         ],
         check=False,
+        stderr=subprocess.DEVNULL,
     )
     subprocess.run(
         [
