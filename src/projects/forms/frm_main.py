@@ -230,7 +230,7 @@ class MainFrame:
             frame.icon_button("update", self._update_pyproject),
             frame.icon_button("folder-open", self._open_dolphin, True),
             frame.icon_button("code-blue", self._open_code, True),
-            frame.icon_button("windsurf", self._open_windurf, True),
+            frame.icon_button("windsurf", self._open_windsurf, True),
             frame.icon_button("console", self._konsole),
             self.script_button,
             self.run_script_button,
@@ -270,7 +270,7 @@ class MainFrame:
             self.build_menu_item,
             MenuItem(txt.UPDATE, self._update_pyproject, dimmable=True),
             MenuItem(txt.CODE, self._open_code, dimmable=True),
-            MenuItem(txt.WINDSURF, self._open_windurf, dimmable=True),
+            MenuItem(txt.WINDSURF, self._open_windsurf, dimmable=True),
             MenuItem(txt.KONSOLE, self._konsole, dimmable=True),
             self.edit_script_menu_item,
             self.run_script_menu_item,
@@ -349,7 +349,7 @@ class MainFrame:
         except FileNotFoundError:
             messagebox.showerror("", "codium not found.")
 
-    def _open_windurf(self, *args) -> None:
+    def _open_windsurf(self, *args) -> None:
         try:
             return self._call_process(["windsurf", self.project.base_dir])
         except FileNotFoundError:
@@ -361,11 +361,37 @@ class MainFrame:
         )
 
     def _edit_script(self, *args) -> None:
-        repsonse = self._call_process(["kate", self.project.script])
-        if repsonse != 0:
-            messagebox.showinfo(
-                "Script open", "Script opened in kate", parent=self.root
-            )
+        response = self._call_process(["kate", self.project.script])
+        response = subprocess.run(
+            [
+                "gdbus",
+                "call",
+                "--session",
+                "--dest",
+                "org.kde.kate",
+                "--object-path",
+                "/MainApplication",
+                "--method",
+                "org.kde.Kate.Application.activate",
+                f"file://{self.project.script}",
+            ],
+            check=False,
+        )
+        subprocess.run(
+            [
+                "kdotool",
+                "search",
+                "--name",
+                "kate",
+                "windowactivate",
+            ],
+            check=False,
+        )
+
+        # if response != 0:
+        #     messagebox.showinfo(
+        #         "Script open", "Script opened in kate", parent=self.root
+        #     )
 
     def _run_script(self, *args) -> Any:
         return self._call_process([self.project.script])

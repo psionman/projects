@@ -2,12 +2,15 @@ from psiutils.buttons import ButtonFrame as PsiButtonFrame
 from psiutils.buttons import IconButton
 
 from projects.constants import ICON_DIR
+from projects.text import Text
+
+txt = Text()
 
 buttons = {
     "console": ("Konsole", "console"),
     "help": ("Help", "help"),
     "folder-open": ("Open here", "folder-open"),
-    "windsurf": ("Windsurf", "windsurf"),
+    "windsurf": (txt.WINDSURF, "windsurf"),
 }
 
 

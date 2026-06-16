@@ -1,4 +1,4 @@
-"""ProjectEditFrame  for <application>."""
+"""ProjectEditFrame  for projects."""
 
 import os
 import tkinter as tk
@@ -238,7 +238,7 @@ class ProjectEditFrame:
                 "Create file?", f"{path} does not exist.\nCreate it?"
             )
             if create:
-                with open(path, "w", opener=self.opener) as f_script:
+                with open(path, "w") as f_script:
                     f_script.write("")
                 return path
             else:
@@ -250,28 +250,6 @@ class ProjectEditFrame:
     def _check_value_changed(self, *args) -> None:
         enable = self._record_changes()
         self.button_frame.enable(enable)
-
-    def _save(self, *args) -> None:
-        changes = self._record_changes()
-        if self.mode == Mode.NEW:
-            self.project = Project()
-            self.project.name = self.project_name.get()
-            self.projects[self.project.name] = self.project
-
-            logger.info("New project", name=self.project.name)
-
-        self.project.source_dir = self.source_dir.get()
-        self.project.pypi = self.pypi.get()
-        self.project.build_for_windows = self.build_for_windows.get()
-        self.project.script = self.script.get()
-        self.project.repository_name = self.repository_name.get()
-
-        logger.info("Project changed", changes=changes)
-
-        self.parent.project_server.save_projects(self.projects)
-        self.project_version.set(self.project.version_text)
-        self.status = Status.UPDATED
-        self._dismiss()
 
     def _record_changes(self) -> dict:
         changes = {}
@@ -301,6 +279,28 @@ class ProjectEditFrame:
             )
 
         return changes
+
+    def _save(self, *args) -> None:
+        changes = self._record_changes()
+        if self.mode == Mode.NEW:
+            self.project = Project()
+            self.project.name = self.project_name.get()
+            self.projects[self.project.name] = self.project
+
+            logger.info("New project", name=self.project.name)
+
+        self.project.source_dir = self.source_dir.get()
+        self.project.pypi = self.pypi.get()
+        self.project.build_for_windows = self.build_for_windows.get()
+        self.project.script = self.script.get()
+        self.project.repository_name = self.repository_name.get()
+
+        logger.info("Project changed", changes=changes)
+
+        self.parent.project_server.save_projects(self.projects)
+        self.project_version.set(self.project.version_text)
+        self.status = Status.UPDATED
+        self._dismiss()
 
     def _dismiss(self, *args) -> None:
         self.root.destroy()

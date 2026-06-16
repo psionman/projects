@@ -1,6 +1,6 @@
 [project]
 name = "projects"
-version = "0.0.0"
+version = "0.0.1"
 description = "Manage python projects,"
 authors = [{name = "Jeff", "email" = "<jeffwatkins2000@gmail.com>"}]
 readme = "README.md"
@@ -16,6 +16,7 @@ dependencies = [
     "python-dateutil>=2.9.0.post0",
     "structlog>=25.5.0",
 ]
+
 [tool.ruff]
 line-length = 79
 target-version = "py311"

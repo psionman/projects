@@ -1,4 +1,4 @@
-"""SearchFrame for <application>."""
+"""SearchFrame for projects."""
 
 import os
 import re
