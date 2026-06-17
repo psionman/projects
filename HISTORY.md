@@ -1,5 +1,9 @@
 # History
 
+## version 0.0.2 - 17 Jun 2026
+
+1. Allow project compare to open windsurf
+
 ## version 0.0.1 - 25 Feb 2026
 
 1. Create script if it doesn't exist

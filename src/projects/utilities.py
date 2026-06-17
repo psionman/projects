@@ -4,7 +4,7 @@ from typing import Any
 
 
 def open_in_kate(file_path: str) -> None:
-    _call_process(["kate", file_path])
+    call_process(["kate", file_path])
     _activate_kate(file_path)
 
 
@@ -37,7 +37,7 @@ def _activate_kate(file_path: str) -> None:
     )
 
 
-def _call_process(process: list) -> Any:
+def call_process(process: list) -> Any:
     threading.Thread(
         target=_call_process_worker,
         args=(process,),

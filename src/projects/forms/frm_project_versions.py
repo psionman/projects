@@ -28,6 +28,7 @@ from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_compare import CompareFrame
 from projects.project import Project
 from projects.project_utilities import update_project
+from projects.utilities import call_process
 
 FRAME_TITLE = "Project compare versions"
 
@@ -220,6 +221,7 @@ class ProjectVersionsFrame:
             frame.icon_button("compare-orange", self._compare_project, True),
             frame.icon_button("update", self._update_project, True),
             frame.icon_button("code-blue", self._open_code, True),
+            frame.icon_button("windsurf", self._open_windsurf, True),
             frame.icon_button("exit-orange", self._dismiss),
         ]
         frame.enable(False)
@@ -333,6 +335,14 @@ class ProjectVersionsFrame:
     def _open_code(self, *args) -> None:
         env_version = self.project.env_versions[self.version.get()]
         subprocess.call(["codium", "-n", env_version.dir])
+
+    def _open_windsurf(self, *args) -> None:
+        env_version = self.project.env_versions[self.version.get()]
+        print(f"Opening windsurf for {env_version.dir}")
+        try:
+            return call_process(["windsurf", env_version.dir])
+        except FileNotFoundError:
+            messagebox.showerror("", "windsurf not found.")
 
     def _dismiss(self, *args) -> None:
         """
