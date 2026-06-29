@@ -1,31 +1,25 @@
 {
-     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-    "[python]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "charliermarsh.ruff"
-    },
-    "editor.codeActionsOnSave": {
-        "source.fixAll.ruff": "explicit",
-        "source.organizeImports.ruff": "explicit"
-    },
-    "workbench.colorCustomizations": {
-        "activityBar.activeBackground": "#aeb2ef",
-        "activityBar.background": "#aeb2ef",
-        "activityBar.foreground": "#15202b",
-        "activityBar.inactiveForeground": "#15202b99",
-        "activityBarBadge.background": "#da454e",
-        "activityBarBadge.foreground": "#e7e7e7",
-        "commandCenter.border": "#15202b99",
-        "sash.hoverBorder": "#aeb2ef",
-        "statusBar.background": "#848ae6",
-        "statusBar.foreground": "#15202b",
-        "statusBarItem.hoverBackground": "#5a62dd",
-        "statusBarItem.remoteBackground": "#848ae6",
-        "statusBarItem.remoteForeground": "#15202b",
-        "titleBar.activeBackground": "#848ae6",
-        "titleBar.activeForeground": "#15202b",
-        "titleBar.inactiveBackground": "#848ae699",
-        "titleBar.inactiveForeground": "#15202b99"
-    },
-    "peacock.color": "#848ae6"
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.ruff": "explicit",
+    "source.organizeImports.ruff": "explicit",
+  },
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#848ae6",
+    "titleBar.activeForeground": "#000000",
+    "titleBar.inactiveBackground": "#aeb2ef",
+    "breadcrumb.foreground": "#33d033",
+    "activityBar.activeBackground": "#848ae6",
+    "activityBar.background": "#aeb2ef",
+    "activityBar.foreground": "#000000",
+    "activityBarBadge.background": "#da454e",
+    "activityBarBadge.foreground": "#e7e7e7",
+    "statusBar.background": "#848ae6",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#ff62dd",
+  },
 }

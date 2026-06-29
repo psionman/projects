@@ -1,9 +1,9 @@
 from psiconfig import TomlConfig
 
-from projects.constants import CONFIG_PATH, DATA_DIR
+from projects.constants import CONFIG_PATH, USER_DATA_DIR
 
 DEFAULT_CONFIG = {
-    "data_directory": DATA_DIR,
+    "data_directory": USER_DATA_DIR,
     "last_project": "",
     "script_directory": "",
     "project_file": "projects.json",

@@ -15,6 +15,32 @@ from projects.constants import (
 
 import projects.projects_io as io
 
+DEFAULT_COLOURS = {
+    "titleBar.activeBackground": "#bbbbbb",
+    "titleBar.activeForeground": "#000000",
+    "titleBar.inactiveBackground": "#bbbbbb",
+    # =========================
+    # Breadcrumb colours
+    # =========================
+    "breadcrumb.foreground": "#33aa33",
+    # =========================
+    # Activity Bar colours
+    # =========================
+    "activityBar.activeBackground": "#888888",
+    "activityBar.background": "#bbbbbb",
+    "activityBar.foreground": "#000000",
+    # =========================
+    # Badge colours
+    # =========================
+    "activityBarBadge.background": "#dd5555",
+    "activityBarBadge.foreground": "#ffffff",
+    # =========================
+    # Status Bar colours
+    # =========================
+    "statusBar.background": "#bbbbbb",
+    "statusBar.foreground": "#000000",
+    "statusBarItem.hoverBackground": "#bbbbbb",
+}
 
 class Project():
     """Project class to support the package module."""
@@ -47,10 +73,11 @@ class Project():
         self.cached_envs = {}
         self.py_project_missing = True
         self._version_text = ''
-        self.script: str = ''
+        self.script: str = '' 
         self.repository_name: str = ''
         self.pypi = False
         self.build_for_windows = False
+        self.workbench_colours = DEFAULT_COLOURS.copy()
 
     def __repr__(self) -> str:
         """

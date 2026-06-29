@@ -1,12 +1,13 @@
 """Project server for package application."""
 
 from pathlib import Path
+import json5
 
 import projects.projects_io as io
 from projects.config import config
-from projects.constants import DATA_DIR
+from projects.constants import USER_DATA_DIR
 from projects.env_version import EnvironmentVersion
-from projects.project import Project
+from projects.project import Project, DEFAULT_COLOURS
 
 
 class ProjectServer:
@@ -14,7 +15,7 @@ class ProjectServer:
 
     def __init__(self) -> None:
         # pylint: disable=no-member
-        self.project_file = Path(DATA_DIR, config.project_file)
+        self.project_file = Path(USER_DATA_DIR, config.project_file)
         self.projects = self._get_projects()
 
     def _get_projects(self) -> dict[str, Project]:
@@ -39,6 +40,7 @@ class ProjectServer:
             if "script" in item:
                 project.script = item["script"]
             project.get_project_data()
+            self.get_project_colours(project)
         return project_dict
 
     def save_projects(self, projects: dict[str, Project] = None) -> int:
@@ -48,4 +50,45 @@ class ProjectServer:
         output = {
             name: project.serialize() for name, project in projects.items()
         }
+        for project in self.projects.values():
+            self.save_project_colours(project)
         return io.update_json_file(self.project_file, output)
+
+
+    def get_project_colours(self, project: Project) -> None:
+        """Get the colours for a project."""
+        
+        settings_file = Path(
+            Path(project.source_dir).parent.parent, 
+            '.vscode', "settings.json")
+        try:
+            with open(settings_file, 'r', encoding='utf-8') as f:
+                settings = json5.load(f)
+        except FileNotFoundError:
+            return
+
+        if "workbench.colorCustomizations" in settings:
+            colour_customizations = settings["workbench.colorCustomizations"]
+            for key, value in colour_customizations.items(): 
+                if key in project.workbench_colours:
+                    project.workbench_colours[key] = value
+
+    def save_project_colours(self, project: Project) -> None:
+        """Save the colours for a project."""
+        settings_file = Path(
+            Path(project.source_dir).parent.parent, 
+            '.vscode', "settings.json")
+        try:
+            with open(settings_file, 'r', encoding='utf-8') as f:
+                settings = json5.load(f)
+        except FileNotFoundError:
+            return
+        if project.workbench_colours != DEFAULT_COLOURS:
+            settings[
+                "workbench.colorCustomizations"
+            ] = project.workbench_colours
+            with open(settings_file, 'w', encoding='utf-8') as f:
+                json5.dump(settings, f, indent=2)
+            #     print(project.name)
+            # print(settings[
+            #     "workbench.colorCustomizations"])
