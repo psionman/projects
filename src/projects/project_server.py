@@ -5,7 +5,7 @@ import json5
 
 import projects.projects_io as io
 from projects.config import config
-from projects.constants import USER_DATA_DIR
+from projects.constants import USER_DATA_DIR, HOME_DIR
 from projects.env_version import EnvironmentVersion
 from projects.project import Project, DEFAULT_COLOURS
 
@@ -26,7 +26,8 @@ class ProjectServer:
             project.name = key
             project_dict[key] = project
 
-            project.source_dir = item["dir"]
+            project.source_dir = item["source_dir"].replace("~", HOME_DIR)
+            project.base_dir = item["base_dir"].replace("~", HOME_DIR)
             project.pypi = item["pypi"]
             if "build_for_windows" not in item:
                 item["build_for_windows"] = False

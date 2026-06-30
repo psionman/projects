@@ -235,6 +235,7 @@ dependencies = [
     { name = "json5" },
     { name = "psiutils" },
     { name = "ruff" },
+    { name = "tksheet" },
 ]
 
 [package.dev-dependencies]
@@ -251,6 +252,7 @@ requires-dist = [
     { name = "json5", specifier = ">=0.15.0" },
     { name = "psiutils", specifier = ">=1.0.2" },
     { name = "ruff", specifier = ">=0.15.19" },
+    { name = "tksheet", specifier = ">=7.6.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -466,6 +468,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/1e/a7/2fcd3e91845e6283887c089b882b020960c38ff80b6d184cc3412b7b4bdb/tkinterweb_tkhtml-2.1.1-py3-none-manylinux2014_aarch64.whl", hash = "sha256:c737250ea9d6ff82a1fe325991a17c734444a5d992667eac082034cfaa0c7e9c", size = 169432, upload-time = "2026-02-06T15:38:27.117Z" },
     { url = "https://files.pythonhosted.org/packages/3e/ce/a814da1089f50f9c6f36ebe179187b235014aca8ff6446d66c7270c474a9/tkinterweb_tkhtml-2.1.1-py3-none-win32.whl", hash = "sha256:bfe25007fb6b99ac74b4bda47a1ac99e79a73982bdcdbd56494b37abf8976771", size = 269074, upload-time = "2026-02-06T15:38:30.52Z" },
     { url = "https://files.pythonhosted.org/packages/87/26/cdc82baedd923afe1ca062ba50fedf4adf058239eafad3087b2bcf778a69/tkinterweb_tkhtml-2.1.1-py3-none-win_amd64.whl", hash = "sha256:5a1f9e5a49e8ff15488557377f3f25f8e7e781bea94f9d63884a887ddbd18d58", size = 269564, upload-time = "2026-02-06T15:38:34.432Z" },
+]
+
+[[package]]
+name = "tksheet"
+version = "7.6.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a1/28/4e83480a2c1d41d25fbae2b613847ead6d9499a2d7eec0000bf17aed2f30/tksheet-7.6.0.tar.gz", hash = "sha256:42d0618b10184294a85489a474ae747097483dd9a47b4385ba12b1afa8648e1a", size = 199108, upload-time = "2026-03-11T17:49:25.335Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/51/a2/406016281147857d919c95a9efb6926b8ada683d2fc4de8c1fabc9d5aefa/tksheet-7.6.0-py3-none-any.whl", hash = "sha256:c586d7d04f93bace45f97888b12ea97cbb48dea4f1c3b7931e89491fdf18f9bb", size = 202704, upload-time = "2026-03-11T17:49:22.644Z" },
 ]
 
 [[package]]

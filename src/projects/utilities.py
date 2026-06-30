@@ -2,6 +2,8 @@ import subprocess
 import threading
 from typing import Any
 
+from projects.constants import HOME_DIR
+
 
 def open_in_kate(file_path: str) -> None:
     call_process(["kate", file_path])
@@ -63,3 +65,5 @@ def _call_process_worker(process: list) -> None:
         #     0, lambda: messagebox.showerror("", "Process failed")
         # )
 
+def collapse_home(path: str) -> str:
+    return path.replace(HOME_DIR, "~")

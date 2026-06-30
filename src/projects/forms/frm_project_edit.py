@@ -48,7 +48,7 @@ class ProjectEditFrame:
 
         if not project:
             project = Project()
-            project.source_dir = DEFAULT_PROJECT_DIR
+            # project.source_dir = DEFAULT_PROJECT_DIR
             project.version_text = DEFAULT_VERSION_TEXT
             project.pypi = False
         self.project = project
@@ -57,6 +57,7 @@ class ProjectEditFrame:
 
         # tk variables
         self.project_name = tk.StringVar(value=project.name)
+        self.base_dir = tk.StringVar(value=project.base_dir)
         self.source_dir = tk.StringVar(value=project.source_dir)
         self.project_version = tk.StringVar(value=project.version_text)
         self.version = tk.StringVar(value=project.version_text)
@@ -72,6 +73,7 @@ class ProjectEditFrame:
 
         # Trace
         self.project_name.trace_add("write", self._check_value_changed)
+        self.base_dir.trace_add("write", self._check_value_changed)
         self.source_dir.trace_add("write", self._check_value_changed)
         self.version.trace_add("write", self._check_value_changed)
         self.pypi.trace_add("write", self._check_value_changed)
@@ -133,6 +135,16 @@ class ProjectEditFrame:
             state=WidgetState.READONLY,
         )
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
+
+        row += 1
+        label = ttk.Label(frame, text="Base dir")
+        label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
+
+        entry = ttk.Entry(frame, textvariable=self.base_dir)
+        entry.grid(row=row, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
+
+        button = IconButton(frame, txt.OPEN, "open", self._get_base_dir)
+        button.grid(row=row, column=3, pady=PAD)
 
         row += 1
         label = ttk.Label(frame, text="Source dir")
@@ -237,9 +249,25 @@ class ProjectEditFrame:
         frame.enable(False)
         return frame
 
-    def _get_source_dir(self, *args) -> None:
+    def _get_base_dir(self, *args) -> None:
+        if self.base_dir.get():
+            init_dir = self.base_dir.get()
+        else:
+            init_dir = DEFAULT_PROJECT_DIR
         if directory := filedialog.askdirectory(
-            initialdir=self.source_dir.get(),
+            initialdir=init_dir,
+            parent=self.root,
+        ):
+            self.base_dir.set(directory)
+
+    def _get_source_dir(self, *args) -> None:
+        if self.source_dir.get():
+            init_dir = self.source_dir.get()
+        else:
+            init_dir = self.base_dir.get()
+
+        if directory := filedialog.askdirectory(
+            initialdir=init_dir,
             parent=self.root,
         ):
             self.source_dir.set(directory)
@@ -292,6 +320,12 @@ class ProjectEditFrame:
                 self.project.name,
                 self.project_name.get(),
             )
+        if self.project.base_dir != self.base_dir.get():
+            changes["base_dir"] = (
+                self.project.base_dir,
+                self.base_dir.get(),
+            )
+
         if self.project.source_dir != self.source_dir.get():
             changes["source_dir"] = (
                 self.project.source_dir,

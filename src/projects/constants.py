@@ -24,6 +24,7 @@ HTML_DIR = resolve_path("html", __file__)
 HELP_URI = ""
 
 # Paths
+HOME_DIR = str(Path.home())
 CONFIG_PATH = Path(user_config_dir(__app_name__, __author__), "config.toml")
 USER_DATA_DIR = Path(user_data_dir(__app_name__, __author__))
 USER_DATA_DIR.mkdir(exist_ok=True)

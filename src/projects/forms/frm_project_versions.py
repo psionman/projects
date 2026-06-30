@@ -116,14 +116,14 @@ class ProjectVersionsFrame:
         # tk variables
         self.project_name = tk.StringVar(value=project.name)
         self.env_dir = tk.StringVar(value=project.env_dir)
-        self.source_dir = tk.StringVar(value=project.source_dir)
+        self.base_dir = tk.StringVar(value=project.base_dir)
         self.project_version = tk.StringVar(value=self.project.version_text)
         self.version = tk.StringVar()
 
         # Trace
         self.project_name.trace_add("write", self._values_changed)
         self.env_dir.trace_add("write", self._values_changed)
-        self.source_dir.trace_add("write", self._values_changed)
+        self.base_dir.trace_add("write", self._values_changed)
         self.version.trace_add("write", self._values_changed)
 
         self._show()
@@ -163,8 +163,9 @@ class ProjectVersionsFrame:
         frame.rowconfigure(5, weight=1)
         frame.columnconfigure(2, weight=1)
 
+        row = 0
         label = ttk.Label(frame, text="Project name")
-        label.grid(row=0, column=0, sticky=tk.E, pady=PAD)
+        label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
 
         state = (
             WidgetState.NORMAL
@@ -172,44 +173,49 @@ class ProjectVersionsFrame:
             else WidgetState.READONLY
         )
         entry = ttk.Entry(frame, textvariable=self.project_name, state=state)
-        entry.grid(row=0, column=1, sticky=tk.EW, padx=PAD)
+        entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
         if state == WidgetState.NORMAL:
             entry.focus_set()
 
         label = ttk.Label(frame, text="(Used to find dirs in virtual envs)")
-        label.grid(row=1, column=1, sticky=tk.W, pady=0)
+        label.grid(row=row, column=2, sticky=tk.W, pady=0)
 
+        row += 1
         label = ttk.Label(frame, text="Current_version")
-        label.grid(row=2, column=0, sticky=tk.E, pady=PAD)
+        label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
 
         entry = ttk.Entry(
             frame,
             textvariable=self.project_version,
             state=WidgetState.READONLY,
         )
-        entry.grid(row=2, column=1, sticky=tk.EW, padx=PAD)
+        entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
 
+        row += 1
         label = ttk.Label(frame, text="Project dir")
-        label.grid(row=3, column=0, sticky=tk.E, pady=PAD)
+        label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
 
         entry = ttk.Entry(
-            frame, textvariable=self.source_dir, state=WidgetState.READONLY
+            frame, textvariable=self.base_dir, state=WidgetState.READONLY
         )
-        entry.grid(row=3, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
+        entry.grid(row=row, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
 
-        label = ttk.Label(frame, text="Development version")
-        label.grid(row=4, column=1, sticky=tk.W, pady=PAD)
+        row += 1
+        label = ttk.Label(frame, text="Development versions")
+        label.grid(row=row, column=0, sticky=tk.W, pady=PAD)
 
+
+        row += 2  # !!!
         self.versions_frame = ScrollingCanvas(
             frame,
             relief=tk.SUNKEN,
             borderwidth=2,
         )
-        self.versions_frame.grid(row=5, column=0, columnspan=3, sticky=tk.NSEW)
+        self.versions_frame.grid(row=row, column=0, columnspan=3, sticky=tk.NSEW)
 
         self.button_frame = self._button_frame(frame)
         self.button_frame.grid(
-            row=0, column=4, rowspan=9, sticky=tk.NS, padx=PAD, pady=PAD
+            row=0, column=4, rowspan=999, sticky=tk.NS, padx=PAD, pady=PAD
         )
         return frame
 

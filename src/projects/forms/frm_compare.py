@@ -18,6 +18,7 @@ from projects.config import read_config
 from projects.env_version import EnvironmentVersion
 from projects.project import Project
 from projects.text import Text
+from projects.utilities import collapse_home
 
 txt = Text()
 FRAME_TITLE = "Compare files across directories"
@@ -45,8 +46,8 @@ class CompareFrame:
 
         # Tk Variables
         self.project_name = tk.StringVar(value=project.name)
-        self.env_dir = tk.StringVar(value=env_version.dir_short)
-        self.source_dir = tk.StringVar(value=project.source_dir_short)
+        self.env_dir = tk.StringVar(value=collapse_home(env_version.dir))
+        self.source_dir = tk.StringVar(value=collapse_home(project.source_dir))
         self.env_version_version = tk.StringVar(value=env_version.version)
         self.project_version = tk.StringVar(value=project.project_version)
         self.mismatch = tk.StringVar(value="")

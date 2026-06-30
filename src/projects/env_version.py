@@ -131,12 +131,3 @@ class EnvironmentVersion():
             source_dir = Path(*parts[:index+2])
             return os.path.join(source_dir, 'bin', 'python')
         return ''
-
-    @property
-    def dir_short(self) -> str:
-        """Property method to return a shortened directory path."""
-        return self._short_dir(self.dir)
-
-    @staticmethod
-    def _short_dir(long_dir: str) -> str:
-        return long_dir.replace(str(Path.home()), '~')

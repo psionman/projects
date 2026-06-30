@@ -23,6 +23,7 @@ from projects.project import Project
 from projects.project_server import ProjectServer
 from projects.text import Text
 from projects.utilities import call_process
+from projects.constants import HOME_DIR
 
 txt = Text()
 
@@ -30,9 +31,10 @@ FRAME_TITLE = "Project management"
 
 COLUMN_DEFS = (
     ColumnDefn("key", "", 0),
-    ColumnDefn("project_name", "Project", 50),
+    ColumnDefn("project_name", "Project", 10),
+    ColumnDefn("colour", "Colour", 0),
     ColumnDefn("script", "Script", 1),
-    ColumnDefn("main", "Source dir", 400),
+    ColumnDefn("main", "Base dir", 400),
 )
 
 
@@ -109,6 +111,7 @@ class MainFrame:
         frame = ttk.Frame(master)
         frame.rowconfigure(0, weight=1)
         frame.columnconfigure(0, weight=1)
+        import tksheet
 
         self.tree = self._get_tree(frame)
         self.tree.bind("<<TreeviewSelect>>", self._tree_clicked)
@@ -148,8 +151,9 @@ class MainFrame:
         return [
             (
                 project.name,
+                "",
                 project.script.replace(f"{self.config.script_directory}/", ""),
-                project.source_dir_short,
+                project.base_dir.replace(HOME_DIR, "~"),
             )
             for project in projects.values()
         ]
@@ -333,7 +337,6 @@ class MainFrame:
         self.root.wait_window(dlg.root)
 
     def _update_pyproject(self, *args) -> None:
-        code = self.project.update_pyproject()
         if code == 0:
             messagebox.showinfo("", "Project updated")
         else:

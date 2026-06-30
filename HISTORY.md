@@ -1,5 +1,9 @@
 # History
 
+## Version 1.0.0 - 30 Jun 2026
+
+1. Added base_dir
+
 ## version 0.0.2 - 17 Jun 2026
 
 1. Allow project compare to open windsurf

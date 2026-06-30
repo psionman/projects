@@ -11,7 +11,7 @@ from psi_toml.parser import TomlParser
 from projects import logger
 from projects.env_version import EnvironmentVersion
 from projects.constants import (
-    PYPROJECT_TOML, HISTORY_FILE, VERSION_FILE, VERSION_TEXT)
+    PYPROJECT_TOML, HISTORY_FILE, VERSION_FILE, VERSION_TEXT, HOME_DIR)
 
 import projects.projects_io as io
 
@@ -60,10 +60,8 @@ class Project():
 
         self.name: str = ''
         self.source_dir: str = ''
-        self._source_dir_short: str = ''
-        self._base_dir: Path = None
+        self.base_dir: str = ""
         self.env_dir: str = ''
-        self._env_dir_short: str = ''
         self.project_version: str = ''
         self.pyproject_version: str = ''
         self.history = ''
@@ -89,14 +87,6 @@ class Project():
 
         return f'Project: {self.name}'
 
-    @property
-    def env_dir_short(self) -> str:
-        return self._short_dir(self.env_dir)
-
-    @property
-    def source_dir_short(self) -> str:
-        return self._short_dir(self.source_dir)
-
     def serialize(self) -> dict:
         """
             Serializes the Projects object into a dictionary.
@@ -105,7 +95,8 @@ class Project():
                 dict: A dictionary containing serialized project data.
         """
         return {
-            'dir': self.source_dir,
+            'base_dir': self.base_dir.replace(HOME_DIR, '~'),
+            'source_dir': self.source_dir.replace(HOME_DIR, '~'),
             'pypi': self.pypi,
             'repository': self .repository_name,
             'build_for_windows': self.build_for_windows,
@@ -133,15 +124,6 @@ class Project():
         version_re = r'[0-9]{1,}.[0-9]{1,}.[0-9]{1,}'
         version = re.search(version_re, raw_text).group()
         return version or err_text
-
-    @property
-    def base_dir(self) -> Path:
-        """Return path to base directory of the project."""
-        if not self._base_dir:
-            self._base_dir = Path(self.source_dir).parent
-            if not Path(self._base_dir, 'pyproject.toml').is_file():
-                self._base_dir = self._base_dir.parent
-        return self._base_dir
 
     @property
     def requirements_path(self) -> Path:
