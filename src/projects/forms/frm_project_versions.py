@@ -213,6 +213,7 @@ class ProjectVersionsFrame:
         self.versions_frame.grid(
             row=row, column=0, columnspan=3, sticky=tk.NSEW
         )
+        self._bind_mousewheel(self.versions_frame.canvas)
 
         self.button_frame = self._button_frame(frame)
         self.button_frame.grid(
@@ -350,6 +351,14 @@ class ProjectVersionsFrame:
             return call_process(["windsurf", env_version.dir])
         except FileNotFoundError:
             messagebox.showerror("", "windsurf not found.")
+
+    def _bind_mousewheel(self, canvas: tk.Canvas) -> None:
+        canvas.bind_all(
+            "<Button-4>", lambda e: canvas.yview_scroll(-1, "units")
+        )
+        canvas.bind_all(
+            "<Button-5>", lambda e: canvas.yview_scroll(1, "units")
+        )
 
     def _dismiss(self, *args) -> None:
         """
