@@ -65,5 +65,6 @@ def _call_process_worker(process: list) -> None:
         #     0, lambda: messagebox.showerror("", "Process failed")
         # )
 
+
 def collapse_home(path: str) -> str:
     return path.replace(HOME_DIR, "~")

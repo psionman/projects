@@ -1,8 +1,10 @@
 """I/O operations for projects.py."""
-from pathlib import Path
+
 import json
+from pathlib import Path
 
 from psiutils.constants import Status
+
 from projects import logger
 
 
@@ -18,10 +20,10 @@ def read_text_file(path: str) -> str:
         if the file is not found.
     """
     try:
-        with open(path, 'r', encoding='utf8') as f_text:
+        with open(path, encoding="utf8") as f_text:
             return f_text.read()
     except FileNotFoundError:
-        logger.warning(f'File not found {path}')
+        logger.warning(f"File not found {path}")
         return Status.ERROR
 
 
@@ -38,15 +40,14 @@ def update_file(pyproject_path: str, output: str) -> int:
         or Status.ERROR).
     """
     try:
-        with open(
-                pyproject_path, 'w', encoding='utf8') as f_output:
+        with open(pyproject_path, "w", encoding="utf8") as f_output:
             f_output.write(output)
         return Status.SUCCESS
     except NotADirectoryError:
-        logger.warning(f'Cannot find directory: {Path(pyproject_path).parent}')
+        logger.warning(f"Cannot find directory: {Path(pyproject_path).parent}")
         return Status.ERROR
     except FileNotFoundError:
-        logger.warning(f'Cannot find file: {pyproject_path}')
+        logger.warning(f"Cannot find file: {pyproject_path}")
         return Status.ERROR
 
 
@@ -62,13 +63,13 @@ def read_json_file(path: str) -> dict:
         if the file is not found or cannot be decoded.
     """
     try:
-        with open(path, 'r', encoding='utf8') as f_json:
+        with open(path, encoding="utf8") as f_json:
             try:
                 return json.load(f_json)
             except json.decoder.JSONDecodeError:
                 return {}
     except FileNotFoundError:
-        logger.warning(f'File not found {path}')
+        logger.warning(f"File not found {path}")
         return {}
 
 
@@ -87,8 +88,8 @@ def update_json_file(path: str, output: dict) -> int:
 
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
-        with open(path, 'w', encoding='utf8') as f_json:
+        with open(path, "w", encoding="utf8") as f_json:
             return json.dump(output, f_json)
     except NotADirectoryError:
-        logger.warning(f'Cannot find directory: {Path(path).parent}')
+        logger.warning(f"Cannot find directory: {Path(path).parent}")
         return {}

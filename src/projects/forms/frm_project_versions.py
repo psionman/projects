@@ -204,14 +204,15 @@ class ProjectVersionsFrame:
         label = ttk.Label(frame, text="Development versions")
         label.grid(row=row, column=0, sticky=tk.W, pady=PAD)
 
-
         row += 2  # !!!
         self.versions_frame = ScrollingCanvas(
             frame,
             relief=tk.SUNKEN,
             borderwidth=2,
         )
-        self.versions_frame.grid(row=row, column=0, columnspan=3, sticky=tk.NSEW)
+        self.versions_frame.grid(
+            row=row, column=0, columnspan=3, sticky=tk.NSEW
+        )
 
         self.button_frame = self._button_frame(frame)
         self.button_frame.grid(

@@ -4,7 +4,7 @@ import os
 import re
 import tkinter as tk
 from pathlib import Path
-from tkinter import filedialog, messagebox, ttk, colorchooser
+from tkinter import colorchooser, filedialog, messagebox, ttk
 
 from psiutils.buttons import ButtonFrame, IconButton
 from psiutils.constants import PAD, Mode, Status, WidgetState
@@ -24,13 +24,15 @@ DEFAULT_DEV_DIR = str(Path(Path.home(), ".pyenv", "versions"))
 DEFAULT_PROJECT_DIR = str(Path(Path.home(), "projects"))
 DEFAULT_VERSION_TEXT = "0.0.0"
 
+
 class ColourLabel(ttk.Label):
     def __init__(self, *args, **kwargs):
-        self.colour = ''
-        if 'colour' in kwargs:
-            self.colour = kwargs['colour']
-            kwargs.pop('colour')
+        self.colour = ""
+        if "colour" in kwargs:
+            self.colour = kwargs["colour"]
+            kwargs.pop("colour")
         super().__init__(*args, **kwargs)
+
 
 class ProjectEditFrame:
     def __init__(self, parent, mode: int, project: Project = None) -> None:
@@ -121,9 +123,9 @@ class ProjectEditFrame:
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
         entry.focus_set()
 
-        row += 1
+        # row += 1
         label = ttk.Label(frame, text="(Used to find dirs in virtual envs)")
-        label.grid(row=row, column=1, sticky=tk.W, pady=0)
+        label.grid(row=row, column=2, sticky=tk.W, pady=0)
 
         row += 1
         label = ttk.Label(frame, text="Current_version")
@@ -178,13 +180,6 @@ class ProjectEditFrame:
         )
         check_button.grid(row=row, column=1, sticky=tk.W)
 
-        # row += 1
-        # label = ttk.Label(frame, text='Repository name')
-        # label.grid(row=row, column=0, sticky=tk.E, padx=PAD, pady=PAD)
-
-        # entry = ttk.Entry(frame, textvariable=self.repository_name)
-        # entry.grid(row=row, column=1, sticky=tk.EW)
-
         row += 1
         separator_frame(frame, "Colours").grid(
             row=row, column=0, columnspan=4, sticky=tk.EW
@@ -207,37 +202,39 @@ class ProjectEditFrame:
     def _populate_colour_frame(self) -> None:
         self.colour_frame.children.clear()
         for row, (key, item) in enumerate(
-                self.project.workbench_colours.items()):
+            self.project.workbench_colours.items()
+        ):
             self._add_colour_widgets(self.colour_frame, row, key, item)
         self._check_value_changed()
 
     def _add_colour_widgets(
-            self, frame: tk.Frame, row: int, key: str, item: dict) -> None:
+        self, frame: tk.Frame, row: int, key: str, item: dict
+    ) -> None:
         label = ttk.Label(frame, text=key)
         label.grid(row=row, column=0, sticky=tk.E, padx=PAD, pady=PAD)
         entry = ttk.Entry(frame, textvariable=getattr(self, key))
         entry.grid(row=row, column=1, sticky=tk.EW)
         entry.bind(
-            "<FocusOut>", lambda e, k=key: self._validate_colour_change(k))
-
+            "<FocusOut>", lambda e, k=key: self._validate_colour_change(k)
+        )
 
         colour = getattr(self, key).get()
-        self.style.configure(
-            f'{colour}.TLabel',
-            background=colour)
+        self.style.configure(f"{colour}.TLabel", background=colour)
 
         label = ColourLabel(
             frame,
             width=10,
-            style=f'{colour}.TLabel',
+            style=f"{colour}.TLabel",
             colour=colour,
-            )
+        )
         label.grid(row=row, column=2, sticky=tk.W, padx=PAD)
         button = IconButton(
-            frame, txt.SELECT, "palette",
+            frame,
+            txt.SELECT,
+            "palette",
             lambda k=key: self._get_color(k),
             icon_path=ICON_DIR,
-        )   
+        )
         button.grid(row=row, column=3, padx=PAD, pady=(0, 5))
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
@@ -277,7 +274,7 @@ class ProjectEditFrame:
         if self.script.get():
             initialdir = Path(self.script.get()).parent
         path = self.ask_save_path(initialdir)
-        
+
         if path:
             self.script.set(path)
 
@@ -361,7 +358,6 @@ class ProjectEditFrame:
             # Invalid colour, reset to original
             getattr(self, key).set(getattr(self, f"{key}_original"))
         self._populate_colour_frame()
-        
 
     def _get_color(self, key: str) -> None:
         colour = getattr(self, key).get()
@@ -379,13 +375,14 @@ class ProjectEditFrame:
 
             logger.info("New project", name=self.project.name)
 
+        self.project.base_dir = self.base_dir.get()
         self.project.source_dir = self.source_dir.get()
         self.project.pypi = self.pypi.get()
         self.project.build_for_windows = self.build_for_windows.get()
         self.project.script = self.script.get()
         self.project.repository_name = self.repository_name.get()
 
-        for key, item in self.project.workbench_colours.items():
+        for key in self.project.workbench_colours.keys():
             colour = getattr(self, key).get()
             self.project.workbench_colours[key] = colour
 

@@ -31,7 +31,7 @@ def _get_modules(module_dir: str) -> dict:
 
 
 def _get_text(path: str) -> list:
-    with open(path, "r", encoding="utf-8") as f_module:
+    with open(path, encoding="utf-8") as f_module:
         return f_module.read().split("\n")
 
 
@@ -53,10 +53,8 @@ def _check_imports(
             if re.search(module_re, line) and f"{package}." not in line:
                 print(module_name, module, line)
                 logger.warning(
-                    (
-                        f"Missing package definition in "
-                        f"{source_dir}/{module_name}: {index + 1}"
-                    )
+                    f"Missing package definition in "
+                    f"{source_dir}/{module_name}: {index + 1}"
                 )
 
 

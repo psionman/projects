@@ -1,5 +1,8 @@
 # History
 
+## Version 1.0.1 - 1 Jul 2026
+1. Fixed bug where base_dir was not being saved
+
 ## Version 1.0.0 - 30 Jun 2026
 
 1. Added base_dir

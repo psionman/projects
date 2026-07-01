@@ -1,13 +1,14 @@
 """Project server for package application."""
 
 from pathlib import Path
+
 import json5
 
 import projects.projects_io as io
 from projects.config import config
-from projects.constants import USER_DATA_DIR, HOME_DIR
+from projects.constants import HOME_DIR, USER_DATA_DIR
 from projects.env_version import EnvironmentVersion
-from projects.project import Project, DEFAULT_COLOURS
+from projects.project import DEFAULT_COLOURS, Project
 
 
 class ProjectServer:
@@ -55,40 +56,39 @@ class ProjectServer:
             self.save_project_colours(project)
         return io.update_json_file(self.project_file, output)
 
-
     def get_project_colours(self, project: Project) -> None:
         """Get the colours for a project."""
-        
+
         settings_file = Path(
-            Path(project.source_dir).parent.parent, 
-            '.vscode', "settings.json")
+            Path(project.source_dir).parent.parent, ".vscode", "settings.json"
+        )
         try:
-            with open(settings_file, 'r', encoding='utf-8') as f:
+            with open(settings_file, encoding="utf-8") as f:
                 settings = json5.load(f)
         except FileNotFoundError:
             return
 
         if "workbench.colorCustomizations" in settings:
             colour_customizations = settings["workbench.colorCustomizations"]
-            for key, value in colour_customizations.items(): 
+            for key, value in colour_customizations.items():
                 if key in project.workbench_colours:
                     project.workbench_colours[key] = value
 
     def save_project_colours(self, project: Project) -> None:
         """Save the colours for a project."""
         settings_file = Path(
-            Path(project.source_dir).parent.parent, 
-            '.vscode', "settings.json")
+            Path(project.source_dir).parent.parent, ".vscode", "settings.json"
+        )
         try:
-            with open(settings_file, 'r', encoding='utf-8') as f:
+            with open(settings_file, encoding="utf-8") as f:
                 settings = json5.load(f)
         except FileNotFoundError:
             return
         if project.workbench_colours != DEFAULT_COLOURS:
-            settings[
-                "workbench.colorCustomizations"
-            ] = project.workbench_colours
-            with open(settings_file, 'w', encoding='utf-8') as f:
+            settings["workbench.colorCustomizations"] = (
+                project.workbench_colours
+            )
+            with open(settings_file, "w", encoding="utf-8") as f:
                 json5.dump(settings, f, indent=2)
             #     print(project.name)
             # print(settings[

@@ -12,6 +12,8 @@ from projects.project_server import ProjectServer
 
 # from projects.github import upload
 
+PROJECT_NAME = "script_launcher"
+
 
 class ModuleCaller:
     def __init__(self, root, module) -> None:
@@ -65,7 +67,6 @@ class ModuleCaller:
         self.root.wait_window(dlg.root)
 
     def _project(self) -> None:
-        PROJECT_NAME = 'projects'
         dlg = ProjectEditFrame(self, Mode.EDIT, self.projects[PROJECT_NAME])
         self.root.wait_window(dlg.root)
 

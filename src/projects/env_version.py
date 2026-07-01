@@ -1,45 +1,46 @@
 """
-    environment_version
-    ====================
+environment_version
+====================
 
-    Provides tools for representing and managing Python virtual environment
-    metadata, including directory paths, Python versions, and version
-    information from a `_version.py` file.
+Provides tools for representing and managing Python virtual environment
+metadata, including directory paths, Python versions, and version
+information from a `_version.py` file.
 
-    Classes
-    -------
-    EnvironmentData : NamedTuple
-        Immutable data container holding the environment's name, directory,
-        and Python version.
+Classes
+-------
+EnvironmentData : NamedTuple
+    Immutable data container holding the environment's name, directory,
+    and Python version.
 
-    EnvironmentVersion
-        Represents and manages the details of a Python environment.
-        Can serialize/deserialize environment data, locate the
-        environment's Python binary, and extract version numbers from
-        `_version.py` files.
+EnvironmentVersion
+    Represents and manages the details of a Python environment.
+    Can serialize/deserialize environment data, locate the
+    environment's Python binary, and extract version numbers from
+    `_version.py` files.
 
-    Usage Example
-    -------------
-    >>> data = EnvironmentData(
-    ...     name="my_env",
-    ...     dir="/path/to/project/.venv",
-    ...     python_version="3.11.4"
-    ... )
-    >>> env = EnvironmentVersion(data)
-    >>> env.version
-    '1.0.0'
-    >>> env.venv_python
-    '/path/to/project/.venv/bin/python'
-    >>> env.dir_short
-    '~/projects/project/.venv'
+Usage Example
+-------------
+>>> data = EnvironmentData(
+...     name="my_env",
+...     dir="/path/to/project/.venv",
+...     python_version="3.11.4"
+... )
+>>> env = EnvironmentVersion(data)
+>>> env.version
+'1.0.0'
+>>> env.venv_python
+'/path/to/project/.venv/bin/python'
+>>> env.dir_short
+'~/projects/project/.venv'
 
-    Notes
-    -----
-    - Version extraction looks for a semantic version pattern (e.g.,
-    '1.2.3') in `_version.py`.
-    - Supports `.venv` and `.pyenv` layouts when locating the Python
-    executable.
+Notes
+-----
+- Version extraction looks for a semantic version pattern (e.g.,
+'1.2.3') in `_version.py`.
+- Supports `.venv` and `.pyenv` layouts when locating the Python
+executable.
 """
+
 import os
 import re
 from pathlib import Path
@@ -54,7 +55,7 @@ class EnvironmentData(NamedTuple):
     python_version: str
 
 
-class EnvironmentVersion():
+class EnvironmentVersion:
     """
     EnvironmentVersion:
     Class for handling environment version information.
@@ -80,10 +81,10 @@ class EnvironmentVersion():
     """
 
     def __init__(self, data: EnvironmentData = None) -> None:
-        self.name = ''
-        self.dir = ''
-        self.python_version = ''
-        self.type = ''
+        self.name = ""
+        self.dir = ""
+        self.python_version = ""
+        self.type = ""
 
         if data:
             self.deserialize(data)
@@ -109,25 +110,25 @@ class EnvironmentVersion():
         self.venv_python = self._get_venv_python()
 
     def _get_version(self):
-        version_re = r'[0-9]{1,}.[0-9]{1,}.[0-9]{1,}'
+        version_re = r"[0-9]{1,}.[0-9]{1,}.[0-9]{1,}"
         path = Path(self.dir, VERSION_FILE)
         try:
-            with open(path, 'r', encoding='utf8') as f_version:
+            with open(path, encoding="utf8") as f_version:
                 text = f_version.read()
                 if match := re.search(version_re, text):
                     return match.group()
         except FileNotFoundError:
-            return 'No version file'
-        return 'Version error'
+            return "No version file"
+        return "Version error"
 
     def _get_venv_python(self) -> str:
         parts = Path(self.dir).parts
-        if '.venv' in parts:
-            index = parts.index('.venv')
+        if ".venv" in parts:
+            index = parts.index(".venv")
             source_dir = Path(*parts[:index])
-            return os.path.join(source_dir, '.venv', 'bin', 'python')
-        if '.pyenv' in parts:
-            index = parts.index('versions')
-            source_dir = Path(*parts[:index+2])
-            return os.path.join(source_dir, 'bin', 'python')
-        return ''
+            return os.path.join(source_dir, ".venv", "bin", "python")
+        if ".pyenv" in parts:
+            index = parts.index("versions")
+            source_dir = Path(*parts[: index + 2])
+            return os.path.join(source_dir, "bin", "python")
+        return ""

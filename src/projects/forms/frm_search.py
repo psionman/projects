@@ -189,7 +189,7 @@ class SearchFrame:
         return False
 
     def _contains_search_text(self, path: str) -> bool:
-        with open(path, "r", encoding="utf-8") as f_test:
+        with open(path, encoding="utf-8") as f_test:
             file_text = f_test.read()
 
         search = self.search_text.get()

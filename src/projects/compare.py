@@ -54,7 +54,7 @@ def _file_contents(path: str) -> str:
     if not path.is_file():
         file_list = list(path.iterdir())
         return len(file_list)
-    with open(path, "r", encoding="utf-8") as f_contents:
+    with open(path, encoding="utf-8") as f_contents:
         return f_contents.read()
 
 
