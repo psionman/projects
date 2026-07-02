@@ -214,6 +214,10 @@ class MainFrame:
         self.refresh_button = frame.icon_button(
             "refresh", self._refresh_project, True
         )
+        self.desktop_button = IconButton(
+            frame, "Edit Desktop", "script", self._edit_script
+        )
+
         self.script_button = IconButton(
             frame, txt.EDIT_SCRIPT, "script", self._edit_script
         )
@@ -232,6 +236,7 @@ class MainFrame:
             frame.icon_button("code-blue", self._open_code, True),
             frame.icon_button("windsurf", self._open_windsurf, True),
             frame.icon_button("console", self._konsole),
+            self.desktop_button,
             self.script_button,
             self.run_script_button,
             self.compare_button,

@@ -6,6 +6,7 @@ DEFAULT_CONFIG = {
     "data_directory": USER_DATA_DIR,
     "last_project": "",
     "script_directory": "",
+    "desktop_directory": "",
     "project_file": "projects.json",
     "ignore": [],
     "geometry": {

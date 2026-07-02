@@ -45,21 +45,18 @@ class MainMenu:
         menubar.add_cascade(menu=help_menu, label="Help")
 
     def _file_menu_items(self) -> list:
-        # pylint: disable=no-member)
         return [
             MenuItem(f"{txt.CONFIG}{txt.ELLIPSIS}", self._config_frame),
             MenuItem(txt.QUIT, self._dismiss),
         ]
 
     def _project_menu_items(self) -> list:
-        # pylint: disable=no-member)
         return [
             MenuItem(f"{txt.NEW}{txt.ELLIPSIS}", self._new_project),
             MenuItem(f"{txt.SEARCH}{txt.ELLIPSIS}", self._search_for_content),
         ]
 
     def _help_menu_items(self) -> list:
-        # pylint: disable=no-member)
         return [
             MenuItem(f"{txt.ABOUT}{txt.ELLIPSIS}", self._show_about),
         ]
@@ -80,7 +77,6 @@ class MainMenu:
         messagebox.showinfo(title=f"{txt.ABOUT} {__app_name__}", message=about)
 
     def _new_project(self, *args) -> None:
-        # pylint: disable=no-member)
         dlg = ProjectEditFrame(self, Mode.NEW)
         self.root.wait_window(dlg.root)
         self.parent.update_projects(dlg)

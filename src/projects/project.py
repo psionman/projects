@@ -78,6 +78,7 @@ class Project:
         self.py_project_missing = True
         self._version_text = ""
         self.script: str = ""
+        self.desktop_file: str = ""
         self.repository_name: str = ""
         self.pypi = False
         self.build_for_windows = False
@@ -110,6 +111,7 @@ class Project:
                 key: item.serialize() for key, item in self.cached_envs.items()
             },
             "script": self.script,
+            "desktop_file": self.desktop_file,
         }
 
     @staticmethod

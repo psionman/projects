@@ -62,7 +62,6 @@ def _file_contents(path: str) -> str:
 def _build_comparison(
     comparison: dict, search_path: str, location: str
 ) -> dict:
-    # pylint: disable=no-member)
     search_dir = Path(search_path)
     file_list = []
     try:

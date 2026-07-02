@@ -15,7 +15,6 @@ class ProjectServer:
     """Handle projects."""
 
     def __init__(self) -> None:
-        # pylint: disable=no-member
         self.project_file = Path(USER_DATA_DIR, config.project_file)
         self.projects = self._get_projects()
 
@@ -41,6 +40,8 @@ class ProjectServer:
             }
             if "script" in item:
                 project.script = item["script"]
+            if "desktop_file" in item:
+                project.desktop_file = item["desktop_file"]
             project.get_project_data()
             self.get_project_colours(project)
         return project_dict

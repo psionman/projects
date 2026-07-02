@@ -19,7 +19,6 @@ FRAME_TITLE = "Build package"
 
 class BuildFrame:
     def __init__(self, parent, project):
-        # pylint: disable=no-member)
         self.root = tk.Toplevel(parent.root)
         self.parent = parent
         self.config = read_config()
@@ -49,7 +48,6 @@ class BuildFrame:
         self._show()
 
     def _show(self) -> None:
-        # pylint: disable=no-member)
         root = self.root
         root.geometry(geometry(self.config, __file__))
         root.transient(self.parent.root)

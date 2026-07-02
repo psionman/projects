@@ -8,17 +8,12 @@ from psiutils.constants import PAD
 from psiutils.utilities import geometry, window_resize
 
 from projects import logger
-from projects.config import config, read_config
+from projects.config import read_config
 from projects.text import Text
 
 txt = Text()
 
 LF = "\n"
-
-FIELDS = {
-    "data_directory": tk.StringVar,
-    "script_directory": tk.StringVar,
-}
 
 
 class ConfigFrame:
@@ -54,15 +49,24 @@ class ConfigFrame:
     """
 
     def __init__(self, parent):
-        # pylint: disable=no-member
         self.root = tk.Toplevel(parent.root)
         self.config = read_config()
         self.parent = parent
         self.ignore_text = None
 
-        for field, f_type in FIELDS.items():
-            if f_type is tk.StringVar:
-                setattr(self, field, self._stringvar(getattr(config, field)))
+        # tk.StringVars
+        self.data_directory = tk.StringVar(value=self.config.data_directory)
+        self.script_directory = tk.StringVar(
+            value=self.config.script_directory
+        )
+        self.desktop_directory = tk.StringVar(
+            value=self.config.desktop_directory
+        )
+
+        # Track changes
+        self.data_directory.trace_add("write", self._check_value_changed)
+        self.script_directory.trace_add("write", self._check_value_changed)
+        self.desktop_directory.trace_add("write", self._check_value_changed)
 
         self.button_frame = None
         self._show()
@@ -88,7 +92,6 @@ class ConfigFrame:
             "<Configure>",
             lambda event, arg=None: window_resize(self, __file__),
         )
-        root.bind("<FocusIn>", self._set_config)
 
         root.wait_visibility()
 
@@ -102,7 +105,6 @@ class ConfigFrame:
         sizegrip.grid(sticky=tk.SE)
 
     def _main_frame(self, master: tk.Frame) -> tk.Frame:
-        # pylint: disable=no-member
         frame = ttk.Frame(master)
 
         frame.columnconfigure(1, weight=1)
@@ -128,6 +130,19 @@ class ConfigFrame:
         )
         select = IconButton(
             frame, txt.OPEN, "open", self._set_script_directory
+        )
+        select.grid(row=row, column=2, sticky=tk.W, padx=PAD, pady=PAD)
+
+        row += 1
+        label = ttk.Label(frame, text="Desktop directory:")
+        label.grid(row=row, column=0, sticky=tk.E)
+
+        directory = ttk.Entry(frame, textvariable=self.desktop_directory)
+        directory.grid(
+            row=row, column=1, columnspan=1, sticky=tk.EW, padx=PAD, pady=PAD
+        )
+        select = IconButton(
+            frame, txt.OPEN, "open", self._set_desktop_directory
         )
         select.grid(row=row, column=2, sticky=tk.W, padx=PAD, pady=PAD)
 
@@ -179,6 +194,14 @@ class ConfigFrame:
         ):
             self.script_directory.set(directory)
 
+    def _set_desktop_directory(self) -> None:
+        if directory := filedialog.askdirectory(
+            initialdir=self.desktop_directory.get(),
+            parent=self.root,
+        ):
+            self.desktop_directory.set(directory)
+            print(f"Desktop directory set to: {directory}")
+
     def _save_config(self) -> None:
         raw_changes = self._config_changes()
         changes = {
@@ -186,8 +209,9 @@ class ConfigFrame:
             for field, change in raw_changes.items()
         }
 
-        for field in FIELDS:
-            self.config.config[field] = getattr(self, field).get()
+        self.config.update("data_directory", self.data_directory.get())
+        self.config.update("script_directory", self.script_directory.get())
+        self.config.update("desktop_directory", self.desktop_directory.get())
         if "ignore" in raw_changes:
             self.config.update("ignore", raw_changes["ignore"][1])
 
@@ -204,12 +228,19 @@ class ConfigFrame:
             f"{field} {stored[field] == getattr(self, field).get()} {stored[field]=} {self.script_directory.get()=}"
         )
         changes = {
-            field: (stored[field], getattr(self, field).get())
-            for field in FIELDS
-            if stored[field] != getattr(self, field).get()
+            "data_directory": (
+                stored["data_directory"],
+                self.data_directory.get(),
+            ),
+            "script_directory": (
+                stored["script_directory"],
+                self.script_directory.get(),
+            ),
+            "desktop_directory": (
+                stored["desktop_directory"],
+                self.desktop_directory.get(),
+            ),
         }
-        # field = 'script_directory'
-        # print(f'{field} {stored[field]=} {getattr(self, field).get()=}')
 
         ignore_text = self.ignore_text.get("0.0", tk.END)
         ignore_text = ignore_text.strip("\n")
@@ -217,11 +248,6 @@ class ConfigFrame:
         if stored["ignore"] != ignore_text:
             changes["ignore"] = (stored["ignore"], ignore_text)
         return changes
-
-    def _set_config(self, *args) -> None:
-        self.config = read_config()
-        for field in FIELDS:
-            getattr(self, field).set(self.config.config[field])
 
     def _dismiss(self) -> None:
         self.root.destroy()
