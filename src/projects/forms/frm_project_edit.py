@@ -65,6 +65,7 @@ class ProjectEditFrame:
         self.version = tk.StringVar(value=project.version_text)
         self.pypi = tk.BooleanVar(value=project.pypi)
         self.build_for_windows = tk.BooleanVar(value=project.build_for_windows)
+        self.desktop_file = tk.StringVar(value=project.desktop_file)
         self.script = tk.StringVar(value=project.script)
         self.repository_name = tk.StringVar(value=project.repository_name)
 
@@ -81,6 +82,7 @@ class ProjectEditFrame:
         self.pypi.trace_add("write", self._check_value_changed)
         self.build_for_windows.trace_add("write", self._check_value_changed)
         self.script.trace_add("write", self._check_value_changed)
+        self.desktop_file.trace_add("write", self._check_value_changed)
         self.repository_name.trace_add("write", self._check_value_changed)
 
         self._show()
@@ -157,6 +159,16 @@ class ProjectEditFrame:
 
         button = IconButton(frame, txt.OPEN, "open", self._get_source_dir)
         button.grid(row=row, column=3)
+
+        row += 1
+        label = ttk.Label(frame, text="Desktop file")
+        label.grid(row=row, column=0, sticky=tk.E, pady=PAD)
+
+        entry = ttk.Entry(frame, textvariable=self.desktop_file)
+        entry.grid(row=row, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
+
+        button = IconButton(frame, txt.OPEN, "open", self._get_desktop_file)
+        button.grid(row=row, column=3, pady=PAD)
 
         row += 1
         label = ttk.Label(frame, text="script")
@@ -269,6 +281,15 @@ class ProjectEditFrame:
         ):
             self.source_dir.set(directory)
 
+    def _get_desktop_file(self, *args) -> None:
+        initialdir = self.config.desktop_directory
+        if self.desktop_file.get():
+            initialdir = Path(self.desktop_file.get()).parent
+        path = self.ask_save_path(initialdir)
+
+        if path:
+            self.desktop_file.set(path)
+
     def _get_script(self, *args) -> None:
         initialdir = self.config.script_directory
         if self.script.get():
@@ -337,6 +358,13 @@ class ProjectEditFrame:
             )
         if self.project.script != self.script.get():
             changes["script"] = (self.project.script, self.script.get())
+
+        if self.project.desktop_file != self.desktop_file.get():
+            changes["desktop_file"] = (
+                self.project.desktop_file,
+                self.desktop_file.get(),
+            )
+
         if self.project.repository_name != self.repository_name.get():
             changes["repository"] = (
                 self.project.repository_name,
@@ -380,6 +408,7 @@ class ProjectEditFrame:
         self.project.pypi = self.pypi.get()
         self.project.build_for_windows = self.build_for_windows.get()
         self.project.script = self.script.get()
+        self.project.desktop_file = self.desktop_file.get()
         self.project.repository_name = self.repository_name.get()
 
         for key in self.project.workbench_colours.keys():

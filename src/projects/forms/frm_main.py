@@ -64,6 +64,7 @@ class MainFrame:
         self.compare_button = None
         self.refresh_button = None
         self.script_button = None
+        self.desktop_button = None
         self.run_script_button = None
         self.windows_build_button = None
 
@@ -173,10 +174,16 @@ class MainFrame:
         self.context_menu.enable(True)
 
         self._enable_script_items()
+        self._enable_desktop_items()
         self._enable_widows_items()
 
         if not self.project.pypi:
             self._disable_non_pypi_buttons()
+
+    def _enable_desktop_items(self) -> None:
+        enable = bool(self.project.desktop_file)
+        self.desktop_button.enable(enable)
+        self.edit_desktop_menu_item.enable(enable)
 
     def _enable_script_items(self) -> None:
         enable = bool(self.project.script)
@@ -215,7 +222,7 @@ class MainFrame:
             "refresh", self._refresh_project, True
         )
         self.desktop_button = IconButton(
-            frame, "Edit Desktop", "script", self._edit_script
+            frame, "Edit Desktop", "script", self._edit_desktop
         )
 
         self.script_button = IconButton(
@@ -246,6 +253,7 @@ class MainFrame:
             frame.icon_button("close-red", self._dismiss),
         ]
         self.script_button.disable()
+        self.desktop_button.disable()
         self.run_script_button.disable()
         self.windows_build_button.disable()
         frame.enable(False)
@@ -260,6 +268,9 @@ class MainFrame:
         )
         self.refresh_menu_item = MenuItem(
             txt.REFRESH, self._refresh_project, dimmable=True
+        )
+        self.edit_desktop_menu_item = MenuItem(
+            txt.EDIT_DESKTOP, self._edit_desktop, dimmable=True
         )
         self.edit_script_menu_item = MenuItem(
             txt.EDIT_SCRIPT, self._edit_script, dimmable=True
@@ -277,6 +288,7 @@ class MainFrame:
             MenuItem(txt.CODE, self._open_code, dimmable=True),
             MenuItem(txt.WINDSURF, self._open_windsurf, dimmable=True),
             MenuItem(txt.KONSOLE, self._konsole, dimmable=True),
+            self.edit_desktop_menu_item,
             self.edit_script_menu_item,
             self.run_script_menu_item,
             self.compare_menu_item,
@@ -362,8 +374,14 @@ class MainFrame:
     def _konsole(self, *args) -> None:
         return call_process(["konsole", "--workdir", self.project.base_dir])
 
+    def _edit_desktop(self, *args) -> None:
+        self.open_kate(self.project.desktop_file)
+
     def _edit_script(self, *args) -> None:
-        call_process(["kate", self.project.script])
+        self.open_kate(self.project.script)
+
+    def open_kate(self, file_path: str) -> None:
+        call_process(["kate", file_path])
 
         subprocess.run(
             [
@@ -376,7 +394,7 @@ class MainFrame:
                 "/MainApplication",
                 "--method",
                 "org.kde.Kate.Application.activate",
-                f"file://{self.project.script}",
+                f"file://{file_path}",
             ],
             check=False,
             stderr=subprocess.DEVNULL,
@@ -391,11 +409,6 @@ class MainFrame:
             ],
             check=False,
         )
-
-        # if response != 0:
-        #     messagebox.showinfo(
-        #         "Script open", "Script opened in kate", parent=self.root
-        #     )
 
     def _run_script(self, *args) -> Any:
         return call_process([self.project.script])

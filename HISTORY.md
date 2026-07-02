@@ -1,5 +1,10 @@
 # History
 
+## Version 1.0.3 - 2 Jul 2026
+1. Added Desktop directory to config
+2. Added desktop file support to frm_main
+3. Added desktop file support to frm_project_edit
+
 ## Version 1.0.2 - 1 Jul 2026
 1. Added scrolling to version list
 

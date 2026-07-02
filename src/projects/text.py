@@ -20,6 +20,7 @@ strings = {
     "COLOUR": "Colour",
     "DELETE_PROMPT": "Are you sure you wish to delete this record?",
     "EDIT_SCRIPT": "Edit script",
+    "EDIT_DESKTOP": "Edit desktop file",
     "KONSOLE": "Konsole",
     "NOT_IN_PROJECT_DIR": "Not working in project's directory",
     "RUN_SCRIPT": "Run script",
