@@ -3,9 +3,11 @@
 import os
 import re
 import subprocess
+import tomllib
 from datetime import datetime
 from pathlib import Path
 
+import json5
 from psi_toml.parser import TomlParser
 from psiutils.constants import Status
 
@@ -19,6 +21,16 @@ from projects.constants import (
     VERSION_TEXT,
 )
 from projects.env_version import EnvironmentVersion
+
+SERIALIZABLE_FIELDS = [
+    "base_dir",
+    "source_dir",
+    "pypi",
+    "repository",
+    "build_for_windows",
+    "script",
+    "desktop_file",
+]
 
 DEFAULT_COLOURS = {
     "titleBar.activeBackground": "#bbbbbb",
@@ -68,6 +80,7 @@ class Project:
         self.source_dir: str = ""
         self.base_dir: str = ""
         self.env_dir: str = ""
+        self.description: str = ""
         self.project_version: str = ""
         self.pyproject_version: str = ""
         self.history = ""
@@ -79,10 +92,12 @@ class Project:
         self._version_text = ""
         self.script: str = ""
         self.desktop_file: str = ""
-        self.repository_name: str = ""
+        self.repository: str = ""
         self.pypi = False
         self.build_for_windows = False
-        self.workbench_colours = DEFAULT_COLOURS.copy()
+        self.workbench_colours = self._get_workbench_colours()
+        if not self.workbench_colours:
+            self.workbench_colours = DEFAULT_COLOURS.copy()
 
     def __repr__(self) -> str:
         """
@@ -101,18 +116,11 @@ class Project:
         Returns:
             dict: A dictionary containing serialized project data.
         """
-        return {
-            "base_dir": self.base_dir.replace(HOME_DIR, "~"),
-            "source_dir": self.source_dir.replace(HOME_DIR, "~"),
-            "pypi": self.pypi,
-            "repository": self.repository_name,
-            "build_for_windows": self.build_for_windows,
-            "cached_envs": {
-                key: item.serialize() for key, item in self.cached_envs.items()
-            },
-            "script": self.script,
-            "desktop_file": self.desktop_file,
-        }
+        output = {}
+        for key in SERIALIZABLE_FIELDS:
+            if getattr(self, key):
+                output[key] = getattr(self, key)
+        return output
 
     @staticmethod
     def _short_dir(long_dir: str) -> str:
@@ -120,12 +128,6 @@ class Project:
 
     def _get_env_version(self) -> str:
         raw_text = io.read_text_file(Path(self.env_dir, VERSION_FILE))
-        return self._get_version_text(raw_text)
-
-    def _get_project_version(self) -> str:
-        raw_text = io.read_text_file(Path(self.source_dir, VERSION_FILE))
-        if raw_text == Status.ERROR:
-            return ""
         return self._get_version_text(raw_text)
 
     def _get_version_text(self, raw_text: str) -> str:
@@ -151,10 +153,9 @@ class Project:
             return self._version_text
 
         err_text = "Version not found"
-        version = self._get_project_version()
         version_re = r"^[0-9]{1,}.[0-9]{1,}.[0-9]{1,}$"
         self._version_text = (
-            version if re.match(version_re, version) else err_text
+            self.version if re.match(version_re, self.version) else err_text
         )
         return self._version_text
 
@@ -183,6 +184,7 @@ class Project:
 
     def next_version(self) -> str:
         """Return the next version string."""
+        print(f"project_version: {self.project_version}")
         version = self.project_version.split(".")
         if "missing" in version[0]:
             path = Path(self.source_dir, VERSION_FILE)
@@ -232,14 +234,70 @@ class Project:
                 return self._clean_string(line_list[1])
         return
 
-    def get_project_data(self) -> None:
-        """Update project attributes."""
-        self.project_version = self._get_project_version()
-        self.history = io.read_text_file(self.history_path)
-        if self.history == Status.ERROR:
-            self.history = ""
-        self.new_history = self._get_new_history()
-        self.pyproject_version = self._get_pyproject_version()
+    def get_project_meta_data(self) -> str:
+        """Get the description for a project."""
+        try:
+            with open(Path(self.base_dir, self.pyproject_path), "rb") as f:
+                pyproject = tomllib.load(f)
+            self.version = pyproject["project"]["version"]
+            self.description = pyproject["project"]["description"]
+        except FileNotFoundError:
+            logger.warning(f"pyproject.toml not found: Project: {self.name}")
+            return ""
+
+    def deserialize(self, data: dict) -> None:
+        """Deserialize the project from a dictionary."""
+        self.name = data["name"]
+
+        self.source_dir = data["source_dir"].replace("~", HOME_DIR)
+        self.base_dir = data["base_dir"].replace("~", HOME_DIR)
+        if "pypi" in data:
+            self.pypi = data["pypi"]
+        if "build_for_windows" in data:
+            self.build_for_windows = data["build_for_windows"]
+        if "repository" in data:
+            self.repository = data["repository"]
+        for key, env in data["cached_envs"].items():
+            self.cached_envs[key] = EnvironmentVersion(env)
+        if "script" in data:
+            self.script = data["script"]
+        if "desktop_file" in data:
+            self.desktop_file = data["desktop_file"]
+        self.get_project_meta_data()
+        self._get_project_colours()
+
+    def _get_project_colours(self) -> None:
+        """Get the colours for a project."""
+
+        settings_file = Path(
+            Path(self.source_dir).parent.parent, ".vscode", "settings.json"
+        )
+        try:
+            with open(settings_file, encoding="utf-8") as f:
+                settings = json5.load(f)
+        except FileNotFoundError:
+            return
+
+        if "workbench.colorCustomizations" in settings:
+            colour_customizations = settings["workbench.colorCustomizations"]
+            for key, value in colour_customizations.items():
+                if key in self.workbench_colours:
+                    self.workbench_colours[key] = value
+
+    def save_project_colours(self) -> None:
+        """Save the colours for a project."""
+        settings_file = Path(
+            Path(self.source_dir).parent.parent, ".vscode", "settings.json"
+        )
+        try:
+            with open(settings_file, encoding="utf-8") as f:
+                settings = json5.load(f)
+        except FileNotFoundError:
+            return
+        if self.workbench_colours != DEFAULT_COLOURS:
+            settings["workbench.colorCustomizations"] = self.workbench_colours
+            with open(settings_file, "w", encoding="utf-8") as f:
+                json5.dump(settings, f, indent=2)
 
     def update_version(self, version: str) -> int:
         output = f"{VERSION_TEXT} = '{version}'"
@@ -437,3 +495,22 @@ class Project:
                 "Update project dependencies: pip installed",
                 project=self.name,
             )
+
+    def _get_workbench_colours(self) -> None:
+        """Get the colours for the project."""
+
+        settings_file = Path(
+            Path(self.source_dir).parent.parent, ".vscode", "settings.json"
+        )
+        try:
+            with open(settings_file, encoding="utf-8") as f:
+                settings = json5.load(f)
+        except FileNotFoundError:
+            return
+
+        if "workbench.colorCustomizations" in settings:
+            colour_customizations = settings["workbench.colorCustomizations"]
+            for key, value in colour_customizations.items():
+                if key in self.workbench_colours:
+                    self.workbench_colours[key] = value
+        return self.workbench_colours

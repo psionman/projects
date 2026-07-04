@@ -228,7 +228,7 @@ class ProjectVersionsFrame:
             frame.icon_button("folder-open", self._open_dolphin, True),
             frame.icon_button("compare-orange", self._compare_project, True),
             frame.icon_button("update", self._update_project, True),
-            frame.icon_button("code-blue", self._open_code, True),
+            # frame.icon_button("code-blue", self._open_code, True),
             frame.icon_button("windsurf", self._open_windsurf, True),
             frame.icon_button("exit-orange", self._dismiss),
         ]
@@ -346,7 +346,6 @@ class ProjectVersionsFrame:
 
     def _open_windsurf(self, *args) -> None:
         env_version = self.project.env_versions[self.version.get()]
-        print(f"Opening windsurf for {env_version.dir}")
         try:
             return call_process(["windsurf", env_version.dir])
         except FileNotFoundError:

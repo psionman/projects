@@ -67,7 +67,7 @@ class ProjectEditFrame:
         self.build_for_windows = tk.BooleanVar(value=project.build_for_windows)
         self.desktop_file = tk.StringVar(value=project.desktop_file)
         self.script = tk.StringVar(value=project.script)
-        self.repository_name = tk.StringVar(value=project.repository_name)
+        self.repository = tk.StringVar(value=project.repository)
 
         # Colour items
         for key, item in project.workbench_colours.items():
@@ -83,7 +83,7 @@ class ProjectEditFrame:
         self.build_for_windows.trace_add("write", self._check_value_changed)
         self.script.trace_add("write", self._check_value_changed)
         self.desktop_file.trace_add("write", self._check_value_changed)
-        self.repository_name.trace_add("write", self._check_value_changed)
+        self.repository.trace_add("write", self._check_value_changed)
 
         self._show()
         self._populate_colour_frame()
@@ -126,8 +126,8 @@ class ProjectEditFrame:
         entry.focus_set()
 
         # row += 1
-        label = ttk.Label(frame, text="(Used to find dirs in virtual envs)")
-        label.grid(row=row, column=2, sticky=tk.W, pady=0)
+        # label = ttk.Label(frame, text="(Used to find dirs in virtual envs)")
+        # label.grid(row=row, column=2, sticky=tk.W, pady=0)
 
         row += 1
         label = ttk.Label(frame, text="Current_version")
@@ -365,10 +365,10 @@ class ProjectEditFrame:
                 self.desktop_file.get(),
             )
 
-        if self.project.repository_name != self.repository_name.get():
+        if self.project.repository != self.repository.get():
             changes["repository"] = (
-                self.project.repository_name,
-                self.repository_name.get(),
+                self.project.repository,
+                self.repository.get(),
             )
 
         for key in self.project.workbench_colours.keys():
@@ -409,7 +409,7 @@ class ProjectEditFrame:
         self.project.build_for_windows = self.build_for_windows.get()
         self.project.script = self.script.get()
         self.project.desktop_file = self.desktop_file.get()
-        self.project.repository_name = self.repository_name.get()
+        self.project.repository = self.repository.get()
 
         for key in self.project.workbench_colours.keys():
             colour = getattr(self, key).get()

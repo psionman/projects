@@ -18,7 +18,6 @@ def compare(source_dir: str, env_dir: str) -> list[str]:
     # comparison is a dict keyed on file name
     # each element contains 'project' and 'env' entries if the file exists in
     # the relevant directories
-    print(f"Comparing {source_dir} and {env_dir}")
     comparison = {}
     comparison = _build_comparison(comparison, source_dir, "project")
     comparison = _build_comparison(comparison, env_dir, "env")

@@ -1,5 +1,10 @@
 # History
 
+## Version 1.0.4 - 4 Jul 2026
+1. Extract cached environments to separate file
+2. Create project deserialize
+3. Move project methods into project class
+
 ## Version 1.0.3 - 2 Jul 2026
 1. Added Desktop directory to config
 2. Added desktop file support to frm_main

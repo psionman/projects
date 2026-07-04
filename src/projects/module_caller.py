@@ -12,7 +12,7 @@ from projects.project_server import ProjectServer
 
 # from projects.github import upload
 
-PROJECT_NAME = "script_launcher"
+PROJECT_NAME = "script launcher"
 
 
 class ModuleCaller:

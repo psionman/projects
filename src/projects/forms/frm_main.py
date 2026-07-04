@@ -14,7 +14,6 @@ from psiutils.utilities import geometry, window_resize
 from projects.build import UV_PUBLISH_TOKEN
 from projects.buttons import ButtonFrame
 from projects.config import read_config
-from projects.constants import HOME_DIR
 from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_project_versions import ProjectVersionsFrame
@@ -32,8 +31,8 @@ FRAME_TITLE = "Project management"
 COLUMN_DEFS = (
     ColumnDefn("key", "", 0),
     ColumnDefn("project_name", "Project", 10),
-    ColumnDefn("script", "Script", 1),
-    ColumnDefn("main", "Base dir", 400),
+    # ColumnDefn("script", "Script", 1),?
+    ColumnDefn("main", "Description", 400),
 )
 
 
@@ -150,8 +149,9 @@ class MainFrame:
         return [
             (
                 project.name,
-                project.script.replace(f"{self.config.script_directory}/", ""),
-                project.base_dir.replace(HOME_DIR, "~"),
+                project.description,
+                # project.script.replace(f"{self.config.script_directory}/", ""),
+                # project.base_dir.replace(HOME_DIR, "~"),
             )
             for project in projects.values()
         ]
@@ -240,7 +240,7 @@ class MainFrame:
             self.build_button,
             frame.icon_button("update", self._update_pyproject),
             frame.icon_button("folder-open", self._open_dolphin, True),
-            frame.icon_button("code-blue", self._open_code, True),
+            # frame.icon_button("code-blue", self._open_code, True),
             frame.icon_button("windsurf", self._open_windsurf, True),
             frame.icon_button("console", self._konsole),
             self.desktop_button,
@@ -285,7 +285,7 @@ class MainFrame:
             MenuItem(txt.EDIT, self._edit_project, dimmable=True),
             self.build_menu_item,
             MenuItem(txt.UPDATE, self._update_pyproject, dimmable=True),
-            MenuItem(txt.CODE, self._open_code, dimmable=True),
+            # MenuItem(txt.CODE, self._open_code, dimmable=True),
             MenuItem(txt.WINDSURF, self._open_windsurf, dimmable=True),
             MenuItem(txt.KONSOLE, self._konsole, dimmable=True),
             self.edit_desktop_menu_item,
