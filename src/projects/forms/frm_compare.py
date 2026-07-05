@@ -263,7 +263,7 @@ class CompareFrame:
         ]
 
         self.root.withdraw()
-        subprocess.run(["meld", *paths])
+        subprocess.run(["kdiff3", *paths])
         self.root.deiconify()
         (self.missing, self.mismatches) = compare(
             self.project.source_dir, self.env_version.dir
