@@ -13,6 +13,7 @@ from projects import (
 from projects.forms.frm_config import ConfigFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_search import SearchFrame
+from projects.project_store import store as project_store
 from projects.text import Text
 
 txt = Text()
@@ -24,8 +25,7 @@ class MainMenu:
     def __init__(self, parent) -> None:
         self.parent = parent
         self.root = parent.root
-        self.projects = parent.projects
-        self.project_server = parent.project_server
+        self.projects = project_store.projects
         self.status = Status.NULL
 
     def create(self) -> None:

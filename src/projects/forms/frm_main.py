@@ -20,7 +20,7 @@ from projects.forms.frm_project_versions import ProjectVersionsFrame
 from projects.forms.frm_search import SearchFrame
 from projects.main_menu import MainMenu
 from projects.project import Project
-from projects.project_server import ProjectServer
+from projects.project_store import store as project_store
 from projects.text import Text
 from projects.utilities import call_process
 
@@ -52,8 +52,8 @@ class MainFrame:
         self.parent = parent
         self.config = read_config()
 
-        self.project_server = ProjectServer()
-        self.projects = self.project_server.projects
+        self.projects = project_store.projects
+        project_store.subscribe(self._populate_tree)
         self.project = Project()
         if self.config.last_project in self.projects:
             self.project = self.projects[self.config.last_project]
@@ -336,7 +336,7 @@ class MainFrame:
         self._save_projects()
 
     def _save_projects(self) -> None:
-        result = self.project_server.save_projects(self.projects)
+        result = project_store.save_projects(self.projects)
         if result == Status.ERROR:
             messagebox.showerror("Save", "Save failed", parent=self.root)
             return

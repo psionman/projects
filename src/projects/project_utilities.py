@@ -1,15 +1,13 @@
 """Project utilities for package application."""
 
-import os
 import subprocess
-from pathlib import Path
 
 from projects import logger
 
 
 def update_project(version: str, env_version: str, project: str) -> None:
     returncode = 0
-    venv_python = _get_venv_python(env_version)
+    venv_python = env_version.get_venv_python()
     if not venv_python:
         return 1
 
@@ -49,17 +47,3 @@ def update_project(version: str, env_version: str, project: str) -> None:
         )
 
     return returncode
-
-
-def _get_venv_python(env_version: str) -> str:
-    parts = Path(env_version.dir).parts
-    if ".venv" in parts:
-        index = parts.index(".venv")
-        source_dir = Path(*parts[:index])
-        return os.path.join(source_dir, ".venv", "bin", "python")
-    if ".pyenv" in parts:
-        index = parts.index("versions")
-        source_dir = Path(*parts[: index + 2])
-        return os.path.join(source_dir, "bin", "python")
-
-    return ""

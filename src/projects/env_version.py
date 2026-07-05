@@ -73,7 +73,7 @@ class EnvironmentVersion:
     _get_version:
     Get the version from a file in the directory.
 
-    _get_venv_python:
+    get_venv_python:
     Get the path to the Python executable in a virtual environment.
 
     dir_short:
@@ -107,7 +107,7 @@ class EnvironmentVersion:
         self.dir = environ.dir
         self.python_version = environ.python_version
         self.version = self._get_version()
-        self.venv_python = self._get_venv_python()
+        self.venv_python = self.get_venv_python()
 
     def _get_version(self):
         version_re = r"[0-9]{1,}.[0-9]{1,}.[0-9]{1,}"
@@ -121,7 +121,7 @@ class EnvironmentVersion:
             return "No version file"
         return "Version error"
 
-    def _get_venv_python(self) -> str:
+    def get_venv_python(self) -> str:
         parts = Path(self.dir).parts
         if ".venv" in parts:
             index = parts.index(".venv")

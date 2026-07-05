@@ -27,6 +27,7 @@ from projects.constants import VERSION_FILE
 from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_compare import CompareFrame
 from projects.project import Project
+from projects.project_store import store as project_store
 from projects.project_utilities import update_project
 from projects.utilities import call_process
 
@@ -93,7 +94,7 @@ class ProjectVersionsFrame:
         self.config = read_config()
         self.mode = Mode.VIEW
         self.project = project
-        self.project_server = parent.project_server
+        # self.project_server = parent.project_server
         self.save_button = None
         self.versions_frame = None
         self.button_frame = None
@@ -213,7 +214,7 @@ class ProjectVersionsFrame:
         self.versions_frame.grid(
             row=row, column=0, columnspan=3, sticky=tk.NSEW
         )
-        self._bind_mousewheel(self.versions_frame.canvas)
+        self._bind_mousewheel()
 
         self.button_frame = self._button_frame(frame)
         self.button_frame.grid(
@@ -238,7 +239,7 @@ class ProjectVersionsFrame:
     def _populate_versions_frame(self) -> None:
         self.project.env_versions = self.project.get_versions(self.refresh)
         if self.refresh:
-            self.project_server.save_projects()
+            project_store.save_projects()
         self.refresh = False
 
         env_versions = self.project.env_versions
@@ -351,7 +352,8 @@ class ProjectVersionsFrame:
         except FileNotFoundError:
             messagebox.showerror("", "windsurf not found.")
 
-    def _bind_mousewheel(self, canvas: tk.Canvas) -> None:
+    def _bind_mousewheel(self) -> None:
+        canvas = self.versions_frame.canvas
         canvas.bind_all(
             "<Button-4>", lambda e: canvas.yview_scroll(-1, "units")
         )
@@ -359,10 +361,16 @@ class ProjectVersionsFrame:
             "<Button-5>", lambda e: canvas.yview_scroll(1, "units")
         )
 
+    def _unbind_mousewheel(self) -> None:
+        canvas = self.versions_frame.canvas
+        canvas.unbind_all("<Button-4>")
+        canvas.unbind_all("<Button-5>")
+
     def _dismiss(self, *args) -> None:
         """
         Close the window and destroy the Toplevel widget.
 
         Typically bound to an exit button or key event to _dismiss the frame.
         """
+        self._unbind_mousewheel()
         self.root.destroy()

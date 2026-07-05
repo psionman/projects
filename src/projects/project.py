@@ -509,9 +509,10 @@ class Project:
         except FileNotFoundError:
             return
 
+        workbench_colours = {}
         if "workbench.colorCustomizations" in settings:
             colour_customizations = settings["workbench.colorCustomizations"]
             for key, value in colour_customizations.items():
-                if key in self.workbench_colours:
-                    self.workbench_colours[key] = value
-        return self.workbench_colours
+                if key in workbench_colours:
+                    workbench_colours[key] = value
+        return workbench_colours

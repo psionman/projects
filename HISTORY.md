@@ -1,5 +1,9 @@
 # History
 
+## Version 1.0.5 - 4 Jul 2026
+1. Convert cached_envs store to list instead of dict
+
+
 ## Version 1.0.4 - 4 Jul 2026
 1. Extract cached environments to separate file
 2. Create project deserialize

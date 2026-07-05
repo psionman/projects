@@ -5,6 +5,7 @@ from pathlib import Path
 from psiutils.icecream_init import ic_init
 
 from projects.modules import check_imports
+from projects.project_store import store
 from projects.root import Root
 
 ic_init()
@@ -14,6 +15,8 @@ def main() -> None:
     """Call the Root loop."""
     check_imports("projects", Path(__file__).parent)
     Root()
+    # initialize the project store
+    _ = store
 
 
 if __name__ == "__main__":

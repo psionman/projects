@@ -8,7 +8,7 @@ from projects.forms.frm_config import ConfigFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_project_versions import ProjectVersionsFrame
 from projects.forms.frm_search import SearchFrame
-from projects.project_server import ProjectServer
+from projects.project_store import store as project_store
 
 # from projects.github import upload
 
@@ -26,8 +26,7 @@ class ModuleCaller:
             "versions": self._versions,
             # 'github': self._github,
         }
-        self.project_server = ProjectServer()
-        self.projects = self.project_server.projects
+        self.projects = project_store.projects
 
         self.invalid = False
         if module == "-h":
