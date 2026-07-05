@@ -241,22 +241,22 @@ class ProjectVersionsFrame:
             self.project_server.save_projects()
         self.refresh = False
 
-        versions = self.project.env_versions
-        for row, name in enumerate(sorted(list(versions))):
-            version = versions[name]
+        env_versions = self.project.env_versions
+        for row, name in enumerate(sorted(list(env_versions))):
+            env_version = env_versions[name]
             (missing, mismatches) = compare(
-                self.project.source_dir, version.dir
+                self.project.source_dir, env_version.dir
             )
 
             mismatch_str = self._get_mismatch_str(missing, mismatches)
-            display_text = f"{name} : ({version.version}) {mismatch_str}"
-            button_style = self._button_style(version, mismatch_str)
+            display_text = f"{name} : ({env_version.version}) {mismatch_str}"
+            button_style = self._button_style(env_version, mismatch_str)
 
             button = ttk.Radiobutton(
                 self.versions_frame.content,
                 text=display_text,
                 variable=self.version,
-                value=version.name,
+                value=env_version.name,
                 style=button_style,
             )
             button.grid(row=row, column=0, sticky=tk.W)

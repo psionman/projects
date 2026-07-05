@@ -58,9 +58,9 @@ class ProjectServer:
     def _save_cached_envs(self, cached_envs: dict) -> None:
         output = {}
         for project_name, env in cached_envs.items():
-            project_envs = {}
-            for key, item in env.items():
-                project_envs[key] = item.serialize()
+            project_envs = []
+            for item in env.values():
+                project_envs.append(item.serialize())
             if project_envs:
                 output[project_name] = project_envs
         """Save the cached environments for a project."""

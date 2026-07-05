@@ -257,8 +257,9 @@ class Project:
             self.build_for_windows = data["build_for_windows"]
         if "repository" in data:
             self.repository = data["repository"]
-        for key, env in data["cached_envs"].items():
-            self.cached_envs[key] = EnvironmentVersion(env)
+        for env in data["cached_envs"]:
+            env_version = EnvironmentVersion(env)
+            self.cached_envs[env_version.name] = env_version
         if "script" in data:
             self.script = data["script"]
         if "desktop_file" in data:
