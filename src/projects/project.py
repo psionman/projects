@@ -259,9 +259,14 @@ class Project:
             self.build_for_windows = data["build_for_windows"]
         if "repository" in data:
             self.repository = data["repository"]
-        for env in data["cached_envs"]:
-            env_version = EnvironmentVersion(env)
-            self.cached_envs[env_version.name] = env_version
+
+        self.cached_envs = {}
+        if "cached_envs" in data and data["cached_envs"]:
+            for env in data["cached_envs"]:
+                env.insert(0, self.name)
+                env_version = EnvironmentVersion(env)
+                self.cached_envs[env_version.name] = env_version
+
         if "script" in data:
             self.script = data["script"]
         if "desktop_file" in data:
@@ -385,6 +390,7 @@ class Project:
                 environment_name = parts[environment_index]
                 if environment_name not in env_versions:
                     data = (
+                        self.name,
                         environment_name,
                         directory,
                         parts[python_version_index],

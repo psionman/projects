@@ -72,13 +72,16 @@ class ProjectStore:
         project_dict = {}
         projects_raw = io.read_json_file(PROJECT_FILE)
         cached_envs = self._get_cached_envs()
-        for key, item in projects_raw.items():
-            item["name"] = key
-            item["cached_envs"] = cached_envs.get(key, {})
+        for project_name, project_data in projects_raw.items():
+            project_data["name"] = project_name
+            project_cached_envs = []
+            for cached_env in cached_envs.get(project_name, {}):
+                project_cached_envs.append(cached_env)
 
             project = Project()
-            project.deserialize(item)
-            project_dict[key] = project
+            project_data["cached_envs"] = project_cached_envs
+            project.deserialize(project_data)
+            project_dict[project_name] = project
         return project_dict
 
     def save_projects(self, projects: dict[str, Project] = None) -> int:

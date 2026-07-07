@@ -46,10 +46,9 @@ import re
 from pathlib import Path
 from typing import NamedTuple
 
-from projects.constants import VERSION_FILE
-
 
 class EnvironmentData(NamedTuple):
+    project: str
     name: str
     dir: str
     python_version: str
@@ -81,6 +80,7 @@ class EnvironmentVersion:
     """
 
     def __init__(self, data: EnvironmentData = None) -> None:
+        self.project = ""
         self.name = ""
         self.dir = ""
         self.python_version = ""
@@ -91,8 +91,20 @@ class EnvironmentVersion:
 
         self.version = self._get_version()
 
+    def __repr__(self) -> str:
+        return (
+            "EnvironmentVersion("
+            f"project='{self.project}', "
+            f"name='{self.name}', "
+            f"dir='{self.dir}', "
+            f"python_version='{self.python_version}')"
+        )
+
     def serialize(self) -> tuple:
-        """Return a tuple of the version for json serialization."""
+        """Return a tuple of the env version for json serialization.
+
+        NB serialize does not contain the project name
+        """
         return (
             self.name,
             str(self.dir),
@@ -100,9 +112,10 @@ class EnvironmentVersion:
         )
 
     def deserialize(self, data: list | tuple) -> None:
-        """Deserialize the version from json."""
+        """Deserialize the env version from json."""
         environ = EnvironmentData(*data)
 
+        self.project = environ.project
         self.name = environ.name
         self.dir = environ.dir
         self.python_version = environ.python_version
@@ -110,15 +123,13 @@ class EnvironmentVersion:
         self.venv_python = self.get_venv_python()
 
     def _get_version(self):
-        version_re = r"[0-9]{1,}.[0-9]{1,}.[0-9]{1,}"
-        path = Path(self.dir, VERSION_FILE)
-        try:
-            with open(path, encoding="utf8") as f_version:
-                text = f_version.read()
-                if match := re.search(version_re, text):
-                    return match.group()
-        except FileNotFoundError:
-            return "No version file"
+        project_re = rf"{re.escape(self.project)}-(\d[\d.]+)\.dist-info"
+        package_dir = Path(self.dir).parent
+        for meta_dir in os.listdir(package_dir):
+            match = re.search(project_re, meta_dir)
+            if match:
+                return match.group(1)
+
         return "Version error"
 
     def get_venv_python(self) -> str:
