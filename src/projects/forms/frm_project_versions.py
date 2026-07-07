@@ -224,6 +224,22 @@ class ProjectVersionsFrame:
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.VERTICAL)
+        self._populate_button_frame(frame)
+        return frame
+
+    def _populate_button_frame(self, frame: ButtonFrame) -> None:
+
+        modify_button = frame.icon_button(
+            "modified", self._toggle_modified, True
+        )
+        # if self.version.get() in self.project.modified_versions:
+        #     modify_button = frame.icon_button(
+        #         "modified", self._toggle_modified, True
+        #     )
+        # else:
+        #     modify_button = frame.icon_button(
+        #         "not-modified", self._toggle_modified, True
+        #     )
         frame.buttons = [
             frame.icon_button("build", self._build_project),
             frame.icon_button("folder-open", self._open_dolphin, True),
@@ -231,10 +247,10 @@ class ProjectVersionsFrame:
             frame.icon_button("update", self._update_project, True),
             # frame.icon_button("code-blue", self._open_code, True),
             frame.icon_button("windsurf", self._open_windsurf, True),
+            modify_button,
             frame.icon_button("exit-orange", self._dismiss),
         ]
         frame.enable(False)
-        return frame
 
     def _populate_versions_frame(self) -> None:
         self.project.env_versions = self.project.get_versions(self.refresh)
@@ -263,7 +279,7 @@ class ProjectVersionsFrame:
             button.grid(row=row, column=0, sticky=tk.W)
 
     def _button_style(self, version, mismatch_str: str) -> str:
-        if "999" in version.version:
+        if version.name in self.project.modified_versions:
             return MODIFIED_STYLE
         if mismatch_str:
             return OUT_OF_DATE_STYLE
@@ -290,6 +306,7 @@ class ProjectVersionsFrame:
         return mismatch_str
 
     def _values_changed(self, *args) -> None:
+        self._populate_button_frame(self.button_frame)
         enable = bool(self.project_name.get())
         self.button_frame.enable(enable)
 
@@ -351,6 +368,14 @@ class ProjectVersionsFrame:
             return call_process(["windsurf", env_version.dir])
         except FileNotFoundError:
             messagebox.showerror("", "windsurf not found.")
+
+    def _toggle_modified(self, *args) -> None:
+        if self.version.get() in self.project.modified_versions:
+            self.project.modified_versions.remove(self.version.get())
+        else:
+            self.project.modified_versions.append(self.version.get())
+        project_store.save_projects()
+        self._populate_versions_frame()
 
     def _bind_mousewheel(self) -> None:
         canvas = self.versions_frame.canvas

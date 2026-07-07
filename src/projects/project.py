@@ -30,6 +30,7 @@ SERIALIZABLE_FIELDS = [
     "build_for_windows",
     "script",
     "desktop_file",
+    "modified_versions",
 ]
 
 DEFAULT_COLOURS = {
@@ -98,6 +99,7 @@ class Project:
         self.workbench_colours = self._get_workbench_colours()
         if not self.workbench_colours:
             self.workbench_colours = DEFAULT_COLOURS.copy()
+        self.modified_versions = []
 
     def __repr__(self) -> str:
         """
@@ -108,19 +110,6 @@ class Project:
         """
 
         return f"Project: {self.name}"
-
-    def serialize(self) -> dict:
-        """
-        Serializes the Projects object into a dictionary.
-
-        Returns:
-            dict: A dictionary containing serialized project data.
-        """
-        output = {}
-        for key in SERIALIZABLE_FIELDS:
-            if getattr(self, key):
-                output[key] = getattr(self, key)
-        return output
 
     @staticmethod
     def _short_dir(long_dir: str) -> str:
@@ -245,6 +234,19 @@ class Project:
             logger.warning(f"pyproject.toml not found: Project: {self.name}")
             return ""
 
+    def serialize(self) -> dict:
+        """
+        Serializes the Projects object into a dictionary.
+
+        Returns:
+            dict: A dictionary containing serialized project data.
+        """
+        output = {}
+        for key in SERIALIZABLE_FIELDS:
+            if getattr(self, key):
+                output[key] = getattr(self, key)
+        return output
+
     def deserialize(self, data: dict) -> None:
         """Deserialize the project from a dictionary."""
         self.name = data["name"]
@@ -264,6 +266,8 @@ class Project:
             self.script = data["script"]
         if "desktop_file" in data:
             self.desktop_file = data["desktop_file"]
+        if "modified_versions" in data:
+            self.modified_versions = data["modified_versions"]
         self.get_project_meta_data()
         self._get_project_colours()
 
