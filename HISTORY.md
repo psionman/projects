@@ -1,8 +1,8 @@
 # History
 
-## Version 1.0.5 - 4 Jul 2026
+## Version 1.0.5 - 7 Jul 2026
 1. Convert cached_envs store to list instead of dict
-
+2. Implement modified flag for versions
 
 ## Version 1.0.4 - 4 Jul 2026
 1. Extract cached environments to separate file
