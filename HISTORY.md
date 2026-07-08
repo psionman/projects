@@ -2,6 +2,7 @@
 
 ## Version 1.0.6 - 8 Jul 2026
 1. Add ability to open project in Dolphin
+1. Add diff & copy buttons to compare dialog
 
 ## Version 1.0.5 - 7 Jul 2026
 1. Convert cached_envs store to list instead of dict

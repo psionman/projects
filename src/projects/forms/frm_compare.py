@@ -43,6 +43,8 @@ class CompareFrame:
         self.config = read_config()
         self.missing_frame = None
         self.button_frame = None
+        self.diff_buttons = {}
+        self.copy_buttons = {}
 
         # Tk Variables
         self.project_name = tk.StringVar(value=project.name)
@@ -176,13 +178,16 @@ class CompareFrame:
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.HORIZONTAL)
         frame.buttons = [
-            frame.icon_button("diff", self._show_differences, True),
+            # frame.icon_button("diff", self._show_differences, True),
             frame.icon_button("exit-orange", self._dismiss),
         ]
         frame.enable(False)
         return frame
 
     def _populate_missing_frame(self) -> None:
+        (self.missing, self.mismatches) = compare(
+            self.project.source_dir, self.env_version.dir
+        )
         self._clear_frame(self.missing_frame)
         if not self.missing:
             self._populate_no_missing_items()
@@ -229,7 +234,11 @@ class CompareFrame:
         )
 
     def _populate_mismatches(self) -> None:
+        (self.missing, self.mismatches) = compare(
+            self.project.source_dir, self.env_version.dir
+        )
         if not self.mismatches:
+            self._clear_frame(self.mismatch_frame.content)
             self._populate_no_mismatches()
             return
         self._populate_mismatched_files()
@@ -252,10 +261,44 @@ class CompareFrame:
             )
             button.grid(row=row + 2, column=0, sticky=tk.W, padx=PAD)
 
+            diff_button = IconButton(
+                self.mismatch_frame.content,
+                txt.DIFF,
+                "diff",
+                partial(self._show_differences, item),
+                True,
+            )
+            diff_button.grid(row=row + 2, column=1, padx=PAD, pady=PADB)
+
+            copy_button = IconButton(
+                self.mismatch_frame.content,
+                txt.COPY,
+                "copy_docs",
+                partial(self._copy_env_to_live, item),
+                True,
+            )
+            copy_button.grid(row=row + 2, column=2, padx=PAD, pady=PADB)
+
+            diff_button.enable(False)
+            copy_button.enable(False)
+            if item == self.mismatch.get():
+                diff_button.enable(True)
+                copy_button.enable(True)
+            self.diff_buttons[item] = diff_button
+            self.copy_buttons[item] = copy_button
+
     def _rb_selected(self, *args) -> None:
+        for button in self.diff_buttons.values():
+            button.enable(False)
+        for button in self.copy_buttons.values():
+            button.enable(False)
+        file = self.mismatch.get()
+        self.diff_buttons[file].enable(True)
+        self.copy_buttons[file].enable(True)
         self.button_frame.enable(True)
 
-    def _show_differences(self, *args) -> None:
+    def _show_differences(self, button_id: str, *args) -> None:
+        print(button_id)
         file = self.mismatch.get()
         paths = [
             str(Path(self.env_version.dir, file)),
@@ -263,12 +306,25 @@ class CompareFrame:
         ]
 
         self.root.withdraw()
-        subprocess.run(["kdiff3", *paths, "-o", paths[1]])
+        # print(f"kdiff3 {paths[0]} {paths[1]} -o {paths[0]}")
+        subprocess.run(["kdiff3", *paths, "-o", paths[0]])
         self.root.deiconify()
         (self.missing, self.mismatches) = compare(
             self.project.source_dir, self.env_version.dir
         )
         self._populate_mismatches()
+
+    def _copy_env_to_live(self, file_name, *args) -> None:
+        # self._copy_file(file_name, *args)
+        response = messagebox.askyesno(
+            "Copy file",
+            f"Are you sure you want to copy {file_name} from env to live?",
+        )
+        if response:
+            source = Path(self.env_version.dir, file_name)
+            destination = Path(self.project.source_dir, file_name)
+            shutil.copy2(source, destination)
+            self._populate_mismatches()
 
     def _copy_file(self, file_name, *args) -> None:
         source = Path(self.env_version.dir, file_name)
