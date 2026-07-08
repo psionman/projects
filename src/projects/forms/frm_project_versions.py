@@ -29,7 +29,7 @@ from projects.forms.frm_compare import CompareFrame
 from projects.project import Project
 from projects.project_store import store as project_store
 from projects.project_utilities import update_project
-from projects.utilities import call_process
+from projects.utilities import call_process, open_dolphin
 
 FRAME_TITLE = "Project compare versions"
 
@@ -356,7 +356,7 @@ class ProjectVersionsFrame:
 
     def _open_dolphin(self, *args) -> None:
         env_version = self.project.env_versions[self.version.get()]
-        subprocess.call(["dolphin", env_version.dir])
+        open_dolphin(env_version.dir)
 
     def _open_code(self, *args) -> None:
         env_version = self.project.env_versions[self.version.get()]

@@ -22,7 +22,7 @@ from projects.main_menu import MainMenu
 from projects.project import Project
 from projects.project_store import store as project_store
 from projects.text import Text
-from projects.utilities import call_process
+from projects.utilities import call_process, open_dolphin
 
 txt = Text()
 
@@ -351,13 +351,29 @@ class MainFrame:
         self.root.wait_window(dlg.root)
 
     def _update_pyproject(self, *args) -> None:
+        code = self.project.update_pyproject()
         if code == 0:
             messagebox.showinfo("", "Project updated")
         else:
             messagebox.showerror("", f"Project not updated - code: {code}")
 
     def _open_dolphin(self, *args) -> None:
-        subprocess.call(["dolphin", self.project.base_dir])
+        open_dolphin(self.project.base_dir)
+        # path = str(self.project.base_dir)
+        # service = find_dolphin_service()
+        # if service:
+        #     subprocess.call(
+        #         [
+        #             "qdbus6",
+        #             service,
+        #             "/dolphin/Dolphin_1",
+        #             "org.kde.dolphin.MainWindow.openDirectories",
+        #             f"file://{path}",
+        #             "false",
+        #         ]
+        #     )
+        # else:
+        #     subprocess.Popen(["dolphin", path])
 
     def _open_code(self, *args) -> None:
         try:

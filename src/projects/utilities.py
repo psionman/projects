@@ -68,3 +68,33 @@ def _call_process_worker(process: list) -> None:
 
 def collapse_home(path: str) -> str:
     return path.replace(HOME_DIR, "~")
+
+
+def open_dolphin(path) -> None:
+    path = str(path)
+    service = _find_dolphin_service()
+    if service:
+        subprocess.call(
+            [
+                "qdbus6",
+                service,
+                "/dolphin/Dolphin_1",
+                "org.kde.dolphin.MainWindow.openDirectories",
+                f"file://{path}",
+                "false",
+            ]
+        )
+    else:
+        subprocess.Popen(["dolphin", path])
+
+
+def _find_dolphin_service() -> str | None:
+    """Return a running Dolphin's D-Bus service name, if any."""
+    result = subprocess.run(
+        ["qdbus6"], capture_output=True, text=True, check=True
+    )
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if line.startswith("org.kde.dolphin"):
+            return line
+    return None

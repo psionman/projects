@@ -1,5 +1,8 @@
 # History
 
+## Version 1.0.6 - 8 Jul 2026
+1. Add ability to open project in Dolphin
+
 ## Version 1.0.5 - 7 Jul 2026
 1. Convert cached_envs store to list instead of dict
 2. Implement modified flag for versions
