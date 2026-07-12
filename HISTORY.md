@@ -1,6 +1,8 @@
 # History
 
-1. Fix build and redactor build
+## Version 1.0.8 - 19 Jul 2026
+1. Flag and highlight modified versions in compare dialog
+2. Delete .orig files
 
 ## Version 1.0.7 - 19 Jul 2026
 1. Remove self.config

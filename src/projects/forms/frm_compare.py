@@ -22,6 +22,8 @@ from projects.utilities import collapse_home
 
 txt = Text()
 FRAME_TITLE = "Compare files across directories"
+MODIFIED_ENTRY_STYLE = "red-fg.TEntry"
+MODIFIED_LABEL_STYLE = "red-fg.TLabel"
 
 
 class CompareFrame:
@@ -44,6 +46,8 @@ class CompareFrame:
         self.button_frame = None
         self.diff_buttons = {}
         self.copy_buttons = {}
+        if self.env_version.name in self.project.modified_versions:
+            env_version.version = f"{env_version.version} (modified)"
 
         # Tk Variables
         self.project_name = tk.StringVar(value=project.name)
@@ -158,6 +162,8 @@ class CompareFrame:
 
         row += 1
         label = ttk.Label(frame, text="Env version")
+        if self.env_version.name in self.project.modified_versions:
+            label.configure(style=MODIFIED_LABEL_STYLE)
         label.grid(row=row, column=0, sticky=tk.E)
 
         entry = ttk.Entry(
@@ -165,11 +171,15 @@ class CompareFrame:
             textvariable=self.env_version_version,
             state=WidgetState.READONLY,
         )
+        if self.env_version.name in self.project.modified_versions:
+            entry.configure(style=MODIFIED_ENTRY_STYLE)
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
 
         entry = ttk.Entry(
             frame, textvariable=self.env_dir, state=WidgetState.READONLY
         )
+        if self.env_version.name in self.project.modified_versions:
+            entry.configure(style=MODIFIED_ENTRY_STYLE)
         entry.grid(row=row, column=2, sticky=tk.EW, padx=PAD)
 
         return frame
@@ -188,6 +198,19 @@ class CompareFrame:
             self.project.source_dir, self.env_version.dir
         )
         self._clear_frame(self.missing_frame)
+
+        missing_button = False
+        for missing in self.missing:
+            if not missing_button and missing.file_name.endswith(".orig"):
+                button = IconButton(
+                    self.missing_frame,
+                    "Delete orig",
+                    "delete",
+                    self._delete_orig,
+                )
+                button.grid(row=0, column=2, padx=PAD, pady=PADB)
+                print(f"Original file: {missing.file_name}")
+                missing_button = True
         if not self.missing:
             self._populate_no_missing_items()
         self._populate_missing_items()
@@ -227,7 +250,8 @@ class CompareFrame:
         self, frame: tk.Frame, missing_file: Missing, row: int
     ) -> None:
         button = IconButton(frame, txt.COPY, "copy_docs")
-        button.grid(row=row, column=2, padx=PAD, pady=PADB)
+        button.grid(row=row, column=2, padx=PAD, pady=PADB, sticky=tk.W)
+        # TODO this should be a command
         button.widget.bind(
             "<Button-1>", partial(self._copy_file, missing_file.file_name)
         )
@@ -357,6 +381,16 @@ class CompareFrame:
         return messagebox.askokcancel(
             "", f"Copy this {item}? ({file_name})", parent=self.root
         )
+
+    def _delete_orig(self, *args) -> None:
+        dlg = messagebox.askyesno(
+            "Delete orig", "Delete orig files?", parent=self.root
+        )
+        if dlg:
+            for missing in self.missing:
+                if missing.file_name.endswith(".orig"):
+                    Path(self.project.source_dir, missing.file_name).unlink()
+            self._populate_missing_frame()
 
     @staticmethod
     def _clear_frame(frame: tk.Frame) -> None:
