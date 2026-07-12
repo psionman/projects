@@ -12,7 +12,7 @@ from psiutils.utilities import geometry, window_resize
 from psiutils.widgets import separator_frame
 
 from projects import logger
-from projects.config import read_config
+from projects.config import config
 from projects.constants import APP_TITLE, ICON_DIR
 from projects.project import Project
 from projects.text import Text
@@ -38,7 +38,6 @@ class ProjectEditFrame:
     def __init__(self, parent, mode: int, project: Project = None) -> None:
         self.root = tk.Toplevel(parent.root)
         self.parent = parent
-        self.config = read_config()
         self.mode = mode
         self.project = project
         self.projects = parent.projects
@@ -90,14 +89,9 @@ class ProjectEditFrame:
 
     def _show(self) -> None:
         root = self.root
-        root.geometry(geometry(self.config, __file__))
+        root.geometry(geometry(config, __file__))
         root.title(FRAME_TITLE)
         root.transient(self.parent.root)
-        root.bind("<Control-x>", self._dismiss)
-        root.bind(
-            "<Configure>",
-            lambda event, arg=None: window_resize(self, __file__),
-        )
 
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
@@ -107,6 +101,13 @@ class ProjectEditFrame:
 
         sizegrip = ttk.Sizegrip(root)
         sizegrip.grid(sticky=tk.SE)
+
+        root.update_idletasks()
+        root.bind("<Control-x>", self._dismiss)
+        root.bind(
+            "<Configure>",
+            lambda event, arg=None: window_resize(root, __file__, config),
+        )
 
     def _main_frame(self, master: tk.Frame) -> ttk.Frame:
         frame = ttk.Frame(master)
@@ -124,10 +125,6 @@ class ProjectEditFrame:
         entry = ttk.Entry(frame, textvariable=self.project_name, state=state)
         entry.grid(row=row, column=1, sticky=tk.EW, padx=PAD)
         entry.focus_set()
-
-        # row += 1
-        # label = ttk.Label(frame, text="(Used to find dirs in virtual envs)")
-        # label.grid(row=row, column=2, sticky=tk.W, pady=0)
 
         row += 1
         label = ttk.Label(frame, text="Current_version")
@@ -216,12 +213,14 @@ class ProjectEditFrame:
         for row, (key, item) in enumerate(
             self.project.workbench_colours.items()
         ):
-            self._add_colour_widgets(self.colour_frame, row, key, item)
+            self._add_colour_widgets(
+                self.colour_frame,
+                row,
+                key,
+            )
         self._check_value_changed()
 
-    def _add_colour_widgets(
-        self, frame: tk.Frame, row: int, key: str, item: dict
-    ) -> None:
+    def _add_colour_widgets(self, frame: tk.Frame, row: int, key: str) -> None:
         label = ttk.Label(frame, text=key)
         label.grid(row=row, column=0, sticky=tk.E, padx=PAD, pady=PAD)
         entry = ttk.Entry(frame, textvariable=getattr(self, key))
@@ -282,7 +281,7 @@ class ProjectEditFrame:
             self.source_dir.set(directory)
 
     def _get_desktop_file(self, *args) -> None:
-        initialdir = self.config.desktop_directory
+        initialdir = config.desktop_directory
         if self.desktop_file.get():
             initialdir = Path(self.desktop_file.get()).parent
         path = self.ask_save_path(initialdir)
@@ -291,7 +290,7 @@ class ProjectEditFrame:
             self.desktop_file.set(path)
 
     def _get_script(self, *args) -> None:
-        initialdir = self.config.script_directory
+        initialdir = config.script_directory
         if self.script.get():
             initialdir = Path(self.script.get()).parent
         path = self.ask_save_path(initialdir)

@@ -22,7 +22,7 @@ from psiutils.widgets import ScrollingCanvas
 from projects.build import UV_PUBLISH_TOKEN
 from projects.buttons import ButtonFrame
 from projects.compare import compare
-from projects.config import read_config
+from projects.config import config
 from projects.constants import VERSION_FILE
 from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_compare import CompareFrame
@@ -56,7 +56,7 @@ class ProjectVersionsFrame:
     Attributes:
         root (tk.Toplevel): The top-level window for this frame.
         parent: The parent window or frame.
-        config (dict): Configuration values loaded via `read_config`.
+        config (dict): Configuration values loaded via `config`.
         mode (int): Determines whether fields are editable (e.g., `Mode.EDIT`).
         project (Project): The project currently being displayed
             and manipulated.
@@ -91,7 +91,7 @@ class ProjectVersionsFrame:
     ) -> None:
         self.root = tk.Toplevel(parent.root)
         self.parent = parent
-        self.config = read_config()
+
         self.mode = Mode.VIEW
         self.project = project
         # self.project_server = parent.project_server
@@ -141,14 +141,9 @@ class ProjectVersionsFrame:
         Typically called during initialization to render the window.
         """
         root = self.root
-        root.geometry(geometry(self.config, __file__))
+        root.geometry(geometry(config, __file__))
         root.title(FRAME_TITLE)
         root.transient(self.parent.root)
-        root.bind("<Control-x>", self._dismiss)
-        root.bind(
-            "<Configure>",
-            lambda event, arg=None: window_resize(self, __file__),
-        )
 
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
@@ -158,6 +153,13 @@ class ProjectVersionsFrame:
 
         sizegrip = ttk.Sizegrip(root)
         sizegrip.grid(sticky=tk.SE)
+
+        root.update_idletasks()
+        root.bind("<Control-x>", self._dismiss)
+        root.bind(
+            "<Configure>",
+            lambda event, arg=None: window_resize(root, __file__, config),
+        )
 
     def _main_frame(self, master: tk.Frame) -> ttk.Frame:
         frame = ttk.Frame(master)

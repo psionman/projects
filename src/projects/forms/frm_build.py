@@ -9,7 +9,7 @@ from psiutils.widgets import WaitCursor, clickable_widget
 
 from projects import logger
 from projects.build import BuildData, update_module
-from projects.config import config, read_config
+from projects.config import config
 from projects.text import Text
 
 txt = Text()
@@ -21,14 +21,12 @@ class BuildFrame:
     def __init__(self, parent, project):
         self.root = tk.Toplevel(parent.root)
         self.parent = parent
-        self.config = read_config()
 
         self.project = project
 
         # tk variables
         self.project_name = tk.StringVar(value=project.name)
-        self.current_version = tk.StringVar(value=project.project_version)
-        self.pyproject_version = tk.StringVar(value=project.pyproject_version)
+        self.current_version = tk.StringVar(value=project.version)
         self.new_version = tk.StringVar(value=project.next_version())
         self.history = tk.StringVar(value=project.new_history)
         self.delete_build = tk.IntVar(value=1)
@@ -49,14 +47,9 @@ class BuildFrame:
 
     def _show(self) -> None:
         root = self.root
-        root.geometry(geometry(self.config, __file__))
+        root.geometry(geometry(config, __file__))
         root.transient(self.parent.root)
         root.title(FRAME_TITLE)
-
-        root.bind(
-            "<Configure>",
-            lambda event, arg=None: window_resize(self, __file__),
-        )
 
         root.rowconfigure(1, weight=1)
         root.columnconfigure(0, weight=1)
@@ -74,6 +67,12 @@ class BuildFrame:
 
         if config.last_project:
             self.button_frame.enable()
+
+        root.update_idletasks()
+        root.bind(
+            "<Configure>",
+            lambda event, arg=None: window_resize(root, __file__, config),
+        )
 
     def _main_frame(self, container: tk.Frame) -> tk.Frame:
         frame = ttk.Frame(container)
@@ -103,18 +102,6 @@ class BuildFrame:
         label.grid(row=row, column=2, sticky=tk.W, padx=PAD)
         entry = ttk.Entry(frame, textvariable=self.new_version)
         entry.grid(row=row, column=3, sticky=tk.W, padx=PAD, pady=PAD)
-
-        row += 1
-        label = ttk.Label(frame, text="pyproject version")
-        label.grid(row=row, column=0, sticky=tk.E, padx=PAD)
-        entry = ttk.Entry(
-            frame,
-            textvariable=self.pyproject_version,
-            state=WidgetState.READONLY,
-        )
-        if self.current_version.get() != self.pyproject_version.get():
-            entry["foreground"] = "red"
-        entry.grid(row=row, column=1, sticky=tk.W, padx=PAD, pady=PAD)
 
         row += 1
         checkbutton = tk.Checkbutton(
@@ -176,7 +163,12 @@ class BuildFrame:
 
     def _build(self, *args) -> None:
         with WaitCursor(self.root):
-            self._build_project()
+            response = self._build_project()
+        if response == Status.SUCCESS:
+            self._build_success()
+        else:
+            self._build_failure()
+        self._dismiss()
 
     def _build_project(self) -> None:
         build_data = BuildData(
@@ -190,12 +182,7 @@ class BuildFrame:
             self.sync_repository.get(),
             self.commit_text.get(),
         )
-
-        if update_module(build_data) == Status.SUCCESS:
-            self._build_success()
-        else:
-            self._build_failure()
-        self._dismiss()
+        return update_module(build_data)
 
     def _build_success(self) -> None:
         messagebox.showinfo(

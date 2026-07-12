@@ -14,7 +14,7 @@ from psiutils.widgets import ScrollingCanvas
 
 from projects import logger
 from projects.compare import Missing, compare
-from projects.config import read_config
+from projects.config import config
 from projects.env_version import EnvironmentVersion
 from projects.project import Project
 from projects.text import Text
@@ -40,7 +40,6 @@ class CompareFrame:
         self.missing_frame = None
         self.mismatch_frame = None
 
-        self.config = read_config()
         self.missing_frame = None
         self.button_frame = None
         self.diff_buttons = {}
@@ -51,7 +50,7 @@ class CompareFrame:
         self.env_dir = tk.StringVar(value=collapse_home(env_version.dir))
         self.source_dir = tk.StringVar(value=collapse_home(project.source_dir))
         self.env_version_version = tk.StringVar(value=env_version.version)
-        self.project_version = tk.StringVar(value=project.project_version)
+        self.project_version = tk.StringVar(value=project.version)
         self.mismatch = tk.StringVar(value="")
         self._show()
 
@@ -72,12 +71,12 @@ class CompareFrame:
 
     def _configure(self) -> None:
         root = self.root
-        root.geometry(geometry(self.config, __file__))
+        root.geometry(geometry(config, __file__))
         root.transient(self.parent.root)
         root.bind("<Control-x>", self._dismiss)
         root.bind(
             "<Configure>",
-            lambda event, arg=None: window_resize(self, __file__),
+            lambda event, arg=None: window_resize(root, __file__, config),
         )
 
         root.rowconfigure(0, weight=1)

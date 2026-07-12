@@ -11,7 +11,7 @@ from psiutils.buttons import ButtonFrame, IconButton
 from psiutils.constants import PAD
 from psiutils.utilities import geometry, window_resize
 
-from projects.config import read_config
+from projects.config import config
 from projects.constants import APP_TITLE
 
 FRAME_TITLE = f"{APP_TITLE} - Search for content"
@@ -31,7 +31,6 @@ class SearchFrame:
     def __init__(self, parent: tk.Frame, search_term: str = "") -> None:
         self.root = tk.Toplevel()
         self.parent = parent
-        self.config = read_config()
         self.projects = parent.projects
         self.files = []
 
@@ -54,14 +53,9 @@ class SearchFrame:
 
     def _show(self) -> None:
         root = self.root
-        root.geometry(geometry(self.config, __file__))
+        root.geometry(geometry(config, __file__))
         root.title(FRAME_TITLE)
         root.transient(self.parent.root)
-        root.bind("<Control-x>", self._dismiss)
-        root.bind(
-            "<Configure>",
-            lambda event, arg=None: window_resize(self, __file__),
-        )
 
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
@@ -75,6 +69,13 @@ class SearchFrame:
 
         sizegrip = ttk.Sizegrip(root)
         sizegrip.grid(sticky=tk.SE)
+
+        root.update_idletasks()
+        root.bind("<Control-x>", self._dismiss)
+        root.bind(
+            "<Configure>",
+            lambda event, arg=None: window_resize(root, __file__, config),
+        )
 
     def _main_frame(self, master: tk.Frame) -> ttk.Frame:
         frame = ttk.Frame(master)

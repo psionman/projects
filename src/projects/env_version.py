@@ -46,6 +46,8 @@ import re
 from pathlib import Path
 from typing import NamedTuple
 
+from projects import logger
+
 
 class EnvironmentData(NamedTuple):
     project: str
@@ -125,10 +127,13 @@ class EnvironmentVersion:
     def _get_version(self):
         project_re = rf"{re.escape(self.project)}-(\d[\d.]+)\.dist-info"
         package_dir = Path(self.dir).parent
-        for meta_dir in os.listdir(package_dir):
-            match = re.search(project_re, meta_dir)
-            if match:
-                return match.group(1)
+        try:
+            for meta_dir in os.listdir(package_dir):
+                match = re.search(project_re, meta_dir)
+                if match:
+                    return match.group(1)
+        except FileNotFoundError:
+            logger.warning(f"Package directory not found: {package_dir}")
 
         return "Version error"
 

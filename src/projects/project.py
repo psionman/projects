@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 import json5
-from psi_toml.parser import TomlParser
+import tomli_w
 from psiutils.constants import Status
 
 import projects.projects_io as io
@@ -18,7 +18,6 @@ from projects.constants import (
     HOME_DIR,
     PYPROJECT_TOML,
     VERSION_FILE,
-    VERSION_TEXT,
 )
 from projects.env_version import EnvironmentVersion
 
@@ -82,13 +81,13 @@ class Project:
         self.base_dir: str = ""
         self.env_dir: str = ""
         self.description: str = ""
-        self.project_version: str = ""
-        self.pyproject_version: str = ""
-        self.history = ""
-        self.new_history = ""
+        self.version: str = ""
+        self.history: list[str] = []
+        self.new_history: list[str] = []
         self._pyproject_list = []
         self.env_versions: dict = {}
         self.cached_envs = {}
+        self.pyproject_data: dict = {}
         self.py_project_missing = True
         self._version_text = ""
         self.script: str = ""
@@ -165,16 +164,15 @@ class Project:
     def _get_new_history(self) -> str:
         if not self.history:
             return []
-        history = self.history.split("\n")
+        history = self.history
         date = datetime.now().strftime("%d %B %Y")
-        version = f"Version {self.next_version()} - {date}"
-        insertion = ["", version, "", "1. ", "-" * 30, ""]
+        version = f"## Version {self.next_version()} - {date}"
+        insertion = ["", version, "1.", ""]
         return "\n".join([history[0]] + insertion + history[2:])
 
     def next_version(self) -> str:
         """Return the next version string."""
-        print(f"project_version: {self.project_version}")
-        version = self.project_version.split(".")
+        version = self.version.split(".")
         if "missing" in version[0]:
             path = Path(self.source_dir, VERSION_FILE)
             logger.warning(
@@ -184,13 +182,13 @@ class Project:
             return ""
         if len(version) != 3:
             logger.warning(
-                f"Invalid version (structure) {self.project_version}",
+                f"Invalid version (structure) {self.version}",
                 project=self.name,
             )
             return ""
         if not version[2].isnumeric():
             logger.warning(
-                f"Invalid version (non-numeric) {self.project_version}",
+                f"Invalid version (non-numeric) {self.version}",
                 project=self.name,
             )
             return ""
@@ -202,7 +200,7 @@ class Project:
         text = text.replace('"', "")
         return text.replace("'", "")
 
-    def _get_pyproject_version(self) -> str:
+    def _get_pyversion(self) -> str:
         default = "-.-.-"
         self.py_project_missing = False
 
@@ -223,16 +221,25 @@ class Project:
                 return self._clean_string(line_list[1])
         return
 
-    def get_project_meta_data(self) -> str:
+    def _get_project_meta_data(self) -> str:
         """Get the description for a project."""
         try:
             with open(Path(self.base_dir, self.pyproject_path), "rb") as f:
-                pyproject = tomllib.load(f)
-            self.version = pyproject["project"]["version"]
-            self.description = pyproject["project"]["description"]
+                self.pyproject_data = tomllib.load(f)
+            self.version = self.pyproject_data["project"]["version"]
+            self.description = self.pyproject_data["project"]["description"]
         except FileNotFoundError:
             logger.warning(f"pyproject.toml not found: Project: {self.name}")
             return ""
+
+    def _get_history(self) -> list[str]:
+        """Get the history for a project."""
+        try:
+            with open(Path(self.base_dir, self.history_path)) as f:
+                return f.read().split("\n")
+        except FileNotFoundError:
+            logger.warning(f"history.md not found: Project: {self.name}")
+            return []
 
     def serialize(self) -> dict:
         """
@@ -273,8 +280,9 @@ class Project:
             self.desktop_file = data["desktop_file"]
         if "modified_versions" in data:
             self.modified_versions = data["modified_versions"]
-        self.get_project_meta_data()
-        self._get_project_colours()
+        self._get_project_meta_data()
+        self.history = self._get_history()
+        self.new_history = self._get_new_history()
 
     def _get_project_colours(self) -> None:
         """Get the colours for a project."""
@@ -310,31 +318,10 @@ class Project:
                 json5.dump(settings, f, indent=2)
 
     def update_version(self, version: str) -> int:
-        output = f"{VERSION_TEXT} = '{version}'"
-        return io.update_file(self.version_path, output)
+        self.pyproject_data["project"]["version"] = version
+        with open(Path(self.base_dir, self.pyproject_path), "wb") as f:
+            tomli_w.dump(self.pyproject_data, f)
 
-    def update_pyproject_version(self, version: str) -> int:
-        for index, line in enumerate(self._pyproject_list):
-            if 'version = {attr = "psiutils.__version__"}' in line:
-                return Status.SUCCESS
-
-            if "version =" not in line:
-                continue
-
-            line_list = line.split("=")
-            if len(line_list) != 2:
-                logger.error(
-                    "Version format error", version_file=str(self.version_path)
-                )
-                return Status.ERROR
-            version_text = f'{line_list[0].strip()} = "{version}"'
-
-            output = self._pyproject_list[:index]
-            output.append(version_text)
-            output.extend(self._pyproject_list[index + 1 :])
-
-            io.update_file(self.pyproject_path, "\n".join(output))
-            break
         return Status.SUCCESS
 
     def update_history(self, history: str) -> int:
@@ -399,8 +386,7 @@ class Project:
         return env_versions
 
     def update_pyproject(self) -> int:
-        """Create a requirements.txt and update pyproject.tom accordingly."""
-
+        """Create a requirements.txt and update pyproject.toml accordingly."""
         logger.info(
             "Starting pyproject.toml update process",
             project=self.name,
@@ -434,26 +420,27 @@ class Project:
 
         self._write_requirements("\n".join(list(requirements.values())))
 
-        code = subprocess.run(
-            [
-                "uv",
-                "add",
-                "-r",
-                self.requirements_path,
-            ],
-            check=True,
-            cwd=self.base_dir,
-        ).returncode
-        if code == 0:
-            logger.info(
-                "Update project dependencies: requirements added",
-                project=self.name,
-            )
-        else:
-            logger.warning(
-                "Update project dependencies: read requirements failed",
-                project=self.name,
-            )
+        code = 0
+        # code = subprocess.run(
+        #     [
+        #         "uv",
+        #         "add",
+        #         "-r",
+        #         self.requirements_path,
+        #     ],
+        #     check=True,
+        #     cwd=self.base_dir,
+        # ).returncode
+        # if code == 0:
+        #     logger.info(
+        #         "Update project dependencies: requirements added",
+        #         project=self.name,
+        #     )
+        # else:
+        #     logger.warning(
+        #         "Update project dependencies: read requirements failed",
+        #         project=self.name,
+        #     )
         return code
 
     def _build_dependency_dict(self, dependencies: dict) -> dict:
@@ -474,9 +461,8 @@ class Project:
         return output
 
     def _read_pyproject(self) -> dict:
-        parser = TomlParser()
-        with open(self.pyproject_path, encoding="utf-8") as f_pyproject:
-            return parser.load(f_pyproject)
+        with open(self.pyproject_path, "rb") as f_pyproject:
+            return tomllib.load(f_pyproject)
 
     def _read_requirements(self) -> list[str]:
         requirements = io.read_text_file(self.requirements_path).strip()

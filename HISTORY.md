@@ -1,5 +1,11 @@
 # History
 
+1. Fix build and redactor build
+
+## Version 1.0.7 - 19 Jul 2026
+1. Remove self.config
+2. change window_resize parameters
+
 ## Version 1.0.6 - 8 Jul 2026
 1. Add ability to open project in Dolphin
 1. Add diff & copy buttons to compare dialog

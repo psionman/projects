@@ -13,7 +13,7 @@ from psiutils.utilities import geometry, window_resize
 
 from projects.build import UV_PUBLISH_TOKEN
 from projects.buttons import ButtonFrame
-from projects.config import read_config
+from projects.config import config
 from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_project_versions import ProjectVersionsFrame
@@ -50,13 +50,12 @@ class MainFrame:
     def __init__(self, parent):
         self.root = parent.root
         self.parent = parent
-        self.config = read_config()
 
         self.projects = project_store.projects
         project_store.subscribe(self._populate_tree)
         self.project = Project()
-        if self.config.last_project in self.projects:
-            self.project = self.projects[self.config.last_project]
+        if config.last_project in self.projects:
+            self.project = self.projects[config.last_project]
 
         self.tree = None
         self.build_button = None
@@ -79,13 +78,8 @@ class MainFrame:
 
     def _show(self):
         root = self.root
-        root.geometry(geometry(self.config, __file__))
+        root.geometry(geometry(config, __file__))
         root.title(FRAME_TITLE)
-        root.bind("<Control-x>", self._dismiss)
-        root.bind(
-            "<Configure>",
-            lambda event, arg=None: window_resize(self, __file__),
-        )
 
         main_menu = MainMenu(self)
         main_menu.create()
@@ -105,6 +99,13 @@ class MainFrame:
         sizegrip.grid(column=1, sticky=tk.SE)
 
         self.context_menu = self._context_menu()
+
+        root.update_idletasks()
+        root.bind("<Control-x>", self._dismiss)
+        root.bind(
+            "<Configure>",
+            lambda event, arg=None: window_resize(root, __file__, config),
+        )
 
     def _main_frame(self, master: tk.Frame) -> ttk.Frame:
         frame = ttk.Frame(master)
@@ -150,7 +151,7 @@ class MainFrame:
             (
                 project.name,
                 project.description,
-                # project.script.replace(f"{self.config.script_directory}/", ""),
+                # project.script.replace(f"{config.script_directory}/", ""),
                 # project.base_dir.replace(HOME_DIR, "~"),
             )
             for project in projects.values()
@@ -166,8 +167,8 @@ class MainFrame:
         self.project = self.projects[values[0]]
         self._enable_relevant_items()
 
-        self.config.update("last_project", values[0])
-        self.config.save()
+        config.update("last_project", values[0])
+        config.save()
 
     def _enable_relevant_items(self) -> None:
         self.button_frame.enable(True)

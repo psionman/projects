@@ -8,7 +8,7 @@ from psiutils.constants import PAD
 from psiutils.utilities import geometry, window_resize
 
 from projects import logger
-from projects.config import read_config
+from projects.config import config
 from projects.text import Text
 
 txt = Text()
@@ -50,18 +50,13 @@ class ConfigFrame:
 
     def __init__(self, parent):
         self.root = tk.Toplevel(parent.root)
-        self.config = read_config()
         self.parent = parent
         self.ignore_text = None
 
         # tk.StringVars
-        self.data_directory = tk.StringVar(value=self.config.data_directory)
-        self.script_directory = tk.StringVar(
-            value=self.config.script_directory
-        )
-        self.desktop_directory = tk.StringVar(
-            value=self.config.desktop_directory
-        )
+        self.data_directory = tk.StringVar(value=config.data_directory)
+        self.script_directory = tk.StringVar(value=config.script_directory)
+        self.desktop_directory = tk.StringVar(value=config.desktop_directory)
 
         # Track changes
         self.data_directory.trace_add("write", self._check_value_changed)
@@ -83,15 +78,8 @@ class ConfigFrame:
 
     def _show(self) -> None:
         root = self.root
-        root.geometry(geometry(self.config, __file__))
+        root.geometry(geometry(config, __file__))
         root.title(txt.CONFIG)
-
-        root.bind("<Control-x>", self._dismiss)
-        root.bind("<Control-s>", self._save_config)
-        root.bind(
-            "<Configure>",
-            lambda event, arg=None: window_resize(self, __file__),
-        )
 
         root.wait_visibility()
 
@@ -103,6 +91,14 @@ class ConfigFrame:
 
         sizegrip = ttk.Sizegrip(root)
         sizegrip.grid(sticky=tk.SE)
+
+        root.update_idletasks()
+        root.bind("<Control-x>", self._dismiss)
+        root.bind("<Control-s>", self._save_config)
+        root.bind(
+            "<Configure>",
+            lambda event, arg=None: window_resize(root, __file__, config),
+        )
 
     def _main_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ttk.Frame(master)
@@ -156,7 +152,7 @@ class ConfigFrame:
         self.ignore_text.grid(
             row=row, column=0, columnspan=3, sticky=tk.NSEW, padx=PAD
         )
-        self.ignore_text.insert("0.0", "\n".join(self.config.ignore))
+        self.ignore_text.insert("0.0", "\n".join(config.ignore))
         self.ignore_text.bind("<KeyRelease>", self._check_value_changed)
 
         row += 1
@@ -209,19 +205,19 @@ class ConfigFrame:
             for field, change in raw_changes.items()
         }
 
-        self.config.update("data_directory", self.data_directory.get())
-        self.config.update("script_directory", self.script_directory.get())
-        self.config.update("desktop_directory", self.desktop_directory.get())
+        config.update("data_directory", self.data_directory.get())
+        config.update("script_directory", self.script_directory.get())
+        config.update("desktop_directory", self.desktop_directory.get())
         if "ignore" in raw_changes:
-            self.config.update("ignore", raw_changes["ignore"][1])
+            config.update("ignore", raw_changes["ignore"][1])
 
         logger.info("Config saved", changes=changes)
 
         self._dismiss()
-        return self.config.save()
+        return config.save()
 
     def _config_changes(self) -> dict:
-        stored = self.config.config
+        stored = config.config
         # for field in FIELDS:
         field = "script_directory"
         print(

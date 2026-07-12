@@ -43,16 +43,20 @@ def update_module(build_data: dict) -> int:
         project=project.name,
     )
     check_imports(project.name, project.source_dir)
+    project.update_pyproject()
 
     if not build_data.test_build:
         if _update_non_test_items(build_data) == Status.ERROR:
             return Status.ERROR
 
+    if _update_version(project, build_data.version) != Status.SUCCESS:
+        return Status.ERROR
+
     if _build(project) != Status.SUCCESS:
         _restore_project(build_data)
         return Status.ERROR
 
-    if _upload(project, build_data.test_build) != Status.SUCCESS:
+    if _pypi_push(project, build_data.test_build) != Status.SUCCESS:
         _restore_project(build_data)
         return Status.ERROR
 
@@ -67,9 +71,7 @@ def _update_non_test_items(build_data: dict) -> Status:
     if _update_version(project, build_data.version) != Status.SUCCESS:
         return Status.ERROR
 
-    xxx = project.update_history(build_data.history)
-    print("b", xxx)
-    if xxx != Status.SUCCESS:
+    if project.update_history(build_data.history) != Status.SUCCESS:
         return Status.ERROR
     logger.info(
         "Update history",
@@ -89,12 +91,6 @@ def _update_version(project: Project, version: str) -> int:
     if project.update_version(version) != Status.SUCCESS:
         return Status.ERROR
     logger.info("Update version", project=project.name, version=version)
-
-    if project.update_pyproject_version(version) != Status.SUCCESS:
-        return Status.ERROR
-    logger.info(
-        "Update pyproject version", project=project.name, version=version
-    )
 
     return Status.SUCCESS
 
@@ -126,7 +122,7 @@ def _build(project: Project) -> int:
     return Status.SUCCESS
 
 
-def _upload(project: Project, test_build: bool = False) -> int:
+def _pypi_push(project: Project, test_build: bool = False) -> int:
     """
     The PyPi token is stored in the environmental variable UV_PUBLISH_TOKEN
     the value is kept in Documents/pypi folder

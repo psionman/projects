@@ -79,6 +79,3 @@ class ModuleCaller:
         search_term = sys.argv[2] if len(sys.argv) > 2 else ""
         dlg = SearchFrame(self, search_term)
         self.root.wait_window(dlg.root)
-
-    # def _github(self):
-    #     upload(self.projects["sudoku"])
