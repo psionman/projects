@@ -19,9 +19,7 @@ FRAME_TITLE = "Build package"
 
 class BuildFrame:
     def __init__(self, parent, project):
-        self.root = tk.Toplevel(parent.root)
-        self.parent = parent
-
+        self.root = tk.Toplevel(parent)
         self.project = project
 
         # tk variables
@@ -48,7 +46,7 @@ class BuildFrame:
     def _show(self) -> None:
         root = self.root
         root.geometry(geometry(config, __file__))
-        root.transient(self.parent.root)
+        # root.transient(root)
         root.title(FRAME_TITLE)
 
         root.rowconfigure(1, weight=1)

@@ -19,12 +19,11 @@ from psiutils.constants import PAD, Mode, Status, WidgetState
 from psiutils.utilities import geometry, window_resize
 from psiutils.widgets import ScrollingCanvas
 
-from projects.build import UV_PUBLISH_TOKEN
 from projects.buttons import ButtonFrame
+from projects.common import build_project
 from projects.compare import compare
 from projects.config import config
 from projects.constants import VERSION_FILE
-from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_compare import CompareFrame
 from projects.project import Project
 from projects.project_store import store as project_store
@@ -340,21 +339,7 @@ class ProjectVersionsFrame:
         self._populate_versions_frame()
 
     def _build_project(self, *args) -> None:
-        if not UV_PUBLISH_TOKEN:
-            messagebox.showerror("", "UV_PUBLISH_TOKEN not set.")
-            return
-
-        if not self._is_valid():
-            return
-
-        dlg = BuildFrame(self, self.project)
-        self.root.wait_window(dlg.root)
-
-    def _is_valid(self) -> bool:
-        if self.project.py_project_missing:
-            messagebox.showerror("", "py_project.toml missing")
-            return False
-        return True
+        build_project(self.root, self.project)
 
     def _open_dolphin(self, *args) -> None:
         env_version = self.project.env_versions[self.version.get()]

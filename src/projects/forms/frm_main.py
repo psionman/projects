@@ -11,10 +11,9 @@ from psiutils.menus import Menu, MenuItem
 from psiutils.treeview import ColumnDefn, Treeview
 from psiutils.utilities import geometry, window_resize
 
-from projects.build import UV_PUBLISH_TOKEN
 from projects.buttons import ButtonFrame
+from projects.common import build_project
 from projects.config import config
-from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_project_versions import ProjectVersionsFrame
 from projects.forms.frm_search import SearchFrame
@@ -344,12 +343,13 @@ class MainFrame:
         self._populate_tree()
 
     def _build_project(self, *args) -> None:
-        if not UV_PUBLISH_TOKEN:
-            messagebox.showerror("", "UV_PUBLISH_TOKEN not set.")
-            return
+        build_project(self.root, self.project)
+        # if not UV_PUBLISH_TOKEN:
+        #     messagebox.showerror("", "UV_PUBLISH_TOKEN not set.")
+        #     return
 
-        dlg = BuildFrame(self, self.project)
-        self.root.wait_window(dlg.root)
+        # dlg = BuildFrame(self, self.project)
+        # self.root.wait_window(dlg.root)
 
     def _update_pyproject(self, *args) -> None:
         code = self.project.update_pyproject()

@@ -88,7 +88,7 @@ class Project:
         self.env_versions: dict = {}
         self.cached_envs = {}
         self.pyproject_data: dict = {}
-        self.py_project_missing = True
+        # self.pyproject_missing = True
         self._version_text = ""
         self.script: str = ""
         self.desktop_file: str = ""
@@ -200,26 +200,27 @@ class Project:
         text = text.replace('"', "")
         return text.replace("'", "")
 
-    def _get_pyversion(self) -> str:
-        default = "-.-.-"
-        self.py_project_missing = False
+    # def _get_pyversion(self) -> str:
+    #     default = "-.-.-"
+    #     self.pyproject_missing = False
 
-        pyproject_text = io.read_text_file(self.pyproject_path)
-        if pyproject_text == Status.ERROR:
-            self.py_project_missing = True
-            print(f"pyproject.toml missing {self.pyproject_path}")
-            return default
+    #     pyproject_text = io.read_text_file(self.pyproject_path)
+    #     print(f"pyproject_text: {self.name} {pyproject_text}")
+    #     if pyproject_text == Status.ERROR:
+    #         self.pyproject_missing = True
+    #         print(f"pyproject.toml missing {self.pyproject_path}")
+    #         return default
 
-        self._pyproject_list = pyproject_text.split("\n")
-        for line in self._pyproject_list:
-            if "version =" in line:
-                line_list = line.split("=")
-                if len(line_list) != 2:
-                    err_str = "pyproject.toml format error in"
-                    print(f"{err_str} {self.pyproject_path}")
-                    return default
-                return self._clean_string(line_list[1])
-        return
+    #     self._pyproject_list = pyproject_text.split("\n")
+    #     for line in self._pyproject_list:
+    #         if "version =" in line:
+    #             line_list = line.split("=")
+    #             if len(line_list) != 2:
+    #                 err_str = "pyproject.toml format error in"
+    #                 print(f"{err_str} {self.pyproject_path}")
+    #                 return default
+    #             return self._clean_string(line_list[1])
+    #     return
 
     def _get_project_meta_data(self) -> str:
         """Get the description for a project."""
