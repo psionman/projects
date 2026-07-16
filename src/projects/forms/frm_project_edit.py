@@ -15,6 +15,7 @@ from projects import logger
 from projects.config import config
 from projects.constants import APP_TITLE, ICON_DIR
 from projects.project import Project
+from projects.project_store import store as project_store
 from projects.text import Text
 
 txt = Text()
@@ -415,7 +416,7 @@ class ProjectEditFrame:
             self.project.workbench_colours[key] = colour
 
         logger.info("Project changed", changes=changes)
-        self.parent.project_server.save_projects(self.projects)
+        project_store.save_projects(self.projects)
         self.project_version.set(self.project.version_text)
         self.status = Status.UPDATED
         self._dismiss()

@@ -3,12 +3,25 @@
 import subprocess
 
 from projects import logger
+from projects.project import Project
+from projects.project_store import store as project_store
 
 
-def update_project(version: str, env_version: str, project: str) -> None:
-    returncode = 0
+def update_project(
+    version: str, env_version: EnvVersion, project: Project
+) -> int:
+    print(f"version: {version}")
+    print(f"env_version: {env_version}")
+    print(f"project: {project}")
+    base_dir = project_store.projects[env_version.name].base_dir
+
     venv_python = env_version.get_venv_python()
     if not venv_python:
+        logger.warning(
+            "No venv python found for environment",
+            environment=env_version,
+            project=project,
+        )
         return 1
 
     logger.info(
@@ -17,33 +30,54 @@ def update_project(version: str, env_version: str, project: str) -> None:
         project=project,
     )
 
-    # Use the venv's python to run pip
-    # ensure pip is installed
-    command = [venv_python, "-m", "ensurepip", "--upgrade"]
-    result = subprocess.run(command, check=True)
-    returncode += result.returncode
+    lock_command = [
+        "uv",
+        "lock",
+        "--upgrade-package",
+        project.name,
+        "--refresh-package",
+        project.name,
+        "--python",
+        str(venv_python),
+    ]
+    try:
+        subprocess.run(
+            lock_command,
+            cwd=base_dir,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        logger.warning(
+            "uv lock failed",
+            dependency=version,
+            project=project,
+            stderr=exc.stderr,
+        )
+        return 1
+
+    sync_command = ["uv", "sync", "--python", str(venv_python)]
+    try:
+        subprocess.run(
+            sync_command,
+            cwd=base_dir,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        logger.warning(
+            "uv sync failed",
+            dependency=version,
+            project=project,
+            stderr=exc.stderr,
+        )
+        return 1
+
     logger.info(
-        "Update .venv dependencies install pip",
+        "Update .venv dependencies update package",
         dependency=version,
         project=project,
     )
-
-    # upgrade package
-    command = [venv_python, "-m", "pip", "install", "-U", project]
-    result = subprocess.run(command, check=True)
-    returncode += result.returncode
-
-    if returncode == 0:
-        logger.info(
-            "Update .venv dependencies update package",
-            dependency=version,
-            project=project,
-        )
-    else:
-        logger.warning(
-            "Update .venv dependencies update package failed",
-            dependency=env_version,
-            project=project,
-        )
-
-    return returncode
+    return 0

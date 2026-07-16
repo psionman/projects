@@ -51,7 +51,6 @@ class ModuleCaller:
         self.root.wait_window(dlg.root)
 
     def _compare(self) -> None:
-        print(sys.argv)
         project_name = sys.argv[2]
         project = self.projects[project_name]
         project.env_versions = project.get_versions()

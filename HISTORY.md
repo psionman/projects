@@ -1,7 +1,11 @@
 # History
 
+## Version 1.0.10 - 16 Jul 2026
+1. Add copy toenv and copy to live button to compare
+2. Fix bug in reinitialilse diff_buttons
+
 ## Version 1.0.9 - 13 Jul 2026
-1. Fixed build bus - pyproject_missing
+1. Fixed build bugs - pyproject_missing
 
 ## Version 1.0.8 - 12 Jul 2026
 1. Flag and highlight modified versions in compare dialog

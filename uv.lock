@@ -295,7 +295,7 @@ wheels = [
 
 [[package]]
 name = "psiutils"
-version = "1.0.2"
+version = "1.0.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "appdirs" },
@@ -317,9 +317,9 @@ dependencies = [
     { name = "tomli" },
     { name = "tomli-w" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f3/a3/be85888b1553417309522b4ef6c6b78e1467d06e6029e7293eb86fce314b/psiutils-1.0.2.tar.gz", hash = "sha256:a8d6e35fdafb5720ee1b72d8ddae3607f27530e06ccc0977c15af9cf7133ce4b", size = 227089, upload-time = "2026-06-16T10:05:04.468Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/06/e4/f06f5d09befd83186324295c8be150b0a5af5eada94ac12f197dd71d393b/psiutils-1.0.3.tar.gz", hash = "sha256:ba1874dba5133413840bd58bd20fca67072bb8165a0ac84efddadf890a6afe7a", size = 237221, upload-time = "2026-07-13T08:53:15.189Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/09/fb/249e6b2e6e594528c4d673ae82b75201ca431edca3d9f113cb591f2de9af/psiutils-1.0.2-py3-none-any.whl", hash = "sha256:d41bd2202cc465e13f26bb6ad0ee00e875ae12edb02bc579ab7b060e851d1d86", size = 254671, upload-time = "2026-06-16T10:05:05.927Z" },
+    { url = "https://files.pythonhosted.org/packages/f9/3b/efd3e06426ef0b0c414f42a50c45f47d5af8fa78749927c24e62962fba15/psiutils-1.0.3-py3-none-any.whl", hash = "sha256:0084c64b85d8719f74b42aa0ae5e4b099cc37c38ae04b75e78f92dd6812525e4", size = 265028, upload-time = "2026-07-13T08:53:13.536Z" },
 ]
 
 [[package]]

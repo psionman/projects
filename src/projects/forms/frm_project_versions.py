@@ -93,7 +93,6 @@ class ProjectVersionsFrame:
 
         self.mode = Mode.VIEW
         self.project = project
-        # self.project_server = parent.project_server
         self.save_button = None
         self.versions_frame = None
         self.button_frame = None
@@ -328,15 +327,14 @@ class ProjectVersionsFrame:
     def _update_project(self) -> None:
         env_version = self.project.env_versions[self.version.get()]
         returncode = update_project(
-            self.version.get(), env_version, self.project.name
+            self.version.get(), env_version, self.project
         )
 
+        self._populate_versions_frame()
         if returncode == 0:
-            self._populate_versions_frame()
             messagebox.showinfo("", "Project updated")
 
         self.refresh = True
-        self._populate_versions_frame()
 
     def _build_project(self, *args) -> None:
         build_project(self.root, self.project)

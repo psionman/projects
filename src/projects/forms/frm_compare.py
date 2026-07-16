@@ -45,7 +45,9 @@ class CompareFrame:
         self.missing_frame = None
         self.button_frame = None
         self.diff_buttons = {}
-        self.copy_buttons = {}
+        self.diff_buttons = {}
+        self.copy_to_env_buttons = {}
+        self.copy_to_live_buttons = {}
         if self.env_version.name in self.project.modified_versions:
             env_version.version = f"{env_version.version} (modified)"
 
@@ -75,6 +77,7 @@ class CompareFrame:
 
     def _configure(self) -> None:
         root = self.root
+        root.update_idletasks()
         root.geometry(geometry(config, __file__))
         root.transient(self.parent.root)
         root.bind("<Control-x>", self._dismiss)
@@ -253,7 +256,8 @@ class CompareFrame:
         button.grid(row=row, column=2, padx=PAD, pady=PADB, sticky=tk.W)
         # TODO this should be a command
         button.widget.bind(
-            "<Button-1>", partial(self._copy_file, missing_file.file_name)
+            "<Button-1>",
+            partial(self._copy_missing_file, missing_file.file_name),
         )
 
     def _populate_mismatches(self) -> None:
@@ -274,7 +278,11 @@ class CompareFrame:
 
     def _populate_mismatched_files(self) -> None:
         self._clear_frame(self.mismatch_frame.content)
-        for row, item in enumerate(sorted(self.mismatches)):
+        self.diff_buttons = {}
+        self.copy_to_env_buttons = {}
+        self.copy_to_live_buttons = {}
+        for index, item in enumerate(sorted(self.mismatches)):
+            row = index + 2
             button = ttk.Radiobutton(
                 self.mismatch_frame.content,
                 text=item,
@@ -282,7 +290,7 @@ class CompareFrame:
                 variable=self.mismatch,
                 command=self._rb_selected,
             )
-            button.grid(row=row + 2, column=0, sticky=tk.W, padx=PAD)
+            button.grid(row=row, column=0, sticky=tk.W, padx=PAD)
 
             diff_button = IconButton(
                 self.mismatch_frame.content,
@@ -291,33 +299,49 @@ class CompareFrame:
                 partial(self._show_differences, item),
                 True,
             )
-            diff_button.grid(row=row + 2, column=1, padx=PAD, pady=PADB)
+            diff_button.grid(row=row, column=1, padx=PAD, pady=PADB)
 
-            copy_button = IconButton(
+            to_env_button = IconButton(
                 self.mismatch_frame.content,
-                txt.COPY,
+                "Copy to env",
+                "copy_docs",
+                partial(self._copy_live_to_env, item),
+                True,
+            )
+            to_env_button.grid(row=row, column=2, padx=PAD, pady=PADB)
+
+            to_live_button = IconButton(
+                self.mismatch_frame.content,
+                "Copy To live",
                 "copy_docs",
                 partial(self._copy_env_to_live, item),
                 True,
             )
-            copy_button.grid(row=row + 2, column=2, padx=PAD, pady=PADB)
+            to_live_button.grid(row=row, column=3, padx=PAD, pady=PADB)
 
             diff_button.enable(False)
-            copy_button.enable(False)
+            to_env_button.enable(False)
+            to_live_button.enable(False)
             if item == self.mismatch.get():
                 diff_button.enable(True)
-                copy_button.enable(True)
+                to_env_button.enable(True)
+                to_live_button.enable(True)
             self.diff_buttons[item] = diff_button
-            self.copy_buttons[item] = copy_button
+            self.copy_to_env_buttons[item] = to_env_button
+            self.copy_to_live_buttons[item] = to_live_button
 
     def _rb_selected(self, *args) -> None:
+        print(self.diff_buttons)
         for button in self.diff_buttons.values():
             button.enable(False)
-        for button in self.copy_buttons.values():
+        for button in self.copy_to_env_buttons.values():
+            button.enable(False)
+        for button in self.copy_to_live_buttons.values():
             button.enable(False)
         file = self.mismatch.get()
         self.diff_buttons[file].enable(True)
-        self.copy_buttons[file].enable(True)
+        self.copy_to_env_buttons[file].enable(True)
+        self.copy_to_live_buttons[file].enable(True)
         self.button_frame.enable(True)
 
     def _show_differences(self, button_id: str, *args) -> None:
@@ -338,18 +362,33 @@ class CompareFrame:
         self._populate_mismatches()
 
     def _copy_env_to_live(self, file_name, *args) -> None:
-        # self._copy_file(file_name, *args)
-        response = messagebox.askyesno(
-            "Copy file",
-            f"Are you sure you want to copy {file_name} from env to live?",
-        )
-        if response:
+        self._confirm_copy_file(file_name=file_name, direction="env_to_live")
+
+    def _copy_live_to_env(self, file_name, *args) -> None:
+        self._confirm_copy_file(file_name=file_name, direction="live_to_env")
+
+    def _confirm_copy_file(self, file_name, direction: str):
+        if direction == "env_to_live":
+            source_str, destination_str = "env", "live"
             source = Path(self.env_version.dir, file_name)
             destination = Path(self.project.source_dir, file_name)
+        elif direction == "live_to_env":
+            source_str, destination_str = "live", "env"
+            source = Path(self.project.source_dir, file_name)
+            destination = Path(self.env_version.dir, file_name)
+
+        response = messagebox.askyesno(
+            "Copy file",
+            (
+                f"Are you sure you want to copy {file_name} "
+                f"from {source_str} to {destination_str}?"
+            ),
+        )
+        if response:
             shutil.copy2(source, destination)
             self._populate_mismatches()
 
-    def _copy_file(self, file_name, *args) -> None:
+    def _copy_missing_file(self, file_name, *args) -> None:
         source = Path(self.env_version.dir, file_name)
         destination = Path(self.project.source_dir, file_name)
         if not source.is_file():
