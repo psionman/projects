@@ -5,6 +5,7 @@ from psiutils.constants import Mode
 from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_compare import CompareFrame
 from projects.forms.frm_config import ConfigFrame
+from projects.forms.frm_notes import NotesFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_project_versions import ProjectVersionsFrame
 from projects.forms.frm_search import SearchFrame
@@ -24,6 +25,7 @@ class ModuleCaller:
             "build": self._build,
             "compare": self._compare,
             "versions": self._versions,
+            "notes": self._notes,
             # 'github': self._github,
         }
         self.projects = project_store.projects
@@ -66,6 +68,10 @@ class ModuleCaller:
 
     def _project(self) -> None:
         dlg = ProjectEditFrame(self, Mode.EDIT, self.projects[PROJECT_NAME])
+        self.root.wait_window(dlg.root)
+
+    def _notes(self) -> None:
+        dlg = NotesFrame(self)
         self.root.wait_window(dlg.root)
 
     def _build(self) -> None:

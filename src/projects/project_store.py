@@ -11,7 +11,7 @@ from pathlib import Path
 
 import projects.projects_io as io
 from projects.config import config
-from projects.constants import CACHED_ENVS_FILE, USER_DATA_DIR
+from projects.constants import CACHED_ENVS_FILE, NOTES_FILE, USER_DATA_DIR
 from projects.project import Project
 
 Listener = Callable[[], None]
@@ -24,6 +24,7 @@ class ProjectStore:
 
     def __init__(self) -> None:
         self._projects: dict[str, Project] = self._get_projects()
+        self.notes: dict[str, str] = self._get_notes()
         self._listeners: list[Listener] = []
 
     # -- data access -----------------------------------------------
@@ -84,6 +85,9 @@ class ProjectStore:
             project_dict[project_name] = project
         return project_dict
 
+    def _get_notes(self) -> dict[str, str]:
+        return io.read_json_file(NOTES_FILE)
+
     def save_projects(self, projects: dict[str, Project] = None) -> int:
         if not projects:
             projects = self.projects
@@ -104,9 +108,8 @@ class ProjectStore:
 
     def _get_cached_envs(self) -> dict:
         """Get the cached environments for a project."""
-        cached_envs_file = Path(USER_DATA_DIR, CACHED_ENVS_FILE)
         try:
-            cached_envs = io.read_json_file(cached_envs_file)
+            cached_envs = io.read_json_file(CACHED_ENVS_FILE)
             return cached_envs
         except FileNotFoundError:
             return {}
@@ -120,8 +123,7 @@ class ProjectStore:
             if project_envs:
                 output[project_name] = project_envs
         """Save the cached environments for a project."""
-        cached_envs_file = Path(USER_DATA_DIR, CACHED_ENVS_FILE)
-        io.update_json_file(cached_envs_file, output)
+        io.update_json_file(CACHED_ENVS_FILE, output)
 
 
 # Module-level singleton - this is the instance everyone imports.

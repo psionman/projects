@@ -20,6 +20,7 @@ strings = {
     "EDIT_SCRIPT": "Edit script",
     "EDIT_DESKTOP": "Edit desktop file",
     "NOT_IN_PROJECT_DIR": "Not working in project's directory",
+    "NOTES": "Notes",
     "RUN_SCRIPT": "Run script",
     "DATA_DIRECTORY": "Data directory",
     "ONLINE_HELP": "Online help",

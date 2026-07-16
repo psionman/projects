@@ -1,5 +1,8 @@
 # History
 
+## Version 1.0.11 - 16 Jul 2026
+1. Fixed Search looking in non-text files
+
 ## Version 1.0.10 - 16 Jul 2026
 1. Add copy toenv and copy to live button to compare
 2. Fix bug in reinitialilse diff_buttons

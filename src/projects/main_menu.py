@@ -11,6 +11,7 @@ from projects import (
     __version__,
 )
 from projects.forms.frm_config import ConfigFrame
+from projects.forms.frm_notes import NotesFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_search import SearchFrame
 from projects.project_store import store as project_store
@@ -36,7 +37,7 @@ class MainMenu:
         file_menu = Menu(menubar, self._file_menu_items())
         menubar.add_cascade(menu=file_menu, label="File")
 
-        # File menu
+        # Project menu
         project_menu = Menu(menubar, self._project_menu_items())
         menubar.add_cascade(menu=project_menu, label="Projects")
 
@@ -54,6 +55,7 @@ class MainMenu:
         return [
             MenuItem(f"{txt.NEW}{txt.ELLIPSIS}", self._new_project),
             MenuItem(f"{txt.SEARCH}{txt.ELLIPSIS}", self._search_for_content),
+            MenuItem(f"{txt.NOTES}{txt.ELLIPSIS}", self._notes),
         ]
 
     def _help_menu_items(self) -> list:
@@ -85,6 +87,10 @@ class MainMenu:
     def _search_for_content(self, *args):
         dlg = SearchFrame(self)
         self.root.wait_window(dlg.root)
+
+    def _notes(self, *args):
+        print("Notes")
+        NotesFrame(self)
 
     def _dismiss(self) -> None:
         """Quit the application."""
