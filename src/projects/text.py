@@ -24,6 +24,7 @@ strings = {
     "RUN_SCRIPT": "Run script",
     "DATA_DIRECTORY": "Data directory",
     "ONLINE_HELP": "Online help",
+    "IDE_COLOURS": "IDE Colours",
 }
 
 

@@ -1,20 +1,19 @@
 """ProjectEditFrame  for projects."""
 
 import os
-import re
 import tkinter as tk
 from pathlib import Path
-from tkinter import colorchooser, filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox, ttk
 
-from projects.data_store import store as data_store
 from psiutils.buttons import ButtonFrame, IconButton
 from psiutils.constants import PAD, Mode, Status, WidgetState
 from psiutils.utilities import geometry, window_resize
-from psiutils.widgets import separator_frame
 
 from projects import logger
 from projects.config import config
 from projects.constants import APP_TITLE, ICON_DIR
+from projects.data_store import store as data_store
+from projects.forms.frm_ide_colours import IdeColoursFrame
 from projects.project import Project
 from projects.text import Text
 
@@ -41,10 +40,6 @@ class ProjectEditFrame:
         self.parent = parent
         self.mode = mode
         self.project = project
-        self.projects = parent.projects
-        if project:
-            project.env_versions: list = project.get_versions()
-
         self.status = Status.NULL
         self.style = ttk.Style()
 
@@ -69,11 +64,6 @@ class ProjectEditFrame:
         self.script = tk.StringVar(value=project.script)
         self.repository = tk.StringVar(value=project.repository)
 
-        # Colour items
-        for key, item in project.workbench_colours.items():
-            setattr(self, key, tk.StringVar(value=item))
-            setattr(self, f"{key}_original", item)
-
         # Trace
         self.project_name.trace_add("write", self._check_value_changed)
         self.base_dir.trace_add("write", self._check_value_changed)
@@ -86,7 +76,6 @@ class ProjectEditFrame:
         self.repository.trace_add("write", self._check_value_changed)
 
         self._show()
-        self._populate_colour_frame()
 
     def _show(self) -> None:
         root = self.root
@@ -112,7 +101,21 @@ class ProjectEditFrame:
 
     def _main_frame(self, master: tk.Frame) -> ttk.Frame:
         frame = ttk.Frame(master)
-        frame.columnconfigure(2, weight=1)
+        frame.columnconfigure(0, weight=1)
+        frame.rowconfigure(0, weight=1)
+
+        project_frame = self._project_frame(frame)
+        project_frame.grid(row=0, column=0, sticky=tk.NSEW)
+
+        self.button_frame = self._button_frame(frame)
+        self.button_frame.grid(
+            row=0, column=1, sticky=tk.NS, padx=PAD, pady=PAD
+        )
+        return frame
+
+    def _project_frame(self, master: tk.Frame) -> ttk.Frame:
+        frame = ttk.Frame(master)
+        frame.columnconfigure(1, weight=1)
 
         row = 0
         label = ttk.Label(frame, text="Project name")
@@ -189,69 +192,18 @@ class ProjectEditFrame:
             frame, text="Build for windows", variable=self.build_for_windows
         )
         check_button.grid(row=row, column=1, sticky=tk.W)
-
-        row += 1
-        separator_frame(frame, "Colours").grid(
-            row=row, column=0, columnspan=4, sticky=tk.EW
-        )
-
-        row += 1
-        self.colour_frame = tk.Frame(frame)
-        self.colour_frame.grid(row=row, column=0, columnspan=4, sticky=tk.EW)
-
-        row += 1
-        frame.rowconfigure(row, weight=1)
-
-        row += 1
-        self.button_frame = self._button_frame(frame)
-        self.button_frame.grid(
-            row=row, column=0, columnspan=4, sticky=tk.EW, padx=PAD, pady=PAD
-        )
         return frame
 
-    def _populate_colour_frame(self) -> None:
-        self.colour_frame.children.clear()
-        for row, (key, item) in enumerate(
-            self.project.workbench_colours.items()
-        ):
-            self._add_colour_widgets(
-                self.colour_frame,
-                row,
-                key,
-            )
-        self._check_value_changed()
-
-    def _add_colour_widgets(self, frame: tk.Frame, row: int, key: str) -> None:
-        label = ttk.Label(frame, text=key)
-        label.grid(row=row, column=0, sticky=tk.E, padx=PAD, pady=PAD)
-        entry = ttk.Entry(frame, textvariable=getattr(self, key))
-        entry.grid(row=row, column=1, sticky=tk.EW)
-        entry.bind(
-            "<FocusOut>", lambda e, k=key: self._validate_colour_change(k)
-        )
-
-        colour = getattr(self, key).get()
-        self.style.configure(f"{colour}.TLabel", background=colour)
-
-        label = ColourLabel(
-            frame,
-            width=10,
-            style=f"{colour}.TLabel",
-            colour=colour,
-        )
-        label.grid(row=row, column=2, sticky=tk.W, padx=PAD)
-        button = IconButton(
-            frame,
-            txt.SELECT,
-            "palette",
-            lambda k=key: self._get_color(k),
-            icon_path=ICON_DIR,
-        )
-        button.grid(row=row, column=3, padx=PAD, pady=(0, 5))
-
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
-        frame = ButtonFrame(master, tk.HORIZONTAL)
+        frame = ButtonFrame(master, tk.VERTICAL)
         frame.buttons = [
+            IconButton(
+                frame,
+                txt.IDE_COLOURS,
+                "palette",
+                self._project_colours,
+                icon_path=ICON_DIR,
+            ),
             frame.icon_button("save", self._save, True),
             frame.icon_button("exit-orange", self._dismiss),
         ]
@@ -324,9 +276,6 @@ class ProjectEditFrame:
             else:
                 return None
 
-    def opener(path: str, flags: int) -> int:
-        return os.open(path, flags, 0o755)
-
     def _check_value_changed(self, *args) -> None:
         enable = self._record_changes()
         self.button_frame.enable(enable)
@@ -379,27 +328,17 @@ class ProjectEditFrame:
 
         return changes
 
-    def _validate_colour_change(self, key: str) -> None:
-        colour = getattr(self, key).get()
-        pattern = r"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
-        if not re.match(pattern, colour):
-            # Invalid colour, reset to original
-            getattr(self, key).set(getattr(self, f"{key}_original"))
-        self._populate_colour_frame()
-
-    def _get_color(self, key: str) -> None:
-        colour = getattr(self, key).get()
-        result = colorchooser.askcolor(colour, parent=self.root)
-        getattr(self, key).set(result[1])
-
-        self._populate_colour_frame()
+    def _project_colours(self, *args) -> None:
+        dlg = IdeColoursFrame(self.root, self.project)
+        self.root.wait_window(dlg.root)
+        pass
 
     def _save(self, *args) -> None:
         changes = self._record_changes()
         if self.mode == Mode.NEW:
             self.project = Project()
             self.project.name = self.project_name.get()
-            self.projects[self.project.name] = self.project
+            data_store.projects[self.project.name] = self.project
 
             logger.info("New project", name=self.project.name)
 

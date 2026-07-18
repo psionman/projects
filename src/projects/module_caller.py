@@ -13,8 +13,6 @@ from projects.forms.frm_search import SearchFrame
 
 # from projects.github import upload
 
-PROJECT_NAME = "script launcher"
-
 
 class ModuleCaller:
     def __init__(self, root, module) -> None:
@@ -28,7 +26,6 @@ class ModuleCaller:
             "notes": self._notes,
             # 'github': self._github,
         }
-        self.projects = data_store.projects
 
         self.invalid = False
         if module == "-h":
@@ -54,20 +51,23 @@ class ModuleCaller:
 
     def _compare(self) -> None:
         project_name = sys.argv[2]
-        project = self.projects[project_name]
+        project = data_store.projects[project_name]
         project.env_versions = project.get_versions()
         dlg = CompareFrame(self, project, project.env_versions[sys.argv[3]])
         self.root.wait_window(dlg.root)
 
     def _versions(self) -> None:
         project_name = sys.argv[2]
-        project = self.projects[project_name]
+        project = data_store.projects[project_name]
         project.env_versions = project.get_versions()
         dlg = ProjectVersionsFrame(self, project)
         self.root.wait_window(dlg.root)
 
     def _project(self) -> None:
-        dlg = ProjectEditFrame(self, Mode.EDIT, self.projects[PROJECT_NAME])
+        project_name = sys.argv[2]
+        dlg = ProjectEditFrame(
+            self, Mode.EDIT, data_store.projects[project_name]
+        )
         self.root.wait_window(dlg.root)
 
     def _notes(self) -> None:
@@ -76,7 +76,7 @@ class ModuleCaller:
 
     def _build(self) -> None:
         project_name = sys.argv[2]
-        project = self.projects[project_name]
+        project = data_store.projects[project_name]
         dlg = BuildFrame(self, project)
         self.root.wait_window(dlg.root)
 

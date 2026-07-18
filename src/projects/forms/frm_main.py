@@ -1,7 +1,7 @@
 """MainFrame for project management."""
 
-import subprocess
 import tkinter as tk
+from pathlib import Path
 from tkinter import messagebox, ttk
 from typing import Any
 
@@ -351,12 +351,6 @@ class MainFrame:
 
     def _build_project(self, *args) -> None:
         build_project(self.root, self.project)
-        # if not UV_PUBLISH_TOKEN:
-        #     messagebox.showerror("", "UV_PUBLISH_TOKEN not set.")
-        #     return
-
-        # dlg = BuildFrame(self, self.project)
-        # self.root.wait_window(dlg.root)
 
     def _update_pyproject(self, *args) -> None:
         code = self.project.update_pyproject()
@@ -367,21 +361,6 @@ class MainFrame:
 
     def _open_dolphin(self, *args) -> None:
         open_dolphin(self.project.base_dir)
-        # path = str(self.project.base_dir)
-        # service = find_dolphin_service()
-        # if service:
-        #     subprocess.call(
-        #         [
-        #             "qdbus6",
-        #             service,
-        #             "/dolphin/Dolphin_1",
-        #             "org.kde.dolphin.MainWindow.openDirectories",
-        #             f"file://{path}",
-        #             "false",
-        #         ]
-        #     )
-        # else:
-        #     subprocess.Popen(["dolphin", path])
 
     def _open_code(self, *args) -> None:
         try:
@@ -405,34 +384,8 @@ class MainFrame:
         self.open_kate(self.project.script)
 
     def open_kate(self, file_path: str) -> None:
+        file_path = file_path.replace("~", str(Path.home()))
         call_process(["kate", file_path])
-
-        subprocess.run(
-            [
-                "gdbus",
-                "call",
-                "--session",
-                "--dest",
-                "org.kde.kate",
-                "--object-path",
-                "/MainApplication",
-                "--method",
-                "org.kde.Kate.Application.activate",
-                f"file://{file_path}",
-            ],
-            check=False,
-            stderr=subprocess.DEVNULL,
-        )
-        subprocess.run(
-            [
-                "kdotool",
-                "search",
-                "--name",
-                "kate",
-                "windowactivate",
-            ],
-            check=False,
-        )
 
     def _run_script(self, *args) -> Any:
         return call_process([self.project.script])
