@@ -14,12 +14,12 @@ from psiutils.utilities import geometry, window_resize
 from projects.buttons import ButtonFrame
 from projects.common import build_project
 from projects.config import config
+from projects.data_store import store as data_store
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_project_versions import ProjectVersionsFrame
 from projects.forms.frm_search import SearchFrame
 from projects.main_menu import MainMenu
 from projects.project import Project
-from projects.project_store import store as project_store
 from projects.text import Text
 from projects.utilities import call_process, open_dolphin
 
@@ -50,8 +50,8 @@ class MainFrame:
         self.root = parent.root
         self.parent = parent
 
-        self.projects = project_store.projects
-        project_store.subscribe(self._populate_tree)
+        self.projects = data_store.projects
+        data_store.subscribe(self._populate_tree)
         self.project = Project()
         if config.last_project in self.projects:
             self.project = self.projects[config.last_project]
@@ -212,52 +212,59 @@ class MainFrame:
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.VERTICAL)
-        self.build_button = frame.icon_button(
-            "build", self._build_project, True
-        )
-        self.compare_button = frame.icon_button(
-            "compare-orange", self._compare_project, True
-        )
-        self.refresh_button = frame.icon_button(
-            "refresh", self._refresh_project, True
-        )
+
         self.desktop_button = IconButton(
             frame, "Edit Desktop", "script", self._edit_desktop
         )
 
-        self.script_button = IconButton(
-            frame, txt.EDIT_SCRIPT, "script", self._edit_script
-        )
-        self.run_script_button = IconButton(
-            frame, txt.RUN_SCRIPT, "start", self._run_script
-        )
-        self.windows_build_button = IconButton(
-            frame, txt.BUILD_FOR_WINDOWS, "windows", self._build_for_windows
-        )
+        frame.buttons = self._frame_buttons(frame)
+        self.build_button = frame.tagged_buttons["build"]
+        self.compare_button = frame.tagged_buttons["compare"]
+        self.refresh_button = frame.tagged_buttons["refresh"]
+        self.script_button = frame.tagged_buttons["script"]
+        self.run_script_button = frame.tagged_buttons["run_script"]
+        self.windows_build_button = frame.tagged_buttons["windows_build"]
+        frame.enable(False)
+        return frame
 
-        frame.buttons = [
+    def _frame_buttons(self, frame: ButtonFrame) -> list[IconButton]:
+        return [
             frame.icon_button("edit", self._edit_project, True),
-            self.build_button,
+            frame.icon_button("build", self._build_project, True, tag="build"),
             frame.icon_button("update", self._update_pyproject),
             frame.icon_button("folder-open", self._open_dolphin, True),
-            # frame.icon_button("code-blue", self._open_code, True),
             frame.icon_button("windsurf", self._open_windsurf, True),
             frame.icon_button("console", self._konsole),
-            self.desktop_button,
-            self.script_button,
-            self.run_script_button,
-            self.compare_button,
-            self.refresh_button,
-            self.windows_build_button,
+            IconButton(
+                frame,
+                txt.EDIT_SCRIPT,
+                "script",
+                self._edit_script,
+                tag="script",
+            ),
+            IconButton(
+                frame,
+                txt.RUN_SCRIPT,
+                "start",
+                self._run_script,
+                tag="run_script",
+            ),
+            frame.icon_button(
+                "compare-orange", self._compare_project, True, tag="compare"
+            ),
+            frame.icon_button(
+                "refresh", self._refresh_project, True, tag="refresh"
+            ),
+            IconButton(
+                frame,
+                txt.BUILD_FOR_WINDOWS,
+                "windows",
+                self._build_for_windows,
+                tag="windows_build",
+            ),
             frame.icon_button("delete", self._delete_project, True),
             frame.icon_button("close-red", self._dismiss),
         ]
-        self.script_button.disable()
-        self.desktop_button.disable()
-        self.run_script_button.disable()
-        self.windows_build_button.disable()
-        frame.enable(False)
-        return frame
 
     def _context_menu(self) -> tk.Menu:
         self.build_menu_item = MenuItem(
@@ -336,7 +343,7 @@ class MainFrame:
         self._save_projects()
 
     def _save_projects(self) -> None:
-        result = project_store.save_projects(self.projects)
+        result = data_store.save_projects(self.projects)
         if result == Status.ERROR:
             messagebox.showerror("Save", "Save failed", parent=self.root)
             return

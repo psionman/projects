@@ -2,6 +2,7 @@ import sys
 
 from psiutils.constants import Mode
 
+from projects.data_store import store as data_store
 from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_compare import CompareFrame
 from projects.forms.frm_config import ConfigFrame
@@ -9,7 +10,6 @@ from projects.forms.frm_notes import NotesFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_project_versions import ProjectVersionsFrame
 from projects.forms.frm_search import SearchFrame
-from projects.project_store import store as project_store
 
 # from projects.github import upload
 
@@ -28,7 +28,7 @@ class ModuleCaller:
             "notes": self._notes,
             # 'github': self._github,
         }
-        self.projects = project_store.projects
+        self.projects = data_store.projects
 
         self.invalid = False
         if module == "-h":

@@ -331,7 +331,6 @@ class CompareFrame:
             self.copy_to_live_buttons[item] = to_live_button
 
     def _rb_selected(self, *args) -> None:
-        print(self.diff_buttons)
         for button in self.diff_buttons.values():
             button.enable(False)
         for button in self.copy_to_env_buttons.values():

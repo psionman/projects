@@ -10,11 +10,11 @@ from projects import (
     __summary__,
     __version__,
 )
+from projects.data_store import store as data_store
 from projects.forms.frm_config import ConfigFrame
 from projects.forms.frm_notes import NotesFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
 from projects.forms.frm_search import SearchFrame
-from projects.project_store import store as project_store
 from projects.text import Text
 
 txt = Text()
@@ -26,7 +26,7 @@ class MainMenu:
     def __init__(self, parent) -> None:
         self.parent = parent
         self.root = parent.root
-        self.projects = project_store.projects
+        self.projects = data_store.projects
         self.status = Status.NULL
 
     def create(self) -> None:

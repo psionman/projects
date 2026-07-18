@@ -15,6 +15,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import messagebox, ttk
 
+from projects.data_store import store as data_store
 from psiutils.constants import PAD, Mode, Status, WidgetState
 from psiutils.utilities import geometry, window_resize
 from psiutils.widgets import ScrollingCanvas
@@ -26,7 +27,6 @@ from projects.config import config
 from projects.constants import VERSION_FILE
 from projects.forms.frm_compare import CompareFrame
 from projects.project import Project
-from projects.project_store import store as project_store
 from projects.project_utilities import update_project
 from projects.utilities import call_process, open_dolphin
 
@@ -255,7 +255,7 @@ class ProjectVersionsFrame:
     def _populate_versions_frame(self) -> None:
         self.project.env_versions = self.project.get_versions(self.refresh)
         if self.refresh:
-            project_store.save_projects()
+            data_store.save_projects()
         self.refresh = False
 
         env_versions = self.project.env_versions
@@ -359,7 +359,7 @@ class ProjectVersionsFrame:
             self.project.modified_versions.remove(self.version.get())
         else:
             self.project.modified_versions.append(self.version.get())
-        project_store.save_projects()
+        data_store.save_projects()
         self._populate_versions_frame()
 
     def _bind_mousewheel(self) -> None:

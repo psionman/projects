@@ -99,6 +99,7 @@ class Project:
         if not self.workbench_colours:
             self.workbench_colours = DEFAULT_COLOURS.copy()
         self.modified_versions = []
+        self.notes = ""
 
     def __repr__(self) -> str:
         """
@@ -259,8 +260,10 @@ class Project:
         """Deserialize the project from a dictionary."""
         self.name = data["name"]
 
-        self.source_dir = data["source_dir"].replace("~", HOME_DIR)
-        self.base_dir = data["base_dir"].replace("~", HOME_DIR)
+        if "base_dir" in data:
+            self.base_dir = data["base_dir"].replace("~", HOME_DIR)
+        if "source_dir" in data:
+            self.source_dir = data["source_dir"].replace("~", HOME_DIR)
         if "pypi" in data:
             self.pypi = data["pypi"]
         if "build_for_windows" in data:

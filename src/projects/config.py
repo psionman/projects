@@ -16,6 +16,7 @@ DEFAULT_CONFIG = {
         "frm_compare": "1100x900",
         "frm_project": "800x400",
     },
+    "horizontal_sashes": [(1, 250)],
 }
 
 

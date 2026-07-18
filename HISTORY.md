@@ -2,6 +2,8 @@
 
 ## Version 1.0.11 - 16 Jul 2026
 1. Fixed Search looking in non-text files
+2. Introduced tagged buttons
+3. rename data_store
 
 ## Version 1.0.10 - 16 Jul 2026
 1. Add copy toenv and copy to live button to compare

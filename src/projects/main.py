@@ -4,8 +4,8 @@ from pathlib import Path
 
 from psiutils.icecream_init import ic_init
 
+from projects.data_store import store
 from projects.modules import check_imports
-from projects.project_store import store
 from projects.root import Root
 
 ic_init()

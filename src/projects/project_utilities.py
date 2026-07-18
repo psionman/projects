@@ -3,8 +3,8 @@
 import subprocess
 
 from projects import logger
+from projects.data_store import store as data_store
 from projects.project import Project
-from projects.project_store import store as project_store
 
 
 def update_project(
@@ -13,7 +13,7 @@ def update_project(
     print(f"version: {version}")
     print(f"env_version: {env_version}")
     print(f"project: {project}")
-    base_dir = project_store.projects[env_version.name].base_dir
+    base_dir = data_store.projects[env_version.name].base_dir
 
     venv_python = env_version.get_venv_python()
     if not venv_python:

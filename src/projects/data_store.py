@@ -1,4 +1,4 @@
-"""Central store for all Project instances.
+"""Central store for all Data instances.
 
 Import `store` from this module anywhere it's needed —
 it's a singleton, so every importer shares the same instance.
@@ -105,6 +105,9 @@ class ProjectStore:
         if cached_envs:
             self._save_cached_envs(cached_envs)
         return io.update_json_file(PROJECT_FILE, output)
+
+    def save_notes(self) -> int:
+        return io.update_json_file(NOTES_FILE, self.notes)
 
     def _get_cached_envs(self) -> dict:
         """Get the cached environments for a project."""
