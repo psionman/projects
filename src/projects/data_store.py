@@ -82,6 +82,8 @@ class ProjectStore:
             project = Project()
             project_data["cached_envs"] = project_cached_envs
             project.deserialize(project_data)
+            if project.name == "projects":
+                print(project.script)
             project_dict[project_name] = project
         return project_dict
 

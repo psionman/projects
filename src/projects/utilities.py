@@ -70,6 +70,10 @@ def collapse_home(path: str) -> str:
     return path.replace(HOME_DIR, "~")
 
 
+def expand_home(path: str) -> str:
+    return path.replace("~", HOME_DIR)
+
+
 def open_dolphin(path) -> None:
     path = str(path)
     service = _find_dolphin_service()

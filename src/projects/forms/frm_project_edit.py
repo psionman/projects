@@ -16,13 +16,13 @@ from projects.data_store import store as data_store
 from projects.forms.frm_ide_colours import IdeColoursFrame
 from projects.project import Project
 from projects.text import Text
+from projects.utilities import call_process
 
 txt = Text()
 FRAME_TITLE = f"{APP_TITLE} - edit"
 
 DEFAULT_DEV_DIR = str(Path(Path.home(), ".pyenv", "versions"))
 DEFAULT_PROJECT_DIR = str(Path(Path.home(), "projects"))
-DEFAULT_VERSION_TEXT = "0.0.0"
 
 
 class ColourLabel(ttk.Label):
@@ -39,15 +39,13 @@ class ProjectEditFrame:
         self.root = tk.Toplevel(parent.root)
         self.parent = parent
         self.mode = mode
-        self.project = project
         self.status = Status.NULL
         self.style = ttk.Style()
+        self.script_button = None
+        self.desktop_button = None
 
         if not project:
             project = Project()
-            # project.source_dir = DEFAULT_PROJECT_DIR
-            project.version_text = DEFAULT_VERSION_TEXT
-            project.pypi = False
         self.project = project
 
         self.button_frame = None
@@ -76,6 +74,15 @@ class ProjectEditFrame:
         self.repository.trace_add("write", self._check_value_changed)
 
         self._show()
+
+        print(f"Script: {self.script.get()}")
+        print(f"Script exists: {Path(self.script.get()).exists()}")
+        print(f"Desktop file: {self.desktop_file.get()}")
+        print(f"Desktop file exists: {Path(self.desktop_file.get()).exists()}")
+        if not Path(self.script.get()).is_file():
+            self.script_button.enable(False)
+        if not Path(self.desktop_file.get()).is_file():
+            self.desktop_button.enable(False)
 
     def _show(self) -> None:
         root = self.root
@@ -196,6 +203,10 @@ class ProjectEditFrame:
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.VERTICAL)
+
+        self.desktop_button = IconButton(
+            frame, "Edit Desktop", "script", self._edit_desktop
+        )
         frame.buttons = [
             IconButton(
                 frame,
@@ -204,9 +215,25 @@ class ProjectEditFrame:
                 self._project_colours,
                 icon_path=ICON_DIR,
             ),
+            IconButton(
+                frame,
+                "Edit Desktop",
+                "script",
+                self._edit_desktop,
+                tag="desktop",
+            ),
+            IconButton(
+                frame,
+                txt.EDIT_SCRIPT,
+                "script",
+                self._edit_script,
+                tag="script",
+            ),
             frame.icon_button("save", self._save, True),
             frame.icon_button("exit-orange", self._dismiss),
         ]
+        self.script_button = frame.tagged_buttons["script"]
+        self.desktop_button = frame.tagged_buttons["desktop"]
         frame.enable(False)
         return frame
 
@@ -279,6 +306,8 @@ class ProjectEditFrame:
     def _check_value_changed(self, *args) -> None:
         enable = self._record_changes()
         self.button_frame.enable(enable)
+        self.script_button.enable(Path(self.script.get()).is_file())
+        self.desktop_button.enable(Path(self.desktop_file.get()).is_file())
 
     def _record_changes(self) -> dict:
         changes = {}
@@ -320,18 +349,21 @@ class ProjectEditFrame:
                 self.repository.get(),
             )
 
-        for key in self.project.workbench_colours.keys():
-            new_colour = getattr(self, key).get()
-            original_colour = getattr(self, f"{key}_original")
-            if new_colour != original_colour:
-                changes[key] = (original_colour, new_colour)
-
         return changes
 
     def _project_colours(self, *args) -> None:
         dlg = IdeColoursFrame(self.root, self.project)
         self.root.wait_window(dlg.root)
         pass
+
+    def _edit_script(self, *args) -> None:
+        self.open_kate(self.project.script)
+
+    def _edit_desktop(self, *args) -> None:
+        self.open_kate(self.project.desktop_file)
+
+    def open_kate(self, file_path: str) -> None:
+        call_process(["kate", file_path])
 
     def _save(self, *args) -> None:
         changes = self._record_changes()
@@ -350,12 +382,12 @@ class ProjectEditFrame:
         self.project.desktop_file = self.desktop_file.get()
         self.project.repository = self.repository.get()
 
-        for key in self.project.workbench_colours.keys():
-            colour = getattr(self, key).get()
-            self.project.workbench_colours[key] = colour
+        # for key in self.project.workbench_colours.keys():
+        #     colour = getattr(self, key).get()
+        #     self.project.workbench_colours[key] = colour
 
         logger.info("Project changed", changes=changes)
-        data_store.save_projects(self.projects)
+        data_store.save_projects(data_store.projects)
         self.project_version.set(self.project.version_text)
         self.status = Status.UPDATED
         self._dismiss()

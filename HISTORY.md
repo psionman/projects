@@ -4,7 +4,8 @@
 1. Fixed Search looking in non-text files
 2. Introduced tagged buttons
 3. rename data_store
-4 Move edit IDE colours
+4. Move edit IDE colours
+5. Collapse home/jeff to ~ on save project
 
 ## Version 1.0.10 - 16 Jul 2026
 1. Add copy toenv and copy to live button to compare

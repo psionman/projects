@@ -22,6 +22,7 @@ REQUIREMENTS_FILE = "requirements.txt"
 # General
 HTML_DIR = resolve_path("html", __file__)
 HELP_URI = ""
+DEFAULT_VERSION_TEXT = "0.0.0"
 
 # Paths
 HOME_DIR = str(Path.home())

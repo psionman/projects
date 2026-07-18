@@ -1,7 +1,6 @@
 """MainFrame for project management."""
 
 import tkinter as tk
-from pathlib import Path
 from tkinter import messagebox, ttk
 from typing import Any
 
@@ -60,15 +59,12 @@ class MainFrame:
         self.build_button = None
         self.compare_button = None
         self.refresh_button = None
-        self.script_button = None
-        self.desktop_button = None
         self.run_script_button = None
         self.windows_build_button = None
 
         self.build_menu_item = None
         self.compare_menu_item = None
         self.refresh_menu_item = None
-        self.edit_script_menu_item = None
         self.run_script_menu_item = None
         self.windows_build_menu_item = None
 
@@ -147,12 +143,7 @@ class MainFrame:
             key: self.projects[key] for key in sorted(self.projects.keys())
         }
         return [
-            (
-                project.name,
-                project.description,
-                # project.script.replace(f"{config.script_directory}/", ""),
-                # project.base_dir.replace(HOME_DIR, "~"),
-            )
+            (project.name, project.description)
             for project in projects.values()
         ]
 
@@ -174,22 +165,14 @@ class MainFrame:
         self.context_menu.enable(True)
 
         self._enable_script_items()
-        self._enable_desktop_items()
         self._enable_widows_items()
 
         if not self.project.pypi:
             self._disable_non_pypi_buttons()
 
-    def _enable_desktop_items(self) -> None:
-        enable = bool(self.project.desktop_file)
-        self.desktop_button.enable(enable)
-        self.edit_desktop_menu_item.enable(enable)
-
     def _enable_script_items(self) -> None:
         enable = bool(self.project.script)
-        self.script_button.enable(enable)
         self.run_script_button.enable(enable)
-        self.edit_script_menu_item.enable(enable)
         self.run_script_menu_item.enable(enable)
 
     def _enable_widows_items(self) -> None:
@@ -213,15 +196,10 @@ class MainFrame:
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.VERTICAL)
 
-        self.desktop_button = IconButton(
-            frame, "Edit Desktop", "script", self._edit_desktop
-        )
-
         frame.buttons = self._frame_buttons(frame)
         self.build_button = frame.tagged_buttons["build"]
         self.compare_button = frame.tagged_buttons["compare"]
         self.refresh_button = frame.tagged_buttons["refresh"]
-        self.script_button = frame.tagged_buttons["script"]
         self.run_script_button = frame.tagged_buttons["run_script"]
         self.windows_build_button = frame.tagged_buttons["windows_build"]
         frame.enable(False)
@@ -235,13 +213,6 @@ class MainFrame:
             frame.icon_button("folder-open", self._open_dolphin, True),
             frame.icon_button("windsurf", self._open_windsurf, True),
             frame.icon_button("console", self._konsole),
-            IconButton(
-                frame,
-                txt.EDIT_SCRIPT,
-                "script",
-                self._edit_script,
-                tag="script",
-            ),
             IconButton(
                 frame,
                 txt.RUN_SCRIPT,
@@ -276,12 +247,6 @@ class MainFrame:
         self.refresh_menu_item = MenuItem(
             txt.REFRESH, self._refresh_project, dimmable=True
         )
-        self.edit_desktop_menu_item = MenuItem(
-            txt.EDIT_DESKTOP, self._edit_desktop, dimmable=True
-        )
-        self.edit_script_menu_item = MenuItem(
-            txt.EDIT_SCRIPT, self._edit_script, dimmable=True
-        )
         self.run_script_menu_item = MenuItem(
             txt.RUN_SCRIPT, self._run_script, dimmable=True
         )
@@ -292,11 +257,8 @@ class MainFrame:
             MenuItem(txt.EDIT, self._edit_project, dimmable=True),
             self.build_menu_item,
             MenuItem(txt.UPDATE, self._update_pyproject, dimmable=True),
-            # MenuItem(txt.CODE, self._open_code, dimmable=True),
             MenuItem(txt.WINDSURF, self._open_windsurf, dimmable=True),
             MenuItem(txt.KONSOLE, self._konsole, dimmable=True),
-            self.edit_desktop_menu_item,
-            self.edit_script_menu_item,
             self.run_script_menu_item,
             self.compare_menu_item,
             self.refresh_menu_item,
@@ -376,16 +338,6 @@ class MainFrame:
 
     def _konsole(self, *args) -> None:
         return call_process(["konsole", "--workdir", self.project.base_dir])
-
-    def _edit_desktop(self, *args) -> None:
-        self.open_kate(self.project.desktop_file)
-
-    def _edit_script(self, *args) -> None:
-        self.open_kate(self.project.script)
-
-    def open_kate(self, file_path: str) -> None:
-        file_path = file_path.replace("~", str(Path.home()))
-        call_process(["kate", file_path])
 
     def _run_script(self, *args) -> Any:
         return call_process([self.project.script])

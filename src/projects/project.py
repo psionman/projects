@@ -14,23 +14,26 @@ from psiutils.constants import Status
 import projects.projects_io as io
 from projects import logger
 from projects.constants import (
+    DEFAULT_VERSION_TEXT,
     HISTORY_FILE,
-    HOME_DIR,
     PYPROJECT_TOML,
     VERSION_FILE,
 )
 from projects.env_version import EnvironmentVersion
+from projects.utilities import collapse_home, expand_home
 
 SERIALIZABLE_FIELDS = [
     "base_dir",
     "source_dir",
+    "script",
+    "desktop_file",
     "pypi",
     "repository",
     "build_for_windows",
-    "script",
-    "desktop_file",
     "modified_versions",
 ]
+
+DIR_FIELDS = ["base_dir", "source_dir", "script", "desktop_file"]
 
 DEFAULT_COLOURS = {
     "titleBar.activeBackground": "#bbbbbb",
@@ -89,7 +92,7 @@ class Project:
         self.cached_envs = {}
         self.pyproject_data: dict = {}
         # self.pyproject_missing = True
-        self._version_text = ""
+        self._version_text = DEFAULT_VERSION_TEXT
         self.script: str = ""
         self.desktop_file: str = ""
         self.repository: str = ""
@@ -110,10 +113,6 @@ class Project:
         """
 
         return f"Project: {self.name}"
-
-    @staticmethod
-    def _short_dir(long_dir: str) -> str:
-        return long_dir.replace(str(Path.home()), "~")
 
     def _get_env_version(self) -> str:
         raw_text = io.read_text_file(Path(self.env_dir, VERSION_FILE))
@@ -253,7 +252,10 @@ class Project:
         output = {}
         for key in SERIALIZABLE_FIELDS:
             if getattr(self, key):
-                output[key] = getattr(self, key)
+                if key in DIR_FIELDS:
+                    output[key] = collapse_home(getattr(self, key))
+                else:
+                    output[key] = getattr(self, key)
         return output
 
     def deserialize(self, data: dict) -> None:
@@ -261,15 +263,21 @@ class Project:
         self.name = data["name"]
 
         if "base_dir" in data:
-            self.base_dir = data["base_dir"].replace("~", HOME_DIR)
+            self.base_dir = expand_home(data["base_dir"])
         if "source_dir" in data:
-            self.source_dir = data["source_dir"].replace("~", HOME_DIR)
+            self.source_dir = expand_home(data["source_dir"])
+        if "script" in data:
+            self.script = expand_home(data["script"])
+        if "desktop_file" in data:
+            self.desktop_file = expand_home(data["desktop_file"])
         if "pypi" in data:
             self.pypi = data["pypi"]
         if "build_for_windows" in data:
             self.build_for_windows = data["build_for_windows"]
         if "repository" in data:
             self.repository = data["repository"]
+        if "modified_versions" in data:
+            self.modified_versions = data["modified_versions"]
 
         self.cached_envs = {}
         if "cached_envs" in data and data["cached_envs"]:
@@ -278,12 +286,6 @@ class Project:
                 env_version = EnvironmentVersion(env)
                 self.cached_envs[env_version.name] = env_version
 
-        if "script" in data:
-            self.script = data["script"]
-        if "desktop_file" in data:
-            self.desktop_file = data["desktop_file"]
-        if "modified_versions" in data:
-            self.modified_versions = data["modified_versions"]
         self._get_project_meta_data()
         self.history = self._get_history()
         self.new_history = self._get_new_history()

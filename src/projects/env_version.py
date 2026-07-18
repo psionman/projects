@@ -47,6 +47,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 from projects import logger
+from projects.utilities import collapse_home, expand_home
 
 
 class EnvironmentData(NamedTuple):
@@ -109,7 +110,7 @@ class EnvironmentVersion:
         """
         return (
             self.name,
-            str(self.dir),
+            collapse_home(str(self.dir)),
             self.python_version,
         )
 
@@ -119,7 +120,7 @@ class EnvironmentVersion:
 
         self.project = environ.project
         self.name = environ.name
-        self.dir = environ.dir
+        self.dir = expand_home(environ.dir)
         self.python_version = environ.python_version
         self.version = self._get_version()
         self.venv_python = self.get_venv_python()
