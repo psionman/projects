@@ -1,6 +1,5 @@
 """Project data for Compare."""
 
-import re
 import subprocess
 import tomllib
 from datetime import datetime
@@ -57,15 +56,13 @@ class Project:
         self.base_dir: str = ""
         self.env_dir: str = ""
         self.description: str = ""
-        self.version: str = ""
+        self.version: str = DEFAULT_VERSION_TEXT
         self.history: list[str] = []
         self.new_history: list[str] = []
         self._pyproject_list = []
         self.env_versions: dict = {}
         self.cached_envs = {}
         self.pyproject_data: dict = {}
-        # self.pyproject_missing = True
-        self._version_text = DEFAULT_VERSION_TEXT
         self.script: str = ""
         self.desktop_file: str = ""
         self.repository: str = ""
@@ -85,16 +82,6 @@ class Project:
 
         return f"Project: {self.name}"
 
-    def _get_env_version(self) -> str:
-        raw_text = io.read_text_file(Path(self.env_dir, VERSION_FILE))
-        return self._get_version_text(raw_text)
-
-    def _get_version_text(self, raw_text: str) -> str:
-        err_text = "Version text missing"
-        version_re = r"[0-9]{1,}.[0-9]{1,}.[0-9]{1,}"
-        version = re.search(version_re, raw_text).group()
-        return version or err_text
-
     @property
     def requirements_path(self) -> Path:
         """Return path to requirements file."""
@@ -104,23 +91,6 @@ class Project:
     def history_path(self) -> Path:
         """Return path to History file."""
         return Path(self.base_dir, HISTORY_FILE)
-
-    @property
-    def version_text(self) -> str:
-        """Return version as text."""
-        if self._version_text:
-            return self._version_text
-
-        err_text = "Version not found"
-        version_re = r"^[0-9]{1,}.[0-9]{1,}.[0-9]{1,}$"
-        self._version_text = (
-            self.version if re.match(version_re, self.version) else err_text
-        )
-        return self._version_text
-
-    @version_text.setter
-    def version_text(self, value: str) -> None:
-        self._version_text = value
 
     @property
     def version_path(self) -> Path:
@@ -193,7 +163,7 @@ class Project:
 
     def serialize(self) -> dict:
         """
-        Serializes the Projects object into a dictionary.
+        Serializes the Project object into a dictionary.
 
         Returns:
             dict: A dictionary containing serialized project data.
@@ -210,35 +180,27 @@ class Project:
     def deserialize(self, data: dict) -> None:
         """Deserialize the project from a dictionary."""
         self.name = data["name"]
-
-        if "base_dir" in data:
-            self.base_dir = expand_home(data["base_dir"])
-        if "source_dir" in data:
-            self.source_dir = expand_home(data["source_dir"])
-        if "script" in data:
-            self.script = expand_home(data["script"])
-        if "desktop_file" in data:
-            self.desktop_file = expand_home(data["desktop_file"])
-        if "pypi" in data:
-            self.pypi = data["pypi"]
-        if "build_for_windows" in data:
-            self.build_for_windows = data["build_for_windows"]
-        if "repository" in data:
-            self.repository = data["repository"]
-        if "modified_versions" in data:
-            self.modified_versions = data["modified_versions"]
-
-        self.cached_envs = {}
-        if "cached_envs" in data and data["cached_envs"]:
-            for env in data["cached_envs"]:
-                env.insert(0, self.name)
-                env_version = EnvironmentVersion(env)
-                self.cached_envs[env_version.name] = env_version
+        for key in SERIALIZABLE_FIELDS:
+            if key in data:
+                setattr(self, key, data[key])
+            if key in DIR_FIELDS:
+                setattr(self, key, expand_home(getattr(self, key)))
 
         self._get_project_meta_data()
         self.history = self._get_history()
         self.new_history = self._get_new_history()
         self.workbench_colours = self._get_workbench_colours()
+        self.cached_envs = self._get_cached_envs(data)
+
+    def _get_cached_envs(self, data: dict) -> None:
+        """Get the cached environments for a project."""
+        cached_envs = {}
+        if "cached_envs" in data:
+            for env in data["cached_envs"]:
+                env.insert(0, self.name)
+                env_version = EnvironmentVersion(env)
+                cached_envs[env_version.name] = env_version
+        return cached_envs
 
     def save_project_colours(self) -> None:
         """Save the colours for a project."""

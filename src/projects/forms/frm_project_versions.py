@@ -117,7 +117,7 @@ class ProjectVersionsFrame:
         self.project_name = tk.StringVar(value=project.name)
         self.env_dir = tk.StringVar(value=project.env_dir)
         self.base_dir = tk.StringVar(value=project.base_dir)
-        self.project_version = tk.StringVar(value=self.project.version_text)
+        self.project_version = tk.StringVar(value=self.project.version)
         self.version = tk.StringVar()
 
         # Trace
