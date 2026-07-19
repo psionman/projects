@@ -75,10 +75,6 @@ class ProjectEditFrame:
 
         self._show()
 
-        print(f"Script: {self.script.get()}")
-        print(f"Script exists: {Path(self.script.get()).exists()}")
-        print(f"Desktop file: {self.desktop_file.get()}")
-        print(f"Desktop file exists: {Path(self.desktop_file.get()).exists()}")
         if not Path(self.script.get()).is_file():
             self.script_button.enable(False)
         if not Path(self.desktop_file.get()).is_file():

@@ -4,15 +4,20 @@ import subprocess
 
 from projects import logger
 from projects.data_store import store as data_store
+from projects.env_version import EnvironmentVersion
 from projects.project import Project
 
 
 def update_project(
-    version: str, env_version: EnvVersion, project: Project
+    version: str, env_version: EnvironmentVersion, project: Project
 ) -> int:
     print(f"version: {version}")
     print(f"env_version: {env_version}")
     print(f"project: {project}")
+    print("b", "directors_rota" in data_store.projects)
+    print("c", "bbo rota" in data_store.projects)
+    for x in data_store.projects.keys():
+        print(f"project: {x}")
     base_dir = data_store.projects[env_version.name].base_dir
 
     venv_python = env_version.get_venv_python()

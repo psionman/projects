@@ -15,7 +15,6 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import messagebox, ttk
 
-from projects.data_store import store as data_store
 from psiutils.constants import PAD, Mode, Status, WidgetState
 from psiutils.utilities import geometry, window_resize
 from psiutils.widgets import ScrollingCanvas
@@ -25,6 +24,8 @@ from projects.common import build_project
 from projects.compare import compare
 from projects.config import config
 from projects.constants import VERSION_FILE
+from projects.data_store import get_versions
+from projects.data_store import store as data_store
 from projects.forms.frm_compare import CompareFrame
 from projects.project import Project
 from projects.project_utilities import update_project
@@ -253,7 +254,8 @@ class ProjectVersionsFrame:
         frame.enable(False)
 
     def _populate_versions_frame(self) -> None:
-        self.project.env_versions = self.project.get_versions(self.refresh)
+        # self.project.env_versions = self.project.get_versions(self.refresh)
+        self.project.env_versions = get_versions(self.project, self.refresh)
         if self.refresh:
             data_store.save_projects()
         self.refresh = False

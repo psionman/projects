@@ -39,3 +39,31 @@ NOTES_FILE = Path(USER_DATA_DIR, "notes.json")
 # GUI
 APP_TITLE = "Project management"
 DEFAULT_GEOMETRY = "300x250"
+
+
+DEFAULT_COLOURS = {
+    "titleBar.activeBackground": "#bbbbbb",
+    "titleBar.activeForeground": "#000000",
+    "titleBar.inactiveBackground": "#bbbbbb",
+    # =========================
+    # Breadcrumb colours
+    # =========================
+    "breadcrumb.foreground": "#33aa33",
+    # =========================
+    # Activity Bar colours
+    # =========================
+    "activityBar.activeBackground": "#888888",
+    "activityBar.background": "#bbbbbb",
+    "activityBar.foreground": "#000000",
+    # =========================
+    # Badge colours
+    # =========================
+    "activityBarBadge.background": "#dd5555",
+    "activityBarBadge.foreground": "#ffffff",
+    # =========================
+    # Status Bar colours
+    # =========================
+    "statusBar.background": "#bbbbbb",
+    "statusBar.foreground": "#000000",
+    "statusBarItem.hoverBackground": "#bbbbbb",
+}

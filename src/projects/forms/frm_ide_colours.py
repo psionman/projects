@@ -6,10 +6,11 @@ import re
 import tkinter as tk
 from tkinter import colorchooser, ttk
 
-from psiutils.buttons import ButtonFrame, IconButton
+from psiutils.buttons import IconButton
 from psiutils.constants import PAD
 from psiutils.utilities import geometry, window_resize
 
+from projects.buttons import ButtonFrame
 from projects.config import config
 from projects.constants import APP_TITLE, ICON_DIR
 from projects.project import Project
@@ -34,6 +35,7 @@ class IdeColoursFrame:
         self.root = tk.Toplevel(root)
         self.project = project
         self.style = ttk.Style()
+        self.colours_changed = False
 
         # tk variables
         self.project_name = tk.StringVar(value=project.name)
@@ -70,8 +72,6 @@ class IdeColoursFrame:
 
     def _main_frame(self, master: tk.Frame) -> ttk.Frame:
         frame = ttk.Frame(master)
-        # frame.rowconfigure(0, weight=1)
-        # frame.columnconfigure(1, weight=1)
 
         self.colour_frame = tk.Frame(frame)
         self.colour_frame.grid(row=0, column=0, columnspan=4, sticky=tk.EW)
@@ -80,6 +80,7 @@ class IdeColoursFrame:
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.HORIZONTAL)
         frame.buttons = [
+            frame.icon_button("accept", self._process, True),
             frame.icon_button("exit", self._dismiss),
         ]
         frame.enable(False)
@@ -121,6 +122,8 @@ class IdeColoursFrame:
             width=10,
             style=f"{colour}.TLabel",
             colour=colour,
+            relief=tk.SOLID,
+            borderwidth=1,
         )
         label.grid(row=row, column=2, sticky=tk.W, padx=PAD)
         button = IconButton(
@@ -144,16 +147,11 @@ class IdeColoursFrame:
         colour = getattr(self, key).get()
         result = colorchooser.askcolor(colour, parent=self.root)
         getattr(self, key).set(result[1])
-
         self._populate_colour_frame()
-
-    def _project_colours(self, *args) -> None:
-        dlg = IdeColoursFrame(self.root, self.project)
-        # self.root.wait_window(dlg.root)
-        pass
 
     def _check_value_changed(self, *args) -> None:
         enable = self._record_changes()
+        self.colours_changed = enable
         self.button_frame.enable(enable)
 
     def _record_changes(self) -> bool:

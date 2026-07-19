@@ -10,6 +10,7 @@ buttons = {
     "folder-open": ("Open here", "folder-open"),
     "modified": ("Modified", "pencil"),
     "not-modified": ("Mark modified", "pencil-outline"),
+    "accept": (txt.ACCEPT, "check-circle-outline"),
 }
 
 

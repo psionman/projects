@@ -1,6 +1,5 @@
 """Project data for Compare."""
 
-import os
 import re
 import subprocess
 import tomllib
@@ -14,6 +13,7 @@ from psiutils.constants import Status
 import projects.projects_io as io
 from projects import logger
 from projects.constants import (
+    DEFAULT_COLOURS,
     DEFAULT_VERSION_TEXT,
     HISTORY_FILE,
     PYPROJECT_TOML,
@@ -34,33 +34,6 @@ SERIALIZABLE_FIELDS = [
 ]
 
 DIR_FIELDS = ["base_dir", "source_dir", "script", "desktop_file"]
-
-DEFAULT_COLOURS = {
-    "titleBar.activeBackground": "#bbbbbb",
-    "titleBar.activeForeground": "#000000",
-    "titleBar.inactiveBackground": "#bbbbbb",
-    # =========================
-    # Breadcrumb colours
-    # =========================
-    "breadcrumb.foreground": "#33aa33",
-    # =========================
-    # Activity Bar colours
-    # =========================
-    "activityBar.activeBackground": "#888888",
-    "activityBar.background": "#bbbbbb",
-    "activityBar.foreground": "#000000",
-    # =========================
-    # Badge colours
-    # =========================
-    "activityBarBadge.background": "#dd5555",
-    "activityBarBadge.foreground": "#ffffff",
-    # =========================
-    # Status Bar colours
-    # =========================
-    "statusBar.background": "#bbbbbb",
-    "statusBar.foreground": "#000000",
-    "statusBarItem.hoverBackground": "#bbbbbb",
-}
 
 
 class Project:
@@ -98,9 +71,7 @@ class Project:
         self.repository: str = ""
         self.pypi = False
         self.build_for_windows = False
-        self.workbench_colours = self._get_workbench_colours()
-        if not self.workbench_colours:
-            self.workbench_colours = DEFAULT_COLOURS.copy()
+        self.workbench_colours: dict = {}
         self.modified_versions = []
         self.notes = ""
 
@@ -200,28 +171,6 @@ class Project:
         text = text.replace('"', "")
         return text.replace("'", "")
 
-    # def _get_pyversion(self) -> str:
-    #     default = "-.-.-"
-    #     self.pyproject_missing = False
-
-    #     pyproject_text = io.read_text_file(self.pyproject_path)
-    #     print(f"pyproject_text: {self.name} {pyproject_text}")
-    #     if pyproject_text == Status.ERROR:
-    #         self.pyproject_missing = True
-    #         print(f"pyproject.toml missing {self.pyproject_path}")
-    #         return default
-
-    #     self._pyproject_list = pyproject_text.split("\n")
-    #     for line in self._pyproject_list:
-    #         if "version =" in line:
-    #             line_list = line.split("=")
-    #             if len(line_list) != 2:
-    #                 err_str = "pyproject.toml format error in"
-    #                 print(f"{err_str} {self.pyproject_path}")
-    #                 return default
-    #             return self._clean_string(line_list[1])
-    #     return
-
     def _get_project_meta_data(self) -> str:
         """Get the description for a project."""
         try:
@@ -289,24 +238,7 @@ class Project:
         self._get_project_meta_data()
         self.history = self._get_history()
         self.new_history = self._get_new_history()
-
-    def _get_project_colours(self) -> None:
-        """Get the colours for a project."""
-
-        settings_file = Path(
-            Path(self.source_dir).parent.parent, ".vscode", "settings.json"
-        )
-        try:
-            with open(settings_file, encoding="utf-8") as f:
-                settings = json5.load(f)
-        except FileNotFoundError:
-            return
-
-        if "workbench.colorCustomizations" in settings:
-            colour_customizations = settings["workbench.colorCustomizations"]
-            for key, value in colour_customizations.items():
-                if key in self.workbench_colours:
-                    self.workbench_colours[key] = value
+        self.workbench_colours = self._get_workbench_colours()
 
     def save_project_colours(self) -> None:
         """Save the colours for a project."""
@@ -332,64 +264,6 @@ class Project:
 
     def update_history(self, history: str) -> int:
         return io.update_file(self.history_path, history)
-
-    def get_versions(
-        self, refresh: bool = False
-    ) -> list[dict[EnvironmentVersion]]:
-        """Return a list of environment versions of the project."""
-        if not refresh:
-            return self.cached_envs
-
-        env_versions = {}  # dict of EnvironmentVersion
-
-        pyenv_dir = Path(Path.home(), ".pyenv", "versions")
-        pyenv_versions = self._get_versions_from_dir(pyenv_dir)
-
-        venv_dir = Path(Path.home(), "projects")
-        venv_versions = self._get_versions_from_dir(venv_dir)
-
-        env_versions = {**pyenv_versions, **venv_versions}
-        self.cached_envs = env_versions
-        return env_versions
-
-    def _get_versions_from_dir(self, path: str) -> dict:
-        env_versions = {}  # dict of EnvironmentVersion
-
-        for directory, subdirs, files in os.walk(path, followlinks=False):
-            del subdirs, files
-            project_name_index, environment_index = 0, 0
-
-            if not Path(directory).is_dir():
-                continue
-
-            parts = Path(directory).parts
-            if ".venv" in parts:
-                start_index = parts.index(".venv")
-                project_name_index = start_index + 4
-                environment_index = start_index - 1
-                python_version_index = start_index + 2
-            elif ".pyenv" in parts:
-                start_index = parts.index(".pyenv")
-                project_name_index = start_index + 6
-                environment_index = start_index + 2
-                python_version_index = start_index + 4
-            else:
-                continue
-
-            if len(parts) <= project_name_index:
-                continue
-
-            if self.name == parts[project_name_index]:
-                environment_name = parts[environment_index]
-                if environment_name not in env_versions:
-                    data = (
-                        self.name,
-                        environment_name,
-                        directory,
-                        parts[python_version_index],
-                    )
-                    env_versions[environment_name] = EnvironmentVersion(data)
-        return env_versions
 
     def update_pyproject(self) -> int:
         """Create a requirements.txt and update pyproject.toml accordingly."""
@@ -427,26 +301,6 @@ class Project:
         self._write_requirements("\n".join(list(requirements.values())))
 
         code = 0
-        # code = subprocess.run(
-        #     [
-        #         "uv",
-        #         "add",
-        #         "-r",
-        #         self.requirements_path,
-        #     ],
-        #     check=True,
-        #     cwd=self.base_dir,
-        # ).returncode
-        # if code == 0:
-        #     logger.info(
-        #         "Update project dependencies: requirements added",
-        #         project=self.name,
-        #     )
-        # else:
-        #     logger.warning(
-        #         "Update project dependencies: read requirements failed",
-        #         project=self.name,
-        #     )
         return code
 
     def _build_dependency_dict(self, dependencies: dict) -> dict:
@@ -501,20 +355,18 @@ class Project:
 
     def _get_workbench_colours(self) -> None:
         """Get the colours for the project."""
-
-        settings_file = Path(
-            Path(self.source_dir).parent.parent, ".vscode", "settings.json"
-        )
+        settings_file = Path(Path(self.base_dir), ".vscode", "settings.json")
         try:
             with open(settings_file, encoding="utf-8") as f:
                 settings = json5.load(f)
         except FileNotFoundError:
-            return
+            return DEFAULT_COLOURS.copy()
 
         workbench_colours = {}
         if "workbench.colorCustomizations" in settings:
             colour_customizations = settings["workbench.colorCustomizations"]
             for key, value in colour_customizations.items():
-                if key in workbench_colours:
-                    workbench_colours[key] = value
-        return workbench_colours
+                workbench_colours[key] = value
+        if workbench_colours:
+            return workbench_colours
+        return DEFAULT_COLOURS.copy()

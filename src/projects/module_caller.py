@@ -2,6 +2,7 @@ import sys
 
 from psiutils.constants import Mode
 
+from projects.data_store import get_versions
 from projects.data_store import store as data_store
 from projects.forms.frm_build import BuildFrame
 from projects.forms.frm_compare import CompareFrame
@@ -52,14 +53,14 @@ class ModuleCaller:
     def _compare(self) -> None:
         project_name = sys.argv[2]
         project = data_store.projects[project_name]
-        project.env_versions = project.get_versions()
+        project.env_versions = get_versions(project)
         dlg = CompareFrame(self, project, project.env_versions[sys.argv[3]])
         self.root.wait_window(dlg.root)
 
     def _versions(self) -> None:
         project_name = sys.argv[2]
         project = data_store.projects[project_name]
-        project.env_versions = project.get_versions()
+        project.env_versions = get_versions(project)
         dlg = ProjectVersionsFrame(self, project)
         self.root.wait_window(dlg.root)
 
