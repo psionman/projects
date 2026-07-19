@@ -1,5 +1,8 @@
 # History
 
+## Version 1.0.12 - 16 Jul 2026
+1. Fixed version text property
+
 ## Version 1.0.11 - 16 Jul 2026
 1. Fixed Search looking in non-text files
 2. Introduced tagged buttons
