@@ -211,7 +211,7 @@ class MainFrame:
             frame.icon_button("build", self._build_project, True, tag="build"),
             frame.icon_button("update", self._update_pyproject),
             frame.icon_button("folder-open", self._open_dolphin, True),
-            frame.icon_button("windsurf", self._open_windsurf, True),
+            frame.icon_button("devin", self._open_devin, True),
             frame.icon_button("console", self._konsole),
             IconButton(
                 frame,
@@ -257,7 +257,7 @@ class MainFrame:
             MenuItem(txt.EDIT, self._edit_project, dimmable=True),
             self.build_menu_item,
             MenuItem(txt.UPDATE, self._update_pyproject, dimmable=True),
-            MenuItem(txt.WINDSURF, self._open_windsurf, dimmable=True),
+            MenuItem(txt.WINDSURF, self._open_devin, dimmable=True),
             MenuItem(txt.KONSOLE, self._konsole, dimmable=True),
             self.run_script_menu_item,
             self.compare_menu_item,
@@ -330,11 +330,11 @@ class MainFrame:
         except FileNotFoundError:
             messagebox.showerror("", "codium not found.")
 
-    def _open_windsurf(self, *args) -> None:
+    def _open_devin(self, *args) -> None:
         try:
-            return call_process(["windsurf", self.project.base_dir])
+            return call_process(["devin-desktop-next", self.project.base_dir])
         except FileNotFoundError:
-            messagebox.showerror("", "windsurf not found.")
+            messagebox.showerror("", "devin-desktop-next not found.")
 
     def _konsole(self, *args) -> None:
         return call_process(["konsole", "--workdir", self.project.base_dir])

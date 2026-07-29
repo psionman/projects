@@ -1,5 +1,8 @@
 # History
 
+## Version 1.0.13 - 29 Jul 2026
+1. Replace windsurf with devin
+
 ## Version 1.0.12 - 16 Jul 2026
 1. Fixed version text property
 

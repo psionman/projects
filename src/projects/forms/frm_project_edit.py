@@ -384,7 +384,7 @@ class ProjectEditFrame:
 
         logger.info("Project changed", changes=changes)
         data_store.save_projects(data_store.projects)
-        self.project_version.set(self.project.version_text)
+        self.project_version.set(self.project.version)
         self.status = Status.UPDATED
         self._dismiss()
 

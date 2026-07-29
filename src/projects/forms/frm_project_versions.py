@@ -1,6 +1,6 @@
 """
 GUI for comparing and building Python package versions.
-
+s
 This module defines the ProjectVersionsFrame class, which provides a
 Tkinter-based interface for selecting, comparing, and
 building different development versions of a Python package project.
@@ -247,7 +247,7 @@ class ProjectVersionsFrame:
             frame.icon_button("compare-orange", self._compare_project, True),
             frame.icon_button("update", self._update_project, True),
             # frame.icon_button("code-blue", self._open_code, True),
-            frame.icon_button("windsurf", self._open_windsurf, True),
+            frame.icon_button("devin", self._open_devin, True),
             modify_button,
             frame.icon_button("exit-orange", self._dismiss),
         ]
@@ -349,12 +349,12 @@ class ProjectVersionsFrame:
         env_version = self.project.env_versions[self.version.get()]
         subprocess.call(["codium", "-n", env_version.dir])
 
-    def _open_windsurf(self, *args) -> None:
+    def _open_devin(self, *args) -> None:
         env_version = self.project.env_versions[self.version.get()]
         try:
-            return call_process(["windsurf", env_version.dir])
+            return call_process(["devin-desktop-next", env_version.dir])
         except FileNotFoundError:
-            messagebox.showerror("", "windsurf not found.")
+            messagebox.showerror("", "devin-desktop-next not found.")
 
     def _toggle_modified(self, *args) -> None:
         if self.version.get() in self.project.modified_versions:
