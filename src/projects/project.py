@@ -218,6 +218,7 @@ class Project:
                 json5.dump(settings, f, indent=2)
 
     def update_version(self, version: str) -> int:
+        self.version = version
         self.pyproject_data["project"]["version"] = version
         with open(Path(self.base_dir, self.pyproject_path), "wb") as f:
             tomli_w.dump(self.pyproject_data, f)
