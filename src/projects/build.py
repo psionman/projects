@@ -47,9 +47,9 @@ def update_module(build_data: dict) -> int:
         check_imports(project.name, project.source_dir)
         project.update_pyproject()
 
-        if not build_data.test_build:
-            if _update_non_test_items(build_data) == Status.ERROR:
-                return Status.ERROR
+    if not build_data.test_build:
+        if _update_non_test_items(build_data) == Status.ERROR:
+            return Status.ERROR
 
     if _update_version(project, build_data.version) != Status.SUCCESS:
         return Status.ERROR

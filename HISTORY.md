@@ -1,5 +1,8 @@
 # History
 
+## Version 1.0.16 - 19 August 2026
+1. Update History on git apply
+
 ## Version 1.0.13 - 29 Jul 2026
 1. Replace windsurf with devin
 
@@ -64,3 +67,4 @@
 
 ## version 0.0.0 - 6 Nov 2025
 1. Copy from 'package'
+
