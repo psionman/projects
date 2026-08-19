@@ -2,13 +2,13 @@ import os
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from psiutils.buttons import ButtonFrame
 from psiutils.constants import PAD, Status, WidgetState
 from psiutils.utilities import geometry, window_resize
 from psiutils.widgets import WaitCursor, clickable_widget
 
 from projects import logger
 from projects.build import BuildData, update_module
+from projects.buttons import ButtonFrame
 from projects.config import config
 from projects.text import Text
 
@@ -18,9 +18,10 @@ FRAME_TITLE = "Build package"
 
 
 class BuildFrame:
-    def __init__(self, parent, project):
+    def __init__(self, parent, project, git_commit: bool):
         self.root = tk.Toplevel(parent)
         self.project = project
+        self.git_commit = git_commit
 
         # tk variables
         self.project_name = tk.StringVar(value=project.name)
@@ -47,7 +48,10 @@ class BuildFrame:
         root = self.root
         root.geometry(geometry(config, __file__))
         # root.transient(root)
-        root.title(FRAME_TITLE)
+        if self.git_commit:
+            root.title("Git apply")
+        else:
+            root.title(FRAME_TITLE)
 
         root.rowconfigure(1, weight=1)
         root.columnconfigure(0, weight=1)
@@ -101,20 +105,23 @@ class BuildFrame:
         entry = ttk.Entry(frame, textvariable=self.new_version)
         entry.grid(row=row, column=3, sticky=tk.W, padx=PAD, pady=PAD)
 
-        row += 1
-        checkbutton = tk.Checkbutton(
-            frame, text='Delete all "build" files', variable=self.delete_build
-        )
-        checkbutton.grid(row=row, column=0, sticky=tk.W)
+        if not self.git_commit:
+            row += 1
+            checkbutton = tk.Checkbutton(
+                frame,
+                text='Delete all "build" files',
+                variable=self.delete_build,
+            )
+            checkbutton.grid(row=row, column=0, sticky=tk.W)
 
-        check_button = tk.Checkbutton(
-            frame, text="Test build", variable=self.test_build
-        )
-        check_button.grid(row=row, column=1, sticky=tk.W)
+            check_button = tk.Checkbutton(
+                frame, text="Test build", variable=self.test_build
+            )
+            check_button.grid(row=row, column=1, sticky=tk.W)
 
-        row += 1
-        commit_frame = self._commit_frame(frame)
-        commit_frame.grid(row=row, column=0, columnspan=4, sticky=tk.EW)
+            row += 1
+            commit_frame = self._commit_frame(frame)
+            commit_frame.grid(row=row, column=0, columnspan=4, sticky=tk.EW)
 
         row += 1
         frame.rowconfigure(row, weight=1)
@@ -136,30 +143,49 @@ class BuildFrame:
         frame.columnconfigure(2, weight=1)
 
         row = 0
-        checkbutton = tk.Checkbutton(
-            frame, text="Sync repository", variable=self.sync_repository
-        )
-        checkbutton.grid(row=row, column=0, sticky=tk.W)
+        column = 0
+        if not self.git_commit:
+            checkbutton = tk.Checkbutton(
+                frame, text="Sync repository", variable=self.sync_repository
+            )
+            checkbutton.grid(row=row, column=column, sticky=tk.W)
+            column += 1
 
         label = ttk.Label(frame, text="Commit text")
-        label.grid(row=row, column=1, sticky=tk.W, padx=PAD, pady=PAD)
+        label.grid(row=row, column=column, sticky=tk.W, padx=PAD, pady=PAD)
+        column += 1
 
         entry = ttk.Entry(frame, textvariable=self.commit_text)
-        entry.grid(row=row, column=2, columnspan=3, sticky=tk.EW)
+        entry.grid(row=row, column=column, columnspan=3, sticky=tk.EW)
 
         return frame
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         """Create button row."""
         frame = ButtonFrame(master, tk.HORIZONTAL)
+        if self.git_commit:
+            self.build_button = frame.icon_button(
+                "git-apply", self._git_apply, True
+            )
+        else:
+            self.build_button = frame.icon_button("build", self._build, False)
         frame.buttons = [
-            frame.icon_button("build", self._build, True),
+            self.build_button,
             frame.icon_button("exit-orange", self._dismiss),
         ]
         frame.disable()
         return frame
 
     def _build(self, *args) -> None:
+        with WaitCursor(self.root):
+            response = self._build_project()
+        if response == Status.SUCCESS:
+            self._build_success()
+        else:
+            self._build_failure()
+        self._dismiss()
+
+    def _git_apply(self, *args) -> None:
         with WaitCursor(self.root):
             response = self._build_project()
         if response == Status.SUCCESS:
@@ -179,6 +205,7 @@ class BuildFrame:
             self.test_build.get(),
             self.sync_repository.get(),
             self.commit_text.get(),
+            self.git_commit,
         )
         return update_module(build_data)
 

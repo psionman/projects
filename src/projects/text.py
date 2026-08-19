@@ -24,6 +24,9 @@ strings = {
     "RUN_SCRIPT": "Run script",
     "DATA_DIRECTORY": "Data directory",
     "ONLINE_HELP": "Online help",
+    "DEVIN": "Devin",
+    "GIT_PUSH": "Git Push",
+    "GIT_APPLY": "Git Apply",
     "IDE_COLOURS": "IDE Colours",
 }
 

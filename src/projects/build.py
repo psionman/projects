@@ -34,6 +34,7 @@ class BuildData:
     test_build: bool
     sync_repository: str
     commit_text: str
+    git_commit: bool
 
 
 def update_module(build_data: dict) -> int:
@@ -42,23 +43,26 @@ def update_module(build_data: dict) -> int:
         "Starting build process",
         project=project.name,
     )
-    check_imports(project.name, project.source_dir)
-    project.update_pyproject()
+    if not build_data.git_commit:
+        check_imports(project.name, project.source_dir)
+        project.update_pyproject()
 
-    if not build_data.test_build:
-        if _update_non_test_items(build_data) == Status.ERROR:
-            return Status.ERROR
+        if not build_data.test_build:
+            if _update_non_test_items(build_data) == Status.ERROR:
+                return Status.ERROR
 
     if _update_version(project, build_data.version) != Status.SUCCESS:
         return Status.ERROR
 
-    if _build(project) != Status.SUCCESS:
-        _restore_project(build_data)
-        return Status.ERROR
+    if not build_data.git_commit:
+        if _build(project) != Status.SUCCESS:
+            _restore_project(build_data)
+            return Status.ERROR
 
-    if _pypi_push(project, build_data.test_build) != Status.SUCCESS:
-        _restore_project(build_data)
-        return Status.ERROR
+    if project.pypi:
+        if _pypi_push(project, build_data.test_build) != Status.SUCCESS:
+            _restore_project(build_data)
+            return Status.ERROR
 
     if _git_push(build_data) != Status.SUCCESS:
         return Status.ERROR

@@ -1,6 +1,6 @@
 import re
 
-from projects._version import __version__
+from projects import __version__
 
 
 def test_version():

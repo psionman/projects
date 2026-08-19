@@ -1,6 +1,7 @@
 """MainFrame for project management."""
 
 import tkinter as tk
+from pathlib import Path
 from tkinter import messagebox, ttk
 from typing import Any
 
@@ -165,7 +166,7 @@ class MainFrame:
         self.context_menu.enable(True)
 
         self._enable_script_items()
-        self._enable_widows_items()
+        self._enable_windows_items()
 
         if not self.project.pypi:
             self._disable_non_pypi_buttons()
@@ -175,7 +176,7 @@ class MainFrame:
         self.run_script_button.enable(enable)
         self.run_script_menu_item.enable(enable)
 
-    def _enable_widows_items(self) -> None:
+    def _enable_windows_items(self) -> None:
         enable = bool(self.project.build_for_windows)
         self.windows_build_button.enable(enable)
         self.windows_build_menu_item.enable(enable)
@@ -198,6 +199,7 @@ class MainFrame:
 
         frame.buttons = self._frame_buttons(frame)
         self.build_button = frame.tagged_buttons["build"]
+        self.git_push_button = frame.tagged_buttons["git_push"]
         self.compare_button = frame.tagged_buttons["compare"]
         self.refresh_button = frame.tagged_buttons["refresh"]
         self.run_script_button = frame.tagged_buttons["run_script"]
@@ -209,6 +211,9 @@ class MainFrame:
         return [
             frame.icon_button("edit", self._edit_project, True),
             frame.icon_button("build", self._build_project, True, tag="build"),
+            frame.icon_button(
+                "git-push", self._git_push, True, tag="git_push"
+            ),
             frame.icon_button("update", self._update_pyproject),
             frame.icon_button("folder-open", self._open_dolphin, True),
             frame.icon_button("devin", self._open_devin, True),
@@ -257,7 +262,7 @@ class MainFrame:
             MenuItem(txt.EDIT, self._edit_project, dimmable=True),
             self.build_menu_item,
             MenuItem(txt.UPDATE, self._update_pyproject, dimmable=True),
-            MenuItem(txt.WINDSURF, self._open_devin, dimmable=True),
+            MenuItem(txt.DEVIN, self._open_devin, dimmable=True),
             MenuItem(txt.KONSOLE, self._konsole, dimmable=True),
             self.run_script_menu_item,
             self.compare_menu_item,
@@ -335,6 +340,13 @@ class MainFrame:
             return call_process(["devin-desktop-next", self.project.base_dir])
         except FileNotFoundError:
             messagebox.showerror("", "devin-desktop-next not found.")
+
+    def _git_push(self, *args) -> None:
+        git_dir = Path(self.project.base_dir, ".git")
+        if not git_dir.exists():
+            messagebox.showerror("", "Project is not a git repository.")
+            return
+        build_project(self.root, self.project, git_commit=True)
 
     def _konsole(self, *args) -> None:
         return call_process(["konsole", "--workdir", self.project.base_dir])

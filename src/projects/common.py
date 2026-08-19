@@ -8,7 +8,9 @@ from projects.forms.frm_build import BuildFrame
 from projects.project import Project
 
 
-def build_project(root: tk.Tk, project: Project) -> None:
+def build_project(
+    root: tk.Tk, project: Project, git_commit: bool = False
+) -> None:
     """Build a project."""
     if not UV_PUBLISH_TOKEN:
         messagebox.showerror("", "UV_PUBLISH_TOKEN not set.")
@@ -17,7 +19,7 @@ def build_project(root: tk.Tk, project: Project) -> None:
     if not _is_valid(project):
         return Status.ERROR
 
-    dlg = BuildFrame(root, project)
+    dlg = BuildFrame(root, project, git_commit)
     root.wait_window(dlg.root)
     return Status.OK
 

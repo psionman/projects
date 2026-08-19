@@ -12,6 +12,8 @@ buttons = {
     "not-modified": ("Mark modified", "pencil-outline"),
     "accept": (txt.ACCEPT, "check-circle-outline"),
     "devin": ("Devin", "devin-desktop-next"),
+    "git-push": (txt.GIT_PUSH, "git-branch"),
+    "git-apply": (txt.GIT_APPLY, "git-stash-apply"),
 }
 
 
