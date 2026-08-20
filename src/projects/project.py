@@ -106,10 +106,21 @@ class Project:
         if not self.history:
             return []
         history = self.history
+        next_version = f"## Version {self.next_version()}"
+        if self._next_version_exists(next_version):
+            return "\n".join(history)
+
         date = datetime.now().strftime("%d %B %Y")
-        version = f"## Version {self.next_version()} - {date}"
+        version = f"{next_version} - {date}"
         insertion = ["", version, "1.", ""]
         return "\n".join([history[0]] + insertion + history[2:])
+
+    def _next_version_exists(self, next_version: str) -> bool:
+        """Check if the next version already exists in the history."""
+        for line in self.history:
+            if line.startswith(next_version):
+                return True
+        return False
 
     def next_version(self) -> str:
         """Return the next version string."""

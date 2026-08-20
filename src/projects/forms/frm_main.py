@@ -188,6 +188,10 @@ class MainFrame:
         self.build_menu_item.disable()
         self.compare_menu_item.disable()
         self.refresh_menu_item.disable()
+        git_dir = Path(self.project.base_dir, ".git")
+        if not git_dir.exists():
+            self.git_push_button.disable()
+            self.git_push_menu_item.disable()
 
     def _show_context_menu(self, event) -> None:
         self.context_menu.tk_popup(event.x_root, event.y_root)
@@ -342,10 +346,6 @@ class MainFrame:
             messagebox.showerror("", "devin-desktop-next not found.")
 
     def _git_push(self, *args) -> None:
-        git_dir = Path(self.project.base_dir, ".git")
-        if not git_dir.exists():
-            messagebox.showerror("", "Project is not a git repository.")
-            return
         build_project(self.root, self.project, git_commit=True)
 
     def _konsole(self, *args) -> None:

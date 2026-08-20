@@ -1,7 +1,10 @@
 # History
 
+## Version 1.0.18 - 20 August 2026
+1. Only add new version to HISTORY.md if it doesn't already exist
+
 ## Version 1.0.17 - 20 August 2026
-1. Refactor build.py for seperation of concerns
+1. Refactor build.py for separation of concerns
 
 ## Version 1.0.16 - 19 August 2026
 1. Update History on git apply
@@ -76,6 +79,7 @@
 
 ## version 0.0.0 - 6 Nov 2025
 1. Copy from 'package'
+
 
 
 
