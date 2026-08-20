@@ -30,7 +30,7 @@ class BuildData:
     version: str
     current_version: str
     history: str
-    current_history: str
+    previous_history: str
     test_build: bool
     sync_repository: str
     commit_text: str
@@ -48,11 +48,12 @@ def update_module(build_data: dict) -> int:
         project.update_pyproject()
 
     if not build_data.test_build:
-        if _update_non_test_items(build_data) == Status.ERROR:
+        if _update_version(build_data) == Status.ERROR:
             return Status.ERROR
-
-    if _update_version(project, build_data.version) != Status.SUCCESS:
-        return Status.ERROR
+        if _update_history(build_data) == Status.ERROR:
+            return Status.ERROR
+        if _delete_build_dirs(build_data) == Status.ERROR:
+            return Status.ERROR
 
     if not build_data.git_commit:
         if _build(project) != Status.SUCCESS:
@@ -70,32 +71,49 @@ def update_module(build_data: dict) -> int:
     return Status.SUCCESS
 
 
-def _update_non_test_items(build_data: dict) -> Status:
-    project = build_data.project
-    if _update_version(project, build_data.version) != Status.SUCCESS:
-        return Status.ERROR
-
-    if project.update_history(build_data.history) != Status.SUCCESS:
+def _update_version(build_data: dict) -> Status:
+    if build_data.project.update_version(build_data.version) != Status.SUCCESS:
         return Status.ERROR
     logger.info(
-        "Update history",
-        project=project.name,
+        "Update version",
+        project=build_data.project.name,
+        version=build_data.version,
     )
-
-    if (
-        build_data.delete_build
-        and _delete_build_dirs(project) != Status.SUCCESS
-    ):
-        return Status.ERROR
-
     return Status.SUCCESS
 
 
-def _update_version(project: Project, version: str) -> int:
-    if project.update_version(version) != Status.SUCCESS:
+def _update_history(build_data: dict) -> Status:
+    if build_data.project.update_history(build_data.history) != Status.SUCCESS:
         return Status.ERROR
-    logger.info("Update version", project=project.name, version=version)
+    logger.info("Update history", project=build_data.project.name)
+    return Status.SUCCESS
 
+
+def _delete_build_dirs(build_data: dict) -> int:
+    project = build_data.project
+    if not build_data.delete_build:
+        return Status.SUCCESS
+    for build_dir in [
+        "dist",
+        "build",
+        f"{project.name}.egg-info",
+    ]:
+        path = Path(project.base_dir, build_dir)
+        if path.is_dir():
+            try:
+                shutil.rmtree(path)
+                logger.info(
+                    "Removing path",
+                    project=project.name,
+                    path=str(path),
+                )
+            except OSError:
+                logger.exception(f"Failed to remove {path}")
+                return Status.ERROR
+    logger.info(
+        "Build directories removed",
+        project=project.name,
+    )
     return Status.SUCCESS
 
 
@@ -106,7 +124,7 @@ def _restore_project(build_data: dict) -> None:
         project=project.name,
     )
     _update_version(project, build_data.current_version)
-    project.update_history(build_data.current_history)
+    project.update_history(build_data.previous_history)
 
 
 def _build(project: Project) -> int:
@@ -195,28 +213,3 @@ def _proc_action(project: Project, action: list[str]) -> int:
     (stdout, stderr) = proc.communicate()
     del stdout, stderr
     return proc.returncode
-
-
-def _delete_build_dirs(project: Project) -> int:
-    logger.info(
-        "Removing build directories",
-        project=project.name,
-    )
-    for build_dir in [
-        "dist",
-        "build",
-        f"{project.name}.egg-info",
-    ]:
-        path = Path(project.base_dir, build_dir)
-        if path.is_dir():
-            try:
-                shutil.rmtree(path)
-                logger.info(
-                    "Removing path",
-                    project=project.name,
-                    path=str(path),
-                )
-            except OSError:
-                logger.exception(f"Failed to remove {path}")
-                return Status.ERROR
-    return Status.SUCCESS

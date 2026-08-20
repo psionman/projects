@@ -1,7 +1,16 @@
 # History
 
+## Version 1.0.17 - 20 August 2026
+1. Refactor build.py for seperation of concerns
+
 ## Version 1.0.16 - 19 August 2026
 1. Update History on git apply
+
+## Version 1.0.15 - 19 August 2026
+1. Update version and history on build
+
+## Version 1.0.14 - 19 August 2026
+1. Update version and history on git apply
 
 ## Version 1.0.13 - 29 Jul 2026
 1. Replace windsurf with devin
@@ -67,4 +76,12 @@
 
 ## version 0.0.0 - 6 Nov 2025
 1. Copy from 'package'
+
+
+
+
+
+
+
+
 

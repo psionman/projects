@@ -227,7 +227,7 @@ wheels = [
 
 [[package]]
 name = "projects"
-version = "1.0.6"
+version = "1.0.16"
 source = { editable = "." }
 dependencies = [
     { name = "clipboard" },
