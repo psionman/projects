@@ -83,7 +83,7 @@ def _update_version(build_data: dict) -> Status:
 
 
 def _update_history(build_data: dict) -> Status:
-    if build_data.project.update_history(build_data.history) != Status.SUCCESS:
+    if build_data.project.save_history(build_data.history) != Status.SUCCESS:
         return Status.ERROR
     logger.info("Update history", project=build_data.project.name)
     return Status.SUCCESS
@@ -124,7 +124,7 @@ def _restore_project(build_data: dict) -> None:
         project=project.name,
     )
     _update_version(project, build_data.current_version)
-    project.update_history(build_data.previous_history)
+    project.save_history(build_data.previous_history)
 
 
 def _build(project: Project) -> int:

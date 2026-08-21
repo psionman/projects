@@ -171,6 +171,7 @@ class BuildFrame:
             self.build_button = frame.icon_button("build", self._build, False)
         frame.buttons = [
             self.build_button,
+            frame.icon_button("save", self._save_history),
             frame.icon_button("exit-orange", self._dismiss),
         ]
         frame.disable()
@@ -222,6 +223,10 @@ class BuildFrame:
         messagebox.showerror(
             "Module update", "Module not updated", parent=self.root
         )
+
+    def _save_history(self, *args):
+        """Save the history to the project."""
+        self.project.save_history(self.history_text.get("1.0", "end"))
 
     def _dismiss(self):
         self.root.destroy()

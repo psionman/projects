@@ -236,7 +236,7 @@ class Project:
 
         return Status.SUCCESS
 
-    def update_history(self, history: str) -> int:
+    def save_history(self, history: str) -> int:
         return io.update_file(self.history_path, history)
 
     def update_pyproject(self) -> int:
