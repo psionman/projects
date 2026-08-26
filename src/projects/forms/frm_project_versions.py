@@ -339,7 +339,7 @@ class ProjectVersionsFrame:
         self.refresh = True
 
     def _build_project(self, *args) -> None:
-        build_project(self.root, self.project)
+        build_project(self, self.project)
 
     def _open_dolphin(self, *args) -> None:
         env_version = self.project.env_versions[self.version.get()]

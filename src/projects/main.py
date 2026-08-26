@@ -7,7 +7,7 @@ import tkinter as tk
 from psiutils.utilities import display_icon
 from psiutils.widgets import get_styles
 
-from projects import __app_name__, __version__, logger
+from projects import __app_name__, __version__
 from projects.constants import APP_TITLE, ICON_FILE
 from projects.data_store import store
 from projects.forms.frm_main import AppFrame
@@ -23,6 +23,12 @@ def main() -> None:
     parser.add_argument(
         "module", nargs="?", default=None, help="Module to load"
     )
+    parser.add_argument(
+        "project", nargs="?", default=None, help="Project name"
+    )
+    parser.add_argument(
+        "secondary", nargs="?", default=None, help="Secondary project name"
+    )
     args = parser.parse_args()
 
     root = tk.Tk()
@@ -35,13 +41,9 @@ def main() -> None:
 
     if args.module:
         try:
-            dlg = ModuleCaller(root, args.module)
-            if dlg.invalid:
-                logger.error("Invalid module", module=args.module)
-                AppFrame(root)
-        except Exception as e:
-            logger.error(f"Failed to load module '{args.module}'", error=e)
-            AppFrame(root)
+            ModuleCaller(root, args)
+        except Exception:
+            root.destroy()
     else:
         AppFrame(root)
 

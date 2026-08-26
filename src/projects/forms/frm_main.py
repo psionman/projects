@@ -320,7 +320,7 @@ class AppFrame:
         self._populate_tree()
 
     def _build_project(self, *args) -> None:
-        build_project(self.root, self.project)
+        build_project(self, self.project)
 
     def _update_pyproject(self, *args) -> None:
         code = self.project.update_pyproject()

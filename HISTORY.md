@@ -3,6 +3,7 @@
 ## Version 1.0.21 - 26 August 2026
 1. Make new script executable
 2. Refactor root.py into main.py
+3. Change call params to BuildFrame to pass self instead of self.root
 
 ## Version 1.0.20 - 25 August 2026
 1. Add ability to open project in Dolphin

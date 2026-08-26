@@ -48,7 +48,7 @@ class ConfigFrame:
         _dismiss() -> None: Dismisses the configuration frame.
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent: ttk.Frame) -> None:
         self.root = tk.Toplevel(parent.root)
         self.parent = parent
         self.ignore_text = None
