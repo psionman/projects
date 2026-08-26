@@ -13,6 +13,7 @@ from psiutils.utilities import geometry, window_resize
 
 from projects.config import config
 from projects.constants import APP_TITLE
+from projects.data_store import store as data_store
 
 FRAME_TITLE = f"{APP_TITLE} - Search for content"
 
@@ -29,9 +30,7 @@ class SearchFrame:
     """
 
     def __init__(self, parent: tk.Frame, search_term: str = "") -> None:
-        self.root = tk.Toplevel()
-        self.parent = parent
-        self.projects = parent.projects
+        self.root = tk.Toplevel(parent.root)
         self.files = []
 
         self.search_button = None
@@ -55,7 +54,6 @@ class SearchFrame:
         root = self.root
         root.geometry(geometry(config, __file__))
         root.title(FRAME_TITLE)
-        root.transient(self.parent.root)
 
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
@@ -163,7 +161,7 @@ class SearchFrame:
         self.found_list.delete("0.0", tk.END)
         self.found = [
             project.name
-            for project in self.projects.values()
+            for project in data_store.projects.values()
             if self._parse_project(project.base_dir)
         ]
         self.found_list.insert("0.0", "\n".join(sorted(self.found)))

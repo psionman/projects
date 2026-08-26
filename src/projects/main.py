@@ -27,7 +27,7 @@ def main() -> None:
         "project", nargs="?", default=None, help="Project name"
     )
     parser.add_argument(
-        "secondary", nargs="?", default=None, help="Secondary project name"
+        "secondary", nargs="?", default=None, help="Secondary argument"
     )
     args = parser.parse_args()
 

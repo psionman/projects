@@ -89,7 +89,6 @@ class MainMenu:
         self.root.wait_window(dlg.root)
 
     def _notes(self, *args):
-        print("Notes")
         NotesFrame(self)
 
     def _dismiss(self) -> None:
