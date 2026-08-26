@@ -12,7 +12,7 @@ dependencies = [
     "dbus-python>=1.4.0",
     "dotenv>=0.9.9",
     "json5>=0.15.0",
-    "psiutils>=1.0.2",
+    "psiutils>=1.0.4",
     "python-dateutil>=2.9.0.post0",
     "tksheet>=7.6.0",
 ]

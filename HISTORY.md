@@ -1,5 +1,8 @@
 # History
 
+## Version 1.0.22 - 26 August 2026
+1. Use ModuleCallerBase from psiutils
+
 ## Version 1.0.21 - 26 August 2026
 1. Make new script executable
 2. Refactor root.py into main.py

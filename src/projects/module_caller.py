@@ -1,4 +1,5 @@
 from psiutils.constants import Mode
+from psiutils.module_caller import ModuleCaller as ModuleCallerBase
 
 from projects.data_store import get_versions
 from projects.data_store import store as data_store
@@ -11,12 +12,9 @@ from projects.forms.frm_project_versions import ProjectVersionsFrame
 from projects.forms.frm_search import SearchFrame
 
 
-class ModuleCaller:
-    def __init__(self, root, parsed_args) -> None:
-        self.args = parsed_args
+class ModuleCaller(ModuleCallerBase):
+    def __init__(self, root, parsed_args: dict) -> None:
         self.modules = {
-            "main": (None, "Call main function"),
-            "list": (None, "List module definitions"),
             "config": (self._config, None),
             "edit": (self._edit, "Param: project name"),
             "search": (self._search, "Param: search term or ''"),
@@ -28,47 +26,7 @@ class ModuleCaller:
             "versions": (self._versions, "Param: project name"),
             "notes": (self._notes, None),
         }
-
-        if self._select_module():
-            self.root = root
-            self.root.after(100, self._run_module)
-        else:
-            root.destroy()
-
-    def _run_module(self) -> None:
-        try:
-            self.modules[self.args.module][0]()
-        except ValueError as e:
-            print(f"Error running module: {e}")
-        finally:
-            self.root.destroy()
-
-    def _select_module(self) -> bool:
-        """Return True if a valid, runnable module was selected."""
-        module = self.args.module
-        if module in ("list", None) or module not in self.modules:
-            if module not in ("list", "main", None):
-                print(f"*** Invalid function name: {module} ***")
-            self._list()
-            return False
-        return True
-
-    def _list(self) -> None:
-        keys = sorted(self.modules.keys())
-        padding = max(len(key) for key in keys)
-        for key in keys:
-            _, help_text = self.modules[key]
-            if help_text:
-                print(f"{key:.<{padding}} {help_text}")
-            else:
-                print(key)
-
-    def _require(self, attr: str, message: str) -> str:
-        """Return the named CLI arg, or raise ValueError if missing."""
-        value = getattr(self.args, attr)
-        if not value:
-            raise ValueError(message)
-        return value
+        super().__init__(root, parsed_args)
 
     def _get_project(self, project_name: str):
         try:
