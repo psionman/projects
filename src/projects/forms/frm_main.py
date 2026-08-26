@@ -35,7 +35,7 @@ COLUMN_DEFS = (
 )
 
 
-class MainFrame:
+class AppFrame:
     """
     MainFrame for project management.
 
@@ -46,9 +46,8 @@ class MainFrame:
         like building projects or editing project details.
     """
 
-    def __init__(self, parent):
-        self.root = parent.root
-        self.parent = parent
+    def __init__(self, root):
+        self.root = root
 
         self.projects = data_store.projects
         data_store.subscribe(self._populate_tree)
