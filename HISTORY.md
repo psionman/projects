@@ -1,5 +1,12 @@
 # History
 
+## Version 1.0.21 - 26 August 2026
+1. Make new script executable
+
+## Version 1.0.20 - 25 August 2026
+1. Add ability to open project in Dolphin
+2. add dev-packages in just file
+
 ## Version 1.0.19 - 21 August 2026
 1.  Add save history button to frm_build
 

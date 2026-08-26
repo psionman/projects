@@ -260,7 +260,7 @@ class ProjectEditFrame:
         initialdir = config.desktop_directory
         if self.desktop_file.get():
             initialdir = Path(self.desktop_file.get()).parent
-        path = self.ask_save_path(initialdir)
+        path = self._ask_save_path(initialdir)
 
         if path:
             self.desktop_file.set(path)
@@ -269,12 +269,12 @@ class ProjectEditFrame:
         initialdir = config.script_directory
         if self.script.get():
             initialdir = Path(self.script.get()).parent
-        path = self.ask_save_path(initialdir)
+        path = self._ask_save_path(initialdir)
 
         if path:
             self.script.set(path)
 
-    def ask_save_path(self, initialdir: Path):
+    def _ask_save_path(self, initialdir: Path):
         path = filedialog.asksaveasfilename(
             title="Choose file",
             initialdir=initialdir,
@@ -284,20 +284,26 @@ class ProjectEditFrame:
         if not path:
             return None  # user cancelled dialog
 
-        if os.path.exists(path):
-            # file exists → just return it (or optionally confirm overwrite)
-            return path
-        else:
-            # file does not exist → ask to create
-            create = messagebox.askyesno(
-                "Create file?", f"{path} does not exist.\nCreate it?"
+        if os.path.isdir(path):
+            messagebox.showerror(
+                "Invalid selection",
+                f"{path} is a directory, not a file.\n"
+                "Please provide a filename.",
             )
-            if create:
-                with open(path, "w") as f_script:
-                    f_script.write("")
-                return path
-            else:
-                return None
+            return None
+
+        if os.path.exists(path):
+            return path
+
+        create = messagebox.askyesno(
+            "Create file?", f"{path} does not exist.\nCreate it?"
+        )
+        if create:
+            with open(path, "w") as f_script:
+                f_script.write("")
+            os.chmod(path, 0o755)  # rwxr-xr-x
+            return path
+        return None
 
     def _check_value_changed(self, *args) -> None:
         enable = self._record_changes()

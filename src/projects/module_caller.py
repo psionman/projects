@@ -66,6 +66,7 @@ class ModuleCaller:
 
     def _project(self) -> None:
         project_name = sys.argv[2]
+        print(f"Editing project: {project_name}")
         dlg = ProjectEditFrame(
             self, Mode.EDIT, data_store.projects[project_name]
         )

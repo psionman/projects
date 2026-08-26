@@ -1,6 +1,10 @@
 import subprocess
 import threading
+from pathlib import Path
 from typing import Any
+
+import dbus
+import dbus.mainloop.glib
 
 from projects.constants import HOME_DIR
 
@@ -74,31 +78,45 @@ def expand_home(path: str) -> str:
     return path.replace("~", HOME_DIR)
 
 
-def open_dolphin(path) -> None:
-    path = str(path)
-    service = _find_dolphin_service()
-    if service:
-        subprocess.call(
-            [
-                "qdbus6",
-                service,
-                "/dolphin/Dolphin_1",
-                "org.kde.dolphin.MainWindow.openDirectories",
-                f"file://{path}",
-                "false",
-            ]
+dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+
+
+def open_dolphin(path: str | Path) -> None:
+    path = Path(path).resolve()
+
+    bus = dbus.SessionBus()
+
+    service = _find_dolphin_service(bus)
+
+    if service is None:
+        subprocess.Popen(
+            ["dolphin", str(path)],
+            start_new_session=True,
         )
-    else:
-        subprocess.Popen(["dolphin", path])
+        return
 
-
-def _find_dolphin_service() -> str | None:
-    """Return a running Dolphin's D-Bus service name, if any."""
-    result = subprocess.run(
-        ["qdbus6"], capture_output=True, text=True, check=True
+    obj = bus.get_object(
+        service,
+        "/dolphin/Dolphin_1",
     )
-    for line in result.stdout.splitlines():
-        line = line.strip()
-        if line.startswith("org.kde.dolphin"):
-            return line
-    return None
+
+    dolphin = dbus.Interface(
+        obj,
+        "org.kde.dolphin.MainWindow",
+    )
+
+    dolphin.openDirectories(
+        dbus.Array(
+            [path.as_uri()],
+            signature="s",
+        ),
+        False,
+    )
+
+
+def _find_dolphin_service(bus) -> str | None:
+    names = bus.list_names()
+
+    services = [name for name in names if name.startswith("org.kde.dolphin-")]
+
+    return services[0] if services else None

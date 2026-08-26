@@ -196,7 +196,6 @@ class ConfigFrame:
             parent=self.root,
         ):
             self.desktop_directory.set(directory)
-            print(f"Desktop directory set to: {directory}")
 
     def _save_config(self) -> None:
         raw_changes = self._config_changes()
@@ -218,11 +217,6 @@ class ConfigFrame:
 
     def _config_changes(self) -> dict:
         stored = config.config
-        # for field in FIELDS:
-        field = "script_directory"
-        print(
-            f"{field} {stored[field] == getattr(self, field).get()} {stored[field]=} {self.script_directory.get()=}"
-        )
         changes = {
             "data_directory": (
                 stored["data_directory"],

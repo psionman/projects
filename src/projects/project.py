@@ -169,7 +169,7 @@ class Project:
             with open(Path(self.base_dir, self.history_path)) as f:
                 return f.read().split("\n")
         except FileNotFoundError:
-            logger.warning(f"history.md not found: Project: {self.name}")
+            logger.warning("HISTORY.md not found", project=self.name)
             return []
 
     def serialize(self) -> dict:
