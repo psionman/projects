@@ -4,6 +4,7 @@
 1. Create PARSER_ARGS tuple for module caller
 2. Fix builder call bug
 3. Add refresh projects button
+4. generic justfile
 
 ## Version 1.0.22 - 26 August 2026
 1. Use ModuleCallerBase from psiutils
