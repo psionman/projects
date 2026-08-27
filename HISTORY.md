@@ -5,6 +5,7 @@
 2. Fix builder call bug
 3. Add refresh projects button
 4. generic justfile
+5. Move refresh button to frm_project_versions
 
 ## Version 1.0.22 - 26 August 2026
 1. Use ModuleCallerBase from psiutils

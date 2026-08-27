@@ -45,45 +45,6 @@ MODIFIED_STYLE = "red-fg.TRadiobutton"
 class ProjectVersionsFrame:
     """
     A GUI frame for selecting, comparing, and building project versions.
-
-    This class provides a Tkinter-based interface for working with multiple
-    development versions of a Python projects. It allows the user to:
-
-    - View and select available development versions.
-    - Compare selected versions to the main project directory.
-    - Build a selected version after validation.
-
-    Attributes:
-        root (tk.Toplevel): The top-level window for this frame.
-        parent: The parent window or frame.
-        config (dict): Configuration values loaded via `config`.
-        mode (int): Determines whether fields are editable (e.g., `Mode.EDIT`).
-        project (Project): The project currently being displayed
-            and manipulated.
-        projects (list): A list of available projects from the parent.
-        save_button: Optional save button (currently unused).
-        versions_frame (tk.Frame): Frame containing version selection buttons.
-        button_frame (tk.Frame):
-            Frame containing action buttons (Compare, Build, Exit).
-        project_name, env_dir, source_dir, project_version,
-            version (tk.StringVar):
-
-        Tkinter variables bound to GUI widgets,
-            used for user input and display.
-
-    Methods:
-        show(): Initializes and lays out the main GUI window.
-        _dismiss(): Closes the window.
-        _main_frame(master): Creates the main layout frame with widgets.
-        _versions_frame(master): Creates the container for version options.
-        _button_frame(master): Sets up action buttons.
-        _populate_versions_frame(): Fills the versions frame with radio buttons
-            and version info.
-        _values_changed(*args): Enables/disables buttons based on
-            field changes.
-        _compare_project(): Launches comparison window for selected version.
-        _build_project(): Opens build dialog for selected version.
-        _is_valid(): Checks project integrity before building.
     """
 
     def __init__(
@@ -249,6 +210,7 @@ class ProjectVersionsFrame:
             # frame.icon_button("code-blue", self._open_code, True),
             frame.icon_button("devin", self._open_devin, True),
             modify_button,
+            frame.icon_button("refresh", self._refresh_project_envs),
             frame.icon_button("exit-orange", self._dismiss),
         ]
         frame.enable(False)
@@ -362,6 +324,10 @@ class ProjectVersionsFrame:
         else:
             self.project.modified_versions.append(self.version.get())
         data_store.save_projects()
+        self._populate_versions_frame()
+
+    def _refresh_project_envs(self, *args) -> None:
+        self.refresh = True
         self._populate_versions_frame()
 
     def _bind_mousewheel(self) -> None:

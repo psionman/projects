@@ -58,13 +58,11 @@ class AppFrame:
         self.tree = None
         self.build_button = None
         self.compare_button = None
-        self.refresh_button = None
         self.run_script_button = None
         self.windows_build_button = None
 
         self.build_menu_item = None
         self.compare_menu_item = None
-        self.refresh_menu_item = None
         self.run_script_menu_item = None
         self.windows_build_menu_item = None
 
@@ -181,12 +179,9 @@ class AppFrame:
         self.windows_build_menu_item.enable(enable)
 
     def _disable_non_pypi_buttons(self) -> None:
-        # self.build_button.disable()
         self.compare_button.disable()
-        self.refresh_button.disable()
         self.build_menu_item.disable()
         self.compare_menu_item.disable()
-        self.refresh_menu_item.disable()
         git_dir = Path(self.project.base_dir, ".git")
         if not git_dir.exists():
             self.git_push_button.disable()
@@ -204,7 +199,6 @@ class AppFrame:
         self.build_button = frame.tagged_buttons["build"]
         self.git_push_button = frame.tagged_buttons["git_push"]
         self.compare_button = frame.tagged_buttons["compare"]
-        self.refresh_button = frame.tagged_buttons["refresh"]
         self.run_script_button = frame.tagged_buttons["run_script"]
         self.windows_build_button = frame.tagged_buttons["windows_build"]
         frame.enable(False)
@@ -231,9 +225,6 @@ class AppFrame:
             frame.icon_button(
                 "compare-orange", self._compare_project, True, tag="compare"
             ),
-            frame.icon_button(
-                "refresh", self._refresh_project_envs, True, tag="refresh"
-            ),
             IconButton(
                 frame,
                 txt.BUILD_FOR_WINDOWS,
@@ -253,9 +244,6 @@ class AppFrame:
         self.compare_menu_item = MenuItem(
             txt.COMPARE, self._compare_project, dimmable=True
         )
-        self.refresh_menu_item = MenuItem(
-            txt.REFRESH, self._refresh_project_envs, dimmable=True
-        )
         self.run_script_menu_item = MenuItem(
             txt.RUN_SCRIPT, self._run_script, dimmable=True
         )
@@ -270,7 +258,6 @@ class AppFrame:
             MenuItem(txt.KONSOLE, self._konsole, dimmable=True),
             self.run_script_menu_item,
             self.compare_menu_item,
-            self.refresh_menu_item,
             self.windows_build_menu_item,
             MenuItem(txt.DELETE, self._delete_project, dimmable=True),
         ]
@@ -296,9 +283,6 @@ class AppFrame:
         dlg = ProjectVersionsFrame(self, self.project, refresh)
         self.root.wait_window(dlg.root)
         self.update_projects(dlg)
-
-    def _refresh_project_envs(self, *args) -> None:
-        self._compare_project(True)
 
     def _delete_project(self, *args) -> None:
         dlg = messagebox.askyesno(

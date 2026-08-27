@@ -16,14 +16,22 @@ class ModuleCaller(ModuleCallerBase):
     def __init__(self, root, parsed_args: dict) -> None:
         self.modules = {
             "config": (self._config, None),
-            "edit": (self._edit, "Param: project name"),
-            "search": (self._search, "Param: search term or ''"),
-            "build": (self._build, "Param: project name"),
+            "edit": (self._edit, "Edit a project. Param: project name"),
+            "search": (
+                self._search,
+                "Search for usage of a string. Param: search term or ''",
+            ),
+            "build": (self._build, "Build the project. Param: project name"),
+            "usage": (
+                self._usage,
+                "Projects using the package, Param: project name",
+            ),
             "compare": (
                 self._compare,
+                "Compare module between Package and usage. "
                 "Params: project name, secondary project name",
             ),
-            "versions": (self._versions, "Param: project name"),
+            # "versions": (self._versions, "Param: project name"),
             "notes": (self._notes, None),
         }
         super().__init__(root, parsed_args)
@@ -36,6 +44,14 @@ class ModuleCaller(ModuleCallerBase):
 
     def _config(self) -> None:
         dlg = ConfigFrame(self)
+        self.root.wait_window(dlg.root)
+
+    def _usage(self) -> None:
+        project_name = self._require("project", "No project name provided")
+        project = self._get_project(project_name)
+        print(f"Usage for...{project_name!r}")
+
+        dlg = ProjectVersionsFrame(self, project, False)
         self.root.wait_window(dlg.root)
 
     def _compare(self) -> None:
@@ -59,13 +75,13 @@ class ModuleCaller(ModuleCallerBase):
         dlg = CompareFrame(self, project, env_version)
         self.root.wait_window(dlg.root)
 
-    def _versions(self) -> None:
-        project_name = self._require("project", "No project name provided")
-        project = self._get_project(project_name)
-        print(f"Getting versions for project: {project_name}")
-        project.env_versions = get_versions(project)
-        dlg = ProjectVersionsFrame(self, project)
-        self.root.wait_window(dlg.root)
+    # def _versions(self) -> None:
+    #     project_name = self._require("project", "No project name provided")
+    #     project = self._get_project(project_name)
+    #     print(f"Getting versions for project: {project_name}")
+    #     project.env_versions = get_versions(project)
+    #     dlg = ProjectVersionsFrame(self, project)
+    #     self.root.wait_window(dlg.root)
 
     def _edit(self) -> None:
         project_name = self._require("project", "No project name provided")
