@@ -19,7 +19,7 @@ FRAME_TITLE = "Build package"
 
 class BuildFrame:
     def __init__(self, parent, project, git_commit: bool) -> None:
-        self.root = tk.Toplevel(parent.root)
+        self.root = tk.Toplevel(parent)
         self.project = project
         self.git_commit = git_commit
 

@@ -287,6 +287,15 @@ class AppFrame:
         self.root.wait_window(dlg.root)
         self.update_projects(dlg)
 
+    def _build_project(self, *args) -> None:
+        build_project(self.root, self.project)
+
+        # from projects.forms.frm_build import BuildFrame
+
+        # dlg = BuildFrame(self.root, self.project, False)
+        # self.root.wait_window(dlg.root)
+        # return Status.OK
+
     def _compare_project(self, refresh: bool = False) -> None:
         dlg = ProjectVersionsFrame(self, self.project, refresh)
         self.root.wait_window(dlg.root)
@@ -318,9 +327,6 @@ class AppFrame:
             messagebox.showerror("Save", "Save failed", parent=self.root)
             return
         self._populate_tree()
-
-    def _build_project(self, *args) -> None:
-        build_project(self, self.project)
 
     def _update_pyproject(self, *args) -> None:
         code = self.project.update_pyproject()
