@@ -3,6 +3,7 @@
 ## Version 1.0.23 - 27 August 2026
 1. Create PARSER_ARGS tuple for module caller
 2. Fix builder call bug
+3. Add refresh projects button
 
 ## Version 1.0.22 - 26 August 2026
 1. Use ModuleCallerBase from psiutils

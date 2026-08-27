@@ -28,6 +28,8 @@ strings = {
     "GIT_PUSH": "Git Push",
     "GIT_APPLY": "Git Apply",
     "IDE_COLOURS": "IDE Colours",
+    "REFRESH": "Refresh",
+    "REFRESH_DATABASE": "Refresh projects",
 }
 
 

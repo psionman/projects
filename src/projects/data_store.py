@@ -25,7 +25,7 @@ class ProjectStore:
     """Single source of truth for all projects in the app."""
 
     def __init__(self) -> None:
-        self._projects: dict[str, Project] = self._get_projects()
+        self._projects: dict[str, Project] = self.get_projects()
         self.notes: dict[str, str] = self._get_notes()
         self._listeners: list[Listener] = []
 
@@ -71,7 +71,7 @@ class ProjectStore:
         for listener in self._listeners:
             listener()
 
-    def _get_projects(self) -> dict[str, Project]:
+    def get_projects(self) -> dict[str, Project]:
         project_dict = {}
         projects_raw = io.read_json_file(PROJECT_FILE)
         cached_envs = self._get_cached_envs()

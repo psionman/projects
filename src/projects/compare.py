@@ -70,13 +70,8 @@ def _build_comparison(
             if name.is_file() or name.is_dir()
         )
     except FileNotFoundError:
+        # TODO what is this?
         return {str(search_dir): "xxx"}
-
-    # try:
-    #     file_list = [name for name in search_dir.iterdir()
-    #                  if name.is_file() or name.is_dir()]
-    # except FileNotFoundError:
-    #     return {}
 
     for path in file_list:
         file_name = path.name

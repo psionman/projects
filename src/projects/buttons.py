@@ -14,6 +14,7 @@ buttons = {
     "devin": ("Devin", "devin-desktop-next"),
     "git-push": (txt.GIT_PUSH, "git-branch"),
     "git-apply": (txt.GIT_APPLY, "git-stash-apply"),
+    "refresh-view": (txt.REFRESH_DATABASE, "view-refresh"),
 }
 
 

@@ -181,7 +181,7 @@ class AppFrame:
         self.windows_build_menu_item.enable(enable)
 
     def _disable_non_pypi_buttons(self) -> None:
-        self.build_button.disable()
+        # self.build_button.disable()
         self.compare_button.disable()
         self.refresh_button.disable()
         self.build_menu_item.disable()
@@ -232,7 +232,7 @@ class AppFrame:
                 "compare-orange", self._compare_project, True, tag="compare"
             ),
             frame.icon_button(
-                "refresh", self._refresh_project, True, tag="refresh"
+                "refresh", self._refresh_project_envs, True, tag="refresh"
             ),
             IconButton(
                 frame,
@@ -242,6 +242,7 @@ class AppFrame:
                 tag="windows_build",
             ),
             frame.icon_button("delete", self._delete_project, True),
+            frame.icon_button("refresh-view", self._refresh_projects),
             frame.icon_button("close-red", self._dismiss),
         ]
 
@@ -253,7 +254,7 @@ class AppFrame:
             txt.COMPARE, self._compare_project, dimmable=True
         )
         self.refresh_menu_item = MenuItem(
-            txt.REFRESH, self._refresh_project, dimmable=True
+            txt.REFRESH, self._refresh_project_envs, dimmable=True
         )
         self.run_script_menu_item = MenuItem(
             txt.RUN_SCRIPT, self._run_script, dimmable=True
@@ -288,20 +289,15 @@ class AppFrame:
         self.update_projects(dlg)
 
     def _build_project(self, *args) -> None:
+        # TODO why is this differnt from _edit_project?
         build_project(self.root, self.project)
-
-        # from projects.forms.frm_build import BuildFrame
-
-        # dlg = BuildFrame(self.root, self.project, False)
-        # self.root.wait_window(dlg.root)
-        # return Status.OK
 
     def _compare_project(self, refresh: bool = False) -> None:
         dlg = ProjectVersionsFrame(self, self.project, refresh)
         self.root.wait_window(dlg.root)
         self.update_projects(dlg)
 
-    def _refresh_project(self, *args) -> None:
+    def _refresh_project_envs(self, *args) -> None:
         self._compare_project(True)
 
     def _delete_project(self, *args) -> None:
@@ -367,6 +363,11 @@ class AppFrame:
     def _search_for_content(self, *args):
         dlg = SearchFrame(self)
         self.root.wait_window(dlg.root)
+
+    def _refresh_projects(self, *args) -> None:
+        projects = data_store.get_projects()
+        data_store.load(projects)
+        self._populate_tree()
 
     def _dismiss(self, *args) -> None:
         self.root.destroy()
