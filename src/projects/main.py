@@ -1,6 +1,5 @@
 """Main procedure for package"""
 
-import argparse
 import sys
 import tkinter as tk
 
@@ -13,23 +12,18 @@ from projects.data_store import store
 from projects.forms.frm_main import AppFrame
 from projects.module_caller import ModuleCaller
 
+PARSER_ARGS = (
+    ("module", "Module to load"),
+    ("project", "Project name"),
+    ("secondary", "Secondary argument"),
+)
+
 
 def main() -> None:
     """Call the Root loop."""
+
     # initialize the project store
     _ = store
-
-    parser = argparse.ArgumentParser(description=APP_TITLE)
-    parser.add_argument(
-        "module", nargs="?", default=None, help="Module to load"
-    )
-    parser.add_argument(
-        "project", nargs="?", default=None, help="Project name"
-    )
-    parser.add_argument(
-        "secondary", nargs="?", default=None, help="Secondary argument"
-    )
-    args = parser.parse_args()
 
     root = tk.Tk()
     root.title(APP_TITLE)
@@ -39,13 +33,15 @@ def main() -> None:
 
     get_styles()
 
-    if args.module:
-        try:
-            ModuleCaller(root, args)
-        except Exception:
-            root.destroy()
-    else:
-        AppFrame(root)
+    if PARSER_ARGS:
+        args = ModuleCaller.create_parser(PARSER_ARGS)
+        if args.module:
+            try:
+                ModuleCaller(root, args)
+            except Exception:
+                root.destroy()
+        else:
+            AppFrame(root)
 
     root.mainloop()
 

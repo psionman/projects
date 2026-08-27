@@ -1,5 +1,8 @@
 # History
 
+## Version 1.0.23 - 27 August 2026
+1. Create PARSER_ARGS tuple for module caller
+
 ## Version 1.0.22 - 26 August 2026
 1. Use ModuleCallerBase from psiutils
 
