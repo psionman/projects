@@ -138,7 +138,8 @@ class AppFrame:
 
     def _get_values_for_tree(self) -> list[tuple]:
         projects = {
-            key: self.projects[key] for key in sorted(self.projects.keys())
+            key: self.projects[key]
+            for key in sorted(self.projects.keys(), key=lambda k: k.lower())
         }
         return [
             (project.name, project.description)
@@ -201,6 +202,7 @@ class AppFrame:
         self.compare_button = frame.get_button("compare")
         self.run_script_button = frame.get_button("run_script")
         self.windows_build_button = frame.get_button("windows_build")
+
         frame.enable(False)
         return frame
 

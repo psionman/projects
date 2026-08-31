@@ -1,5 +1,8 @@
 # History
 
+## Version 1.0.24 - 31 August 2026
+1. Sort projects in tree by name.lower()
+
 ## Version 1.0.23 - 27 August 2026
 1. Create PARSER_ARGS tuple for module caller
 2. Fix builder call bug
