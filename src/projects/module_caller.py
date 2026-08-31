@@ -90,16 +90,16 @@ class ModuleCaller(ModuleCallerBase):
         dlg = ProjectEditFrame(self, Mode.EDIT, project)
         self.root.wait_window(dlg.root)
 
-    def _notes(self) -> None:
-        print("Editing notes")
-        dlg = NotesFrame(self)
-        self.root.wait_window(dlg.root)
-
     def _build(self) -> None:
         project_name = self._require("project", "No project name provided")
         project = self._get_project(project_name)
         print(f"Building...{project_name!r}")
         dlg = BuildFrame(self, project, False)
+        self.root.wait_window(dlg.root)
+
+    def _notes(self) -> None:
+        print("Editing notes")
+        dlg = NotesFrame(self)
         self.root.wait_window(dlg.root)
 
     def _search(self) -> None:

@@ -284,7 +284,7 @@ class AppFrame:
 
     def _build_project(self, *args) -> None:
         # TODO why is this differnt from _edit_project?
-        build_project(self.root, self.project)
+        build_project(self, self.project)
 
     def _compare_project(self, refresh: bool = False) -> None:
         dlg = ProjectVersionsFrame(self, self.project, refresh)

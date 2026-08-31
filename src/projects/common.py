@@ -1,4 +1,3 @@
-import tkinter as tk
 from tkinter import messagebox
 
 from psiutils.constants import Status
@@ -9,7 +8,7 @@ from projects.project import Project
 
 
 def build_project(
-    root: tk.Tk, project: Project, git_commit: bool = False
+    parent: any, project: Project, git_commit: bool = False
 ) -> None:
     """Build a project."""
     if not UV_PUBLISH_TOKEN:
@@ -19,8 +18,8 @@ def build_project(
     if not _is_valid(project):
         return Status.ERROR
 
-    dlg = BuildFrame(root, project, git_commit)
-    root.wait_window(dlg.root)
+    dlg = BuildFrame(parent, project, git_commit)
+    parent.root.wait_window(dlg.root)
     return Status.OK
 
 

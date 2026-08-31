@@ -7,6 +7,7 @@
 4. generic justfile
 5. Move refresh button to frm_project_usage
 6. Use revised psiutils.buttons
+7. Fix call build from module_caller
 
 ## Version 1.0.22 - 26 August 2026
 1. Use ModuleCallerBase from psiutils
