@@ -8,7 +8,7 @@ from projects.forms.frm_compare import CompareFrame
 from projects.forms.frm_config import ConfigFrame
 from projects.forms.frm_notes import NotesFrame
 from projects.forms.frm_project_edit import ProjectEditFrame
-from projects.forms.frm_project_versions import ProjectVersionsFrame
+from projects.forms.frm_project_usage import ProjectVersionsFrame
 from projects.forms.frm_search import SearchFrame
 
 

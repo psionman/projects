@@ -186,32 +186,22 @@ class ProjectVersionsFrame:
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.VERTICAL)
-        self._populate_button_frame(frame)
+        self._frame_buttons(frame)
         return frame
 
-    def _populate_button_frame(self, frame: ButtonFrame) -> None:
-
-        modify_button = frame.icon_button(
-            "modified", self._toggle_modified, True
-        )
-        # if self.version.get() in self.project.modified_versions:
-        #     modify_button = frame.icon_button(
-        #         "modified", self._toggle_modified, True
-        #     )
-        # else:
-        #     modify_button = frame.icon_button(
-        #         "not-modified", self._toggle_modified, True
-        #     )
+    def _frame_buttons(self, frame: ButtonFrame) -> None:
         frame.buttons = [
             frame.icon_button("build", self._build_project),
-            frame.icon_button("folder-open", self._open_dolphin, True),
-            frame.icon_button("compare-orange", self._compare_project, True),
-            frame.icon_button("update", self._update_project, True),
+            frame.icon_button("open-file-manager", self._open_dolphin, True),
+            frame.icon_button("compare", self._compare_project, True),
+            # frame.icon_button("update", self._update_project, True),
             # frame.icon_button("code-blue", self._open_code, True),
             frame.icon_button("devin", self._open_devin, True),
-            modify_button,
+            frame.icon_button(
+                "flag", self._toggle_modified, True, text="Modified"
+            ),
             frame.icon_button("refresh", self._refresh_project_envs),
-            frame.icon_button("exit-orange", self._dismiss),
+            frame.icon_button("cancel", self._dismiss),
         ]
         frame.enable(False)
 
@@ -270,7 +260,7 @@ class ProjectVersionsFrame:
         return mismatch_str
 
     def _values_changed(self, *args) -> None:
-        self._populate_button_frame(self.button_frame)
+        self._frame_buttons(self.button_frame)
         enable = bool(self.project_name.get())
         self.button_frame.enable(enable)
 

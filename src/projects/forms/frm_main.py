@@ -16,7 +16,7 @@ from projects.common import build_project
 from projects.config import config
 from projects.data_store import store as data_store
 from projects.forms.frm_project_edit import ProjectEditFrame
-from projects.forms.frm_project_versions import ProjectVersionsFrame
+from projects.forms.frm_project_usage import ProjectVersionsFrame
 from projects.forms.frm_search import SearchFrame
 from projects.main_menu import MainMenu
 from projects.project import Project
@@ -77,6 +77,8 @@ class AppFrame:
         main_menu = MainMenu(self)
         main_menu.create()
 
+        self.context_menu = self._context_menu()
+
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
 
@@ -90,8 +92,6 @@ class AppFrame:
 
         sizegrip = ttk.Sizegrip(root)
         sizegrip.grid(column=1, sticky=tk.SE)
-
-        self.context_menu = self._context_menu()
 
         root.update_idletasks()
         root.bind("<Control-x>", self._dismiss)
@@ -194,13 +194,13 @@ class AppFrame:
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.VERTICAL)
-
         frame.buttons = self._frame_buttons(frame)
-        self.build_button = frame.tagged_buttons["build"]
-        self.git_push_button = frame.tagged_buttons["git_push"]
-        self.compare_button = frame.tagged_buttons["compare"]
-        self.run_script_button = frame.tagged_buttons["run_script"]
-        self.windows_build_button = frame.tagged_buttons["windows_build"]
+
+        self.build_button = frame.get_button("build")
+        self.git_push_button = frame.get_button("git_push")
+        self.compare_button = frame.get_button("compare")
+        self.run_script_button = frame.get_button("run_script")
+        self.windows_build_button = frame.get_button("windows_build")
         frame.enable(False)
         return frame
 
@@ -208,13 +208,20 @@ class AppFrame:
         return [
             frame.icon_button("edit", self._edit_project, True),
             frame.icon_button("build", self._build_project, True, tag="build"),
+            # frame.icon_button(
+            #     "git-push", self._git_push, True, tag="git_push"
+            # ),
+            # frame.icon_button("update", self._update_pyproject),
             frame.icon_button(
-                "git-push", self._git_push, True, tag="git_push"
+                "open-file-manager",
+                self._open_dolphin,
+                True,
+                text="Open in Dolphin",
             ),
-            frame.icon_button("update", self._update_pyproject),
-            frame.icon_button("folder-open", self._open_dolphin, True),
             frame.icon_button("devin", self._open_devin, True),
-            frame.icon_button("console", self._konsole),
+            frame.icon_button(
+                "open-terminal", self._konsole, text="Open in Konsole"
+            ),
             IconButton(
                 frame,
                 txt.RUN_SCRIPT,
@@ -223,7 +230,7 @@ class AppFrame:
                 tag="run_script",
             ),
             frame.icon_button(
-                "compare-orange", self._compare_project, True, tag="compare"
+                "compare", self._compare_project, True, tag="compare"
             ),
             IconButton(
                 frame,
@@ -233,8 +240,8 @@ class AppFrame:
                 tag="windows_build",
             ),
             frame.icon_button("delete", self._delete_project, True),
-            frame.icon_button("refresh-view", self._refresh_projects),
-            frame.icon_button("close-red", self._dismiss),
+            # frame.icon_button("refresh-view", self._refresh_projects),
+            frame.icon_button("cancel", self._dismiss, icon_colour="red"),
         ]
 
     def _context_menu(self) -> tk.Menu:

@@ -8,31 +8,31 @@ from psiutils.constants import Status
 from projects import logger
 
 
-def read_text_file(path: str) -> str:
+def read_text_file(json_file: str) -> str:
     """
     Reads and returns the content of a text file.
 
     Args:
-        path (str): The path to the text file.
+        json_file (str): The path to the text file.
 
     Returns:
         str: The content of the text file, or Status.ERROR
         if the file is not found.
     """
     try:
-        with open(path, encoding="utf8") as f_text:
+        with open(json_file, encoding="utf8") as f_text:
             return f_text.read()
     except FileNotFoundError:
-        logger.warning(f"File not found {path}")
+        logger.warning(f"File not found {json_file}")
         return Status.ERROR
 
 
-def update_file(pyproject_path: str, output: str) -> int:
+def update_file(sjon_file: str, output: str) -> int:
     """
     Update the file with the provided output.
 
     Args:
-        pyproject_path (str): The path to the file to be updated.
+        sjon_file (str): The path to the file to be updated.
         output (str): The content to write to the file.
 
     Returns:
@@ -40,14 +40,14 @@ def update_file(pyproject_path: str, output: str) -> int:
         or Status.ERROR).
     """
     try:
-        with open(pyproject_path, "w", encoding="utf8") as f_output:
+        with open(sjon_file, "w", encoding="utf8") as f_output:
             f_output.write(output)
         return Status.SUCCESS
     except NotADirectoryError:
-        logger.warning(f"Cannot find directory: {Path(pyproject_path).parent}")
+        logger.warning(f"Cannot find directory: {Path(sjon_file).parent}")
         return Status.ERROR
     except FileNotFoundError:
-        logger.warning(f"Cannot find file: {pyproject_path}")
+        logger.warning(f"Cannot find file: {sjon_file}")
         return Status.ERROR
 
 

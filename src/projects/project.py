@@ -9,7 +9,7 @@ import json5
 import tomli_w
 from psiutils.constants import Status
 
-import projects.projects_io as io
+import projects.io_operations as io
 from projects import logger
 from projects.constants import (
     DEFAULT_COLOURS,

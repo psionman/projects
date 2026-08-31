@@ -254,7 +254,7 @@ requires-dist = [
     { name = "dbus-python", specifier = ">=1.4.0" },
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "json5", specifier = ">=0.15.0" },
-    { name = "psiutils", specifier = ">=1.0.4" },
+    { name = "psiutils", editable = "../../psi-utilities/psiutils" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0" },
     { name = "tksheet", specifier = ">=7.6.0" },
 ]
@@ -300,7 +300,7 @@ wheels = [
 [[package]]
 name = "psiutils"
 version = "1.0.7"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "../../psi-utilities/psiutils" }
 dependencies = [
     { name = "appdirs" },
     { name = "iniconfig" },
@@ -321,10 +321,31 @@ dependencies = [
     { name = "tomli" },
     { name = "tomli-w" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c4/1f/b947b85a6c24446a8a3ae16f8fd48bda0e5114f3cd38ada51cca283888a8/psiutils-1.0.7.tar.gz", hash = "sha256:affab9795a3171dd53c28a064f34840f30131ff600033b8216a92d78e58c5ffc", size = 237981, upload-time = "2026-08-27T05:20:11.052Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/8c/65/c9102eec93fcdcd7091f41934903d04e64e5a816e80b0ff605646124cc87/psiutils-1.0.7-py3-none-any.whl", hash = "sha256:f592b41c6fe22cff6bb479536e0377bba6a9520e896c2874db104baa91663c9a", size = 265945, upload-time = "2026-08-27T05:20:12.912Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "appdirs", specifier = ">=1.4.4" },
+    { name = "iniconfig", specifier = ">=2.1.0" },
+    { name = "markdown", specifier = ">=3.8.2" },
+    { name = "packaging", specifier = ">=25.0" },
+    { name = "pillow", specifier = ">=11.3.0" },
+    { name = "pluggy", specifier = ">=1.6.0" },
+    { name = "psi-toml", specifier = ">=0.0.12" },
+    { name = "psiconfig", specifier = ">=0.0.14" },
+    { name = "pycairo", specifier = ">=1.28.0" },
+    { name = "pygments", specifier = ">=2.19.2" },
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "ruff", specifier = ">=0.15.15" },
+    { name = "structlog", specifier = ">=25.4.0" },
+    { name = "tkcalendar", specifier = ">=1.6.1" },
+    { name = "tkinterweb", specifier = ">=4.4.4" },
+    { name = "tkinterweb-tkhtml", specifier = ">=1.1.1" },
+    { name = "tomli", specifier = ">=2.2.1" },
+    { name = "tomli-w", specifier = ">=1.2.0" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest" }]
 
 [[package]]
 name = "pycairo"

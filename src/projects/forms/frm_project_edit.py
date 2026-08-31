@@ -5,11 +5,12 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
-from psiutils.buttons import ButtonFrame, IconButton
+from psiutils.buttons import IconButton
 from psiutils.constants import PAD, Mode, Status, WidgetState
 from psiutils.utilities import geometry, window_resize
 
 from projects import logger
+from projects.buttons import ButtonFrame
 from projects.config import config
 from projects.constants import APP_TITLE, ICON_DIR
 from projects.data_store import store as data_store
@@ -199,11 +200,16 @@ class ProjectEditFrame:
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.VERTICAL)
+        frame.buttons = self._frame_buttons(frame)
 
-        self.desktop_button = IconButton(
-            frame, "Edit Desktop", "script", self._edit_desktop
-        )
-        frame.buttons = [
+        self.script_button = frame.tagged_buttons["script"]
+        self.desktop_button = frame.tagged_buttons["desktop"]
+        frame.enable(False)
+        return frame
+
+    def _frame_buttons(self, frame: ButtonFrame) -> list[IconButton]:
+        return [
+            # self.desktop_button,
             IconButton(
                 frame,
                 txt.IDE_COLOURS,
@@ -226,12 +232,8 @@ class ProjectEditFrame:
                 tag="script",
             ),
             frame.icon_button("save", self._save, True),
-            frame.icon_button("exit-orange", self._dismiss),
+            frame.icon_button("cancel", self._dismiss),
         ]
-        self.script_button = frame.tagged_buttons["script"]
-        self.desktop_button = frame.tagged_buttons["desktop"]
-        frame.enable(False)
-        return frame
 
     def _get_base_dir(self, *args) -> None:
         if self.base_dir.get():

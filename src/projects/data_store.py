@@ -10,7 +10,7 @@ import os
 from collections.abc import Callable
 from pathlib import Path
 
-import projects.projects_io as io
+import projects.io_operations as io
 from projects.config import config
 from projects.constants import CACHED_ENVS_FILE, NOTES_FILE, USER_DATA_DIR
 from projects.env_version import EnvironmentVersion

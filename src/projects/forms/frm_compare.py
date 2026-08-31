@@ -7,12 +7,13 @@ from functools import partial
 from pathlib import Path
 from tkinter import messagebox, ttk
 
-from psiutils.buttons import ButtonFrame, IconButton
+from psiutils.buttons import IconButton
 from psiutils.constants import PAD, PADB, PADT, WidgetState
 from psiutils.utilities import geometry, window_resize
 from psiutils.widgets import ScrollingCanvas
 
 from projects import logger
+from projects.buttons import ButtonFrame
 from projects.compare import Missing, compare
 from projects.config import config
 from projects.env_version import EnvironmentVersion
@@ -189,12 +190,14 @@ class CompareFrame:
 
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         frame = ButtonFrame(master, tk.HORIZONTAL)
-        frame.buttons = [
-            # frame.icon_button("diff", self._show_differences, True),
-            frame.icon_button("exit-orange", self._dismiss),
-        ]
+        frame.buttons = self._frame_buttons(frame)
         frame.enable(False)
         return frame
+
+    def _frame_buttons(self, frame: ButtonFrame) -> list[IconButton]:
+        return [
+            frame.icon_button("cancel", self._dismiss),
+        ]
 
     def _populate_missing_frame(self) -> None:
         (self.missing, self.mismatches) = compare(

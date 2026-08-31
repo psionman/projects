@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 from tkinter import messagebox, ttk
 
+from psiutils.buttons import IconButton
 from psiutils.constants import PAD, Status, WidgetState
 from psiutils.utilities import geometry, window_resize
 from psiutils.widgets import WaitCursor, clickable_widget
@@ -47,7 +48,6 @@ class BuildFrame:
     def _show(self) -> None:
         root = self.root
         root.geometry(geometry(config, __file__))
-        # root.transient(root)
         if self.git_commit:
             root.title("Git apply")
         else:
@@ -163,19 +163,22 @@ class BuildFrame:
     def _button_frame(self, master: tk.Frame) -> tk.Frame:
         """Create button row."""
         frame = ButtonFrame(master, tk.HORIZONTAL)
+        frame.buttons = self._frame_buttons(frame)
+        frame.enable(False)
+        return frame
+
+    def _frame_buttons(self, frame: ButtonFrame) -> list[IconButton]:
         if self.git_commit:
             self.build_button = frame.icon_button(
                 "git-apply", self._git_apply, True
             )
         else:
             self.build_button = frame.icon_button("build", self._build, False)
-        frame.buttons = [
+        return [
             self.build_button,
             frame.icon_button("save", self._save_history),
-            frame.icon_button("exit-orange", self._dismiss),
+            frame.icon_button("cancel", self._dismiss),
         ]
-        frame.disable()
-        return frame
 
     def _build(self, *args) -> None:
         with WaitCursor(self.root):
