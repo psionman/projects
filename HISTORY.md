@@ -1,5 +1,9 @@
 # History
 
+## Version 1.0.25 - 7 September 2026
+1. Update buttons
+2.
+
 ## Version 1.0.24 - 31 August 2026
 1. Sort projects in tree by name.lower()
 

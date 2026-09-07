@@ -3,11 +3,11 @@
 import tkinter as tk
 from tkinter import filedialog, ttk
 
-from psiutils.buttons import ButtonFrame, IconButton
 from psiutils.constants import PAD
 from psiutils.utilities import geometry, window_resize
 
 from projects import logger
+from projects.buttons import ButtonFrame, IconButton
 from projects.config import config
 from projects.text import Text
 
@@ -167,7 +167,7 @@ class ConfigFrame:
         frame = ButtonFrame(master, tk.HORIZONTAL)
         frame.buttons = [
             frame.icon_button("save", self._save_config, True),
-            frame.icon_button("exit-orange", self._dismiss),
+            frame.icon_button("cancel", self._dismiss),
         ]
         frame.grid(row=0, column=0, sticky=tk.EW)
         return frame

@@ -36,6 +36,12 @@ USER_DATA_FILE = Path(USER_DATA_DIR, "data.json")
 CACHED_ENVS_FILE = Path(USER_DATA_DIR, "cached_envs.json")
 NOTES_FILE = Path(USER_DATA_DIR, "notes.json")
 
+# Buttons
+PSIUTILS_DIR = user_data_dir("psiutils", __author__)
+BUTTONS_DIR = Path(PSIUTILS_DIR, "buttons")
+BUTTON_ICON_PATH = str(Path(BUTTONS_DIR, "icons"))
+BUTTON_CONFIG_PATH = str(Path(BUTTONS_DIR, "buttons.json"))
+
 # GUI
 APP_TITLE = "Project management"
 DEFAULT_GEOMETRY = "300x250"

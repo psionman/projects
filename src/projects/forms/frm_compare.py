@@ -7,13 +7,12 @@ from functools import partial
 from pathlib import Path
 from tkinter import messagebox, ttk
 
-from psiutils.buttons import IconButton
 from psiutils.constants import PAD, PADB, PADT, WidgetState
 from psiutils.utilities import geometry, window_resize
 from psiutils.widgets import ScrollingCanvas
 
 from projects import logger
-from projects.buttons import ButtonFrame
+from projects.buttons import ButtonFrame, IconButton
 from projects.compare import Missing, compare
 from projects.config import config
 from projects.env_version import EnvironmentVersion
@@ -255,7 +254,7 @@ class CompareFrame:
     def _missing_button(
         self, frame: tk.Frame, missing_file: Missing, row: int
     ) -> None:
-        button = IconButton(frame, txt.COPY, "copy_docs")
+        button = IconButton(frame, txt.COPY, "copy-doc")
         button.grid(row=row, column=2, padx=PAD, pady=PADB, sticky=tk.W)
         # TODO this should be a command
         button.widget.bind(
@@ -307,7 +306,7 @@ class CompareFrame:
             to_env_button = IconButton(
                 self.mismatch_frame.content,
                 "Copy to env",
-                "copy_docs",
+                "copy-doc",
                 partial(self._copy_live_to_env, item),
                 True,
             )
@@ -316,7 +315,7 @@ class CompareFrame:
             to_live_button = IconButton(
                 self.mismatch_frame.content,
                 "Copy To live",
-                "copy_docs",
+                "copy-doc",
                 partial(self._copy_env_to_live, item),
                 True,
             )

@@ -5,12 +5,11 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
-from psiutils.buttons import IconButton
 from psiutils.constants import PAD, Mode, Status, WidgetState
 from psiutils.utilities import geometry, window_resize
 
 from projects import logger
-from projects.buttons import ButtonFrame
+from projects.buttons import ButtonFrame, IconButton
 from projects.config import config
 from projects.constants import APP_TITLE, ICON_DIR
 from projects.data_store import store as data_store
