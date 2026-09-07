@@ -277,6 +277,7 @@ class ProjectVersionsFrame:
         dlg = CompareFrame(self, self.project, env_version)
         self.root.wait_window(dlg.root)
         self._populate_versions_frame()
+        self._bind_mousewheel()
 
     def _update_project(self) -> None:
         env_version = self.project.env_versions[self.version.get()]

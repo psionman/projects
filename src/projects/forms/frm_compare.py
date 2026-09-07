@@ -131,6 +131,7 @@ class CompareFrame:
         self.button_frame.grid(
             row=row, column=0, sticky=tk.EW, padx=PAD, pady=PAD
         )
+        self._bind_mousewheel()
 
         return frame
 
@@ -437,5 +438,20 @@ class CompareFrame:
         for widget in frame.winfo_children():
             widget.destroy()
 
+    def _bind_mousewheel(self) -> None:
+        canvas = self.mismatch_frame.canvas
+        canvas.bind_all(
+            "<Button-4>", lambda e: canvas.yview_scroll(-1, "units")
+        )
+        canvas.bind_all(
+            "<Button-5>", lambda e: canvas.yview_scroll(1, "units")
+        )
+
+    def _unbind_mousewheel(self) -> None:
+        canvas = self.mismatch_frame.canvas
+        canvas.unbind_all("<Button-4>")
+        canvas.unbind_all("<Button-5>")
+
     def _dismiss(self, *args) -> None:
+        self._unbind_mousewheel()
         self.root.destroy()
