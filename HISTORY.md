@@ -1,7 +1,10 @@
 # History
 
+## Version 1.0.26 - 8 September 2026
+1. Align with psiutils version 2.0.0
+
 ## Version 1.0.25 - 7 September 2026
-1. Update buttons  access
+1. Update buttons access
 2. Bind mousewheel to frm_compare
 3. Update button text on 'Open'
 4. Update text access

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from appdirs import user_config_dir, user_data_dir
+from platformdirs import user_config_dir, user_data_dir, user_state_dir
 from psiutils.known_paths import resolve_path
 
 from projects import __app_name__, __author__
@@ -29,10 +29,11 @@ HOME_DIR = str(Path.home())
 CONFIG_PATH = Path(user_config_dir(__app_name__, __author__), "config.toml")
 USER_DATA_DIR = Path(user_data_dir(__app_name__, __author__))
 USER_DATA_DIR.mkdir(exist_ok=True)
-
 ICON_FILE = Path(Path(__file__).parent, "images", "rocket-launch-outline.png")
 ICON_DIR = f"{Path(__file__).parent}/icons/"
 USER_DATA_FILE = Path(USER_DATA_DIR, "data.json")
+STATE_DIR = user_state_dir(__app_name__, __author__)
+
 CACHED_ENVS_FILE = Path(USER_DATA_DIR, "cached_envs.json")
 NOTES_FILE = Path(USER_DATA_DIR, "notes.json")
 

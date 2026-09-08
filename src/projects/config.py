@@ -1,6 +1,16 @@
-from psiconfig import TomlConfig
+from pathlib import Path
+
+from psiconfig import ConfigField, TomlConfig
 
 from projects.constants import CONFIG_PATH, USER_DATA_DIR
+
+# FIELDS for config, and to create tkinter variables in frm_config.py
+# e.g. self.data_directory is a tk.StringVar
+FIELDS = {
+    "data_directory": ConfigField(str, USER_DATA_DIR),
+    "script_directory": ConfigField(str, Path(Path.home(), ".scripts")),
+    "desktop_directory": ConfigField(str, Path(USER_DATA_DIR, "applications")),
+}
 
 DEFAULT_CONFIG = {
     "data_directory": USER_DATA_DIR,

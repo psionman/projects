@@ -22,13 +22,13 @@ from psiutils.widgets import ScrollingCanvas
 from projects.buttons import ButtonFrame
 from projects.common import build_project
 from projects.compare import compare
-from projects.config import config
 from projects.constants import VERSION_FILE
 from projects.data_store import get_versions
 from projects.data_store import store as data_store
 from projects.forms.frm_compare import CompareFrame
 from projects.project import Project
 from projects.project_utilities import update_project
+from projects.state import state
 from projects.utilities import call_process, open_dolphin
 
 FRAME_TITLE = "Project compare versions"
@@ -101,7 +101,7 @@ class ProjectVersionsFrame:
         Typically called during initialization to render the window.
         """
         root = self.root
-        root.geometry(geometry(config, __file__))
+        root.geometry(geometry(state, __file__))
         root.title(FRAME_TITLE)
         root.transient(self.parent.root)
 
@@ -118,7 +118,7 @@ class ProjectVersionsFrame:
         root.bind("<Control-x>", self._dismiss)
         root.bind(
             "<Configure>",
-            lambda event, arg=None: window_resize(root, __file__, config),
+            lambda event, arg=None: window_resize(root, __file__, state),
         )
 
     def _main_frame(self, master: tk.Frame) -> ttk.Frame:
@@ -192,11 +192,16 @@ class ProjectVersionsFrame:
     def _frame_buttons(self, frame: ButtonFrame) -> None:
         frame.buttons = [
             frame.icon_button("build", self._build_project),
-            frame.icon_button("open-file-manager", self._open_dolphin, True),
+            frame.icon_button(
+                "open-file-manager",
+                self._open_dolphin,
+                True,
+                text="File manager",
+            ),
             frame.icon_button("compare", self._compare_project, True),
             # frame.icon_button("update", self._update_project, True),
             # frame.icon_button("code-blue", self._open_code, True),
-            frame.icon_button("devin", self._open_devin, True),
+            frame.icon_button("devin", self._open_devin, True, text="Devin"),
             frame.icon_button(
                 "flag", self._toggle_modified, True, text="Modified"
             ),

@@ -14,9 +14,9 @@ from psiutils.widgets import ScrollingCanvas
 from projects import logger
 from projects.buttons import ButtonFrame, IconButton
 from projects.compare import Missing, compare
-from projects.config import config
 from projects.env_version import EnvironmentVersion
 from projects.project import Project
+from projects.state import state
 from projects.text import Text
 from projects.utilities import collapse_home
 
@@ -78,12 +78,12 @@ class CompareFrame:
     def _configure(self) -> None:
         root = self.root
         root.update_idletasks()
-        root.geometry(geometry(config, __file__))
+        root.geometry(geometry(state, __file__))
         root.transient(self.parent.root)
         root.bind("<Control-x>", self._dismiss)
         root.bind(
             "<Configure>",
-            lambda event, arg=None: window_resize(root, __file__, config),
+            lambda event, arg=None: window_resize(root, __file__, state),
         )
 
         root.rowconfigure(0, weight=1)

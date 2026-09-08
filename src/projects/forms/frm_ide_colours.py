@@ -11,9 +11,9 @@ from psiutils.constants import PAD
 from psiutils.utilities import geometry, window_resize
 
 from projects.buttons import ButtonFrame
-from projects.config import config
 from projects.constants import APP_TITLE, ICON_DIR
 from projects.project import Project
+from projects.state import state
 from projects.text import Text
 
 txt = Text()
@@ -49,7 +49,7 @@ class IdeColoursFrame:
 
     def show(self):
         root = self.root
-        root.geometry(geometry(config, __file__))
+        root.geometry(geometry(state, __file__))
         root.title(f"{FRAME_TITLE} - IDE Colours")
 
         root.rowconfigure(0, weight=1)
@@ -67,7 +67,7 @@ class IdeColoursFrame:
         root.bind("<Control-o>", self._process)
         root.bind(
             "<Configure>",
-            lambda event, arg=None: window_resize(root, __file__, config),
+            lambda event, arg=None: window_resize(root, __file__, state),
         )
 
     def _main_frame(self, master: tk.Frame) -> ttk.Frame:

@@ -15,6 +15,7 @@ from projects.constants import APP_TITLE, ICON_DIR
 from projects.data_store import store as data_store
 from projects.forms.frm_ide_colours import IdeColoursFrame
 from projects.project import Project
+from projects.state import state
 from projects.text import Text
 from projects.utilities import call_process
 
@@ -82,7 +83,7 @@ class ProjectEditFrame:
 
     def _show(self) -> None:
         root = self.root
-        root.geometry(geometry(config, __file__))
+        root.geometry(geometry(state, __file__))
         root.title(FRAME_TITLE)
         root.transient(self.parent.root)
 
@@ -99,7 +100,7 @@ class ProjectEditFrame:
         root.bind("<Control-x>", self._dismiss)
         root.bind(
             "<Configure>",
-            lambda event, arg=None: window_resize(root, __file__, config),
+            lambda event, arg=None: window_resize(root, __file__, state),
         )
 
     def _main_frame(self, master: tk.Frame) -> ttk.Frame:
@@ -151,7 +152,7 @@ class ProjectEditFrame:
         entry = ttk.Entry(frame, textvariable=self.base_dir)
         entry.grid(row=row, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
 
-        button = IconButton(frame, txt.OPEN, "open", self._get_base_dir)
+        button = IconButton(frame, txt.OPEN, "open-folder", self._get_base_dir)
         button.grid(row=row, column=3, pady=PAD)
 
         row += 1
@@ -161,7 +162,9 @@ class ProjectEditFrame:
         entry = ttk.Entry(frame, textvariable=self.source_dir)
         entry.grid(row=row, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
 
-        button = IconButton(frame, txt.OPEN, "open", self._get_source_dir)
+        button = IconButton(
+            frame, txt.OPEN, "open-folder", self._get_source_dir
+        )
         button.grid(row=row, column=3)
 
         row += 1
@@ -171,7 +174,9 @@ class ProjectEditFrame:
         entry = ttk.Entry(frame, textvariable=self.desktop_file)
         entry.grid(row=row, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
 
-        button = IconButton(frame, txt.OPEN, "open", self._get_desktop_file)
+        button = IconButton(
+            frame, txt.OPEN, "open-folder", self._get_desktop_file
+        )
         button.grid(row=row, column=3, pady=PAD)
 
         row += 1
@@ -181,7 +186,7 @@ class ProjectEditFrame:
         entry = ttk.Entry(frame, textvariable=self.script)
         entry.grid(row=row, column=1, columnspan=2, padx=PAD, sticky=tk.EW)
 
-        button = IconButton(frame, txt.OPEN, "open", self._get_script)
+        button = IconButton(frame, txt.OPEN, "open-folder", self._get_script)
         button.grid(row=row, column=3, pady=PAD)
 
         row += 1

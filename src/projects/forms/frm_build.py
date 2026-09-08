@@ -11,6 +11,7 @@ from projects import logger
 from projects.build import BuildData, update_module
 from projects.buttons import ButtonFrame
 from projects.config import config
+from projects.state import state
 from projects.text import Text
 
 txt = Text()
@@ -47,7 +48,7 @@ class BuildFrame:
 
     def _show(self) -> None:
         root = self.root
-        root.geometry(geometry(config, __file__))
+        root.geometry(geometry(state, __file__))
         if self.git_commit:
             root.title("Git apply")
         else:
@@ -73,7 +74,7 @@ class BuildFrame:
         root.update_idletasks()
         root.bind(
             "<Configure>",
-            lambda event, arg=None: window_resize(root, __file__, config),
+            lambda event, arg=None: window_resize(root, __file__, state),
         )
 
     def _main_frame(self, container: tk.Frame) -> tk.Frame:

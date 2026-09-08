@@ -8,7 +8,8 @@ from psiutils.utilities import geometry, window_resize
 
 from projects import logger
 from projects.buttons import ButtonFrame, IconButton
-from projects.config import config
+from projects.config import FIELDS, config
+from projects.state import state
 from projects.text import Text
 
 txt = Text()
@@ -17,68 +18,20 @@ LF = "\n"
 
 
 class ConfigFrame:
-    """
-    Represents a configuration frame for managing and displaying
-    configuration settings.
-
-    Args:
-        parent: The parent window for the configuration frame.
-
-    Attributes:
-        root: The root window of the configuration frame.
-        config: The configuration settings.
-        parent: The parent window.
-        ignore_text: Text field for ignored settings.
-
-    Methods:
-        _stringvar(value: str) -> tk.StringVar: Creates a StringVar with a
-        given value.
-        _show() -> None: Displays the configuration frame.
-        _main_frame(master: tk.Frame) -> tk.Frame: Creates the main frame of
-        the configuration.
-        _button_frame(master: tk.Frame) -> tk.Frame: Creates the button frame
-        for the configuration.
-        _check_value_changed(*args) -> None: Checks if values have changed.
-        _set_data_directory() -> None: Sets the data directory.
-        _set_script_directory() -> None: Sets the script directory.
-        _save_config() -> None: Saves the configuration changes.
-        _config_changes() -> dict: Determines the changes in
-        configuration settings.
-        _set_config(*args) -> None: Sets the configuration settings.
-        _dismiss() -> None: Dismisses the configuration frame.
-    """
-
     def __init__(self, parent: ttk.Frame) -> None:
         self.root = tk.Toplevel(parent.root)
         self.parent = parent
         self.ignore_text = None
 
-        # tk.StringVars
-        self.data_directory = tk.StringVar(value=config.data_directory)
-        self.script_directory = tk.StringVar(value=config.script_directory)
-        self.desktop_directory = tk.StringVar(value=config.desktop_directory)
-
-        # Track changes
-        self.data_directory.trace_add("write", self._check_value_changed)
-        self.script_directory.trace_add("write", self._check_value_changed)
-        self.desktop_directory.trace_add("write", self._check_value_changed)
+        # Assign tk variables and check for changes
+        config.assign_tk_variables(self, FIELDS, self._check_value_changed)
 
         self.button_frame = None
         self._show()
 
-    def _stringvar(self, value: str) -> tk.StringVar:
-        stringvar = tk.StringVar(value=value)
-        stringvar.trace_add("write", self._check_value_changed)
-        return stringvar
-
-    def _boolvar(self, value: bool) -> tk.BooleanVar:
-        boolvar = tk.BooleanVar(value=value)
-        boolvar.trace_add("write", self._check_value_changed)
-        return boolvar
-
     def _show(self) -> None:
         root = self.root
-        root.geometry(geometry(config, __file__))
+        root.geometry(geometry(state, __file__))
         root.title(txt.CONFIG)
 
         root.wait_visibility()
@@ -97,7 +50,7 @@ class ConfigFrame:
         root.bind("<Control-s>", self._save_config)
         root.bind(
             "<Configure>",
-            lambda event, arg=None: window_resize(root, __file__, config),
+            lambda event, arg=None: window_resize(root, __file__, state),
         )
 
     def _main_frame(self, master: tk.Frame) -> tk.Frame:
@@ -113,7 +66,9 @@ class ConfigFrame:
         directory.grid(
             row=row, column=1, columnspan=1, sticky=tk.EW, padx=PAD, pady=PAD
         )
-        select = IconButton(frame, txt.OPEN, "open", self._set_data_directory)
+        select = IconButton(
+            frame, txt.OPEN, "open-folder", self._set_data_directory
+        )
         select.grid(row=row, column=2, sticky=tk.W, padx=PAD)
 
         row += 1
@@ -125,7 +80,7 @@ class ConfigFrame:
             row=row, column=1, columnspan=1, sticky=tk.EW, padx=PAD, pady=PAD
         )
         select = IconButton(
-            frame, txt.OPEN, "open", self._set_script_directory
+            frame, txt.OPEN, "open-folder", self._set_script_directory
         )
         select.grid(row=row, column=2, sticky=tk.W, padx=PAD, pady=PAD)
 
@@ -138,7 +93,7 @@ class ConfigFrame:
             row=row, column=1, columnspan=1, sticky=tk.EW, padx=PAD, pady=PAD
         )
         select = IconButton(
-            frame, txt.OPEN, "open", self._set_desktop_directory
+            frame, txt.OPEN, "open-folder", self._set_desktop_directory
         )
         select.grid(row=row, column=2, sticky=tk.W, padx=PAD, pady=PAD)
 

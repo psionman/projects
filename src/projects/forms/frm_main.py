@@ -20,6 +20,7 @@ from projects.forms.frm_project_usage import ProjectVersionsFrame
 from projects.forms.frm_search import SearchFrame
 from projects.main_menu import MainMenu
 from projects.project import Project
+from projects.state import state
 from projects.text import Text
 from projects.utilities import call_process, open_dolphin
 
@@ -71,7 +72,7 @@ class AppFrame:
 
     def _show(self):
         root = self.root
-        root.geometry(geometry(config, __file__))
+        root.geometry(geometry(state, __file__))
         root.title(FRAME_TITLE)
 
         main_menu = MainMenu(self)
@@ -97,7 +98,7 @@ class AppFrame:
         root.bind("<Control-x>", self._dismiss)
         root.bind(
             "<Configure>",
-            lambda event, arg=None: window_resize(root, __file__, config),
+            lambda event, arg=None: window_resize(root, __file__, state),
         )
 
     def _main_frame(self, master: tk.Frame) -> ttk.Frame:
@@ -218,10 +219,10 @@ class AppFrame:
                 "open-file-manager",
                 self._open_dolphin,
                 True,
-                text="Open",
+                text="File manager",
             ),
-            frame.icon_button("devin", self._open_devin, True),
-            frame.icon_button("open-terminal", self._konsole, text="Open"),
+            frame.icon_button("devin", self._open_devin, True, text="Devin"),
+            frame.icon_button("open-terminal", self._konsole, text="Terminal"),
             IconButton(
                 frame,
                 txt.RUN_SCRIPT,
