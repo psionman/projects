@@ -1,9 +1,10 @@
 # History
 
 ## Version 1.0.25 - 7 September 2026
-1. Update buttons
-2. Bind mouewheel to frm_compare
-3.
+1. Update buttons  access
+2. Bind mousewheel to frm_compare
+3. Update button text on 'Open'
+4. Update text access
 
 ## Version 1.0.24 - 31 August 2026
 1. Sort projects in tree by name.lower()

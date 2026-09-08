@@ -13,6 +13,8 @@ from dataclasses import dataclass, field
 
 from psiutils.text import Text as PsiText
 
+from .constants import TEXT_FILE
+
 strings = {
     "BUILD_FOR_WINDOWS": "Build for Windows",
     "CONFIG": "Preferences",
@@ -20,15 +22,11 @@ strings = {
     "EDIT_SCRIPT": "Edit script",
     "EDIT_DESKTOP": "Edit desktop file",
     "NOT_IN_PROJECT_DIR": "Not working in project's directory",
-    "NOTES": "Notes",
     "RUN_SCRIPT": "Run script",
-    "DATA_DIRECTORY": "Data directory",
-    "ONLINE_HELP": "Online help",
     "DEVIN": "Devin",
     "GIT_PUSH": "Git Push",
     "GIT_APPLY": "Git Apply",
     "IDE_COLOURS": "IDE Colours",
-    "REFRESH": "Refresh",
     "REFRESH_DATABASE": "Refresh projects",
 }
 
@@ -46,7 +44,7 @@ class Text:
     def __post_init__(self) -> None:
         """Populate the dataclass instance with string attributes."""
         # Load psiutils strings
-        psi_text = PsiText()
+        psi_text = PsiText(TEXT_FILE)
         psi_strings = psi_text.strings
         for key, string in psi_strings.items():
             setattr(self, key, string)

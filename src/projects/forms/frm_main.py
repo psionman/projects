@@ -218,12 +218,10 @@ class AppFrame:
                 "open-file-manager",
                 self._open_dolphin,
                 True,
-                text="Open in Dolphin",
+                text="Open",
             ),
             frame.icon_button("devin", self._open_devin, True),
-            frame.icon_button(
-                "open-terminal", self._konsole, text="Open in Konsole"
-            ),
+            frame.icon_button("open-terminal", self._konsole, text="Open"),
             IconButton(
                 frame,
                 txt.RUN_SCRIPT,
