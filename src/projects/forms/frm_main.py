@@ -221,6 +221,7 @@ class AppFrame:
                 True,
                 text="File manager",
             ),
+            frame.icon_button("dev", self._open_development, True),
             frame.icon_button("devin", self._open_devin, True, text="Devin"),
             frame.icon_button("open-terminal", self._konsole, text="Terminal"),
             IconButton(
@@ -331,6 +332,10 @@ class AppFrame:
             return call_process(["codium", "-n", self.project.base_dir])
         except FileNotFoundError:
             messagebox.showerror("", "codium not found.")
+
+    def _open_development(self, *args) -> None:
+        self._konsole()
+        self._open_devin()
 
     def _open_devin(self, *args) -> None:
         try:

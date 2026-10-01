@@ -1,12 +1,53 @@
-# Python-generated files
+# Byte-compiled / cache
 __pycache__/
-*.py[oc]
+*.py[cod]
+*$py.class
+*.so
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+*.log
+logs/
+media/
+staticfiles/
+
+# uv / venv
+.venv/
+venv/
+env/
+.python-version
+
+# Distribution / packaging
 build/
 dist/
-wheels/
-*.egg-info
-.env
-*.log
+*.egg-info/
+*.egg
+MANIFEST
 
-# Virtual environments
-.venv
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Sync conflict files (Syncthing etc.)
+*.sync-conflict-*
+
+# Coverage / test artifacts
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

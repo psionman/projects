@@ -1,5 +1,8 @@
 # History
 
+## Version 1.0.27 - 1 October 2026
+1. Add ability to open development environment (codium + devin)
+
 ## Version 1.0.26 - 8 September 2026
 1. Align with psiutils version 2.0.0
 
@@ -116,16 +119,3 @@
 
 ## version 0.0.0 - 6 Nov 2025
 1. Copy from 'package'
-
-
-
-
-
-
-
-
-
-
-
-
-
